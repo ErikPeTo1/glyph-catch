@@ -40,3 +40,7 @@ nul
 
 keystore.base64
 keystore.properties
+
+# Personal helper to build and install on my own phone
+actualizar.bat
+actualizar.ps1
