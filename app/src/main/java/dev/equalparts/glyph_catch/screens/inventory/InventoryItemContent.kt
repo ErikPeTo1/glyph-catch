@@ -30,11 +30,13 @@ import dev.equalparts.glyph_catch.AppSizes
 import dev.equalparts.glyph_catch.ItemGlyphCircle
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.ActiveItem
+import dev.equalparts.glyph_catch.data.FISHING_RODS
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.descriptionRes
 import dev.equalparts.glyph_catch.data.effectDurationMinutes
+import dev.equalparts.glyph_catch.data.isFishingRod
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.ndotFontFamily
 import dev.equalparts.glyph_catch.util.rememberActiveItemStatus
@@ -205,6 +207,9 @@ private suspend fun activateItem(db: PokemonDatabase, item: Item, durationMinute
     val now = System.currentTimeMillis()
     val expiresAt = now + durationMinutes * 60_000L
     withContext(Dispatchers.IO) {
+        if (item.isFishingRod) {
+            FISHING_RODS.filter { it != item }.forEach { db.activeItemDao().deactivateItem(it.ordinal) }
+        }
         db.activeItemDao().activateItem(
             ActiveItem(
                 itemId = item.ordinal,

@@ -5,10 +5,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
+import dev.equalparts.glyph_catch.data.displayName
 
 fun NavController.navigateToPokemon(speciesId: Int) {
     val species = Pokemon[speciesId]
-    val searchQuery = species?.name.orEmpty()
+    val searchQuery = species?.displayName.orEmpty()
     val targetRoute = AppScreen.Caught.createRoute(searchQuery)
     val shouldRestoreState = searchQuery.isBlank()
     navigate(targetRoute) {

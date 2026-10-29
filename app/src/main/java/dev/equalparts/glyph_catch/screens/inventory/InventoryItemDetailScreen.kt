@@ -3,9 +3,11 @@ package dev.equalparts.glyph_catch.screens.inventory
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,9 +30,11 @@ import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.data.displayName
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.util.ItemUsageError
 import dev.equalparts.glyph_catch.util.ItemUsageResult
+import dev.equalparts.glyph_catch.util.tradeTargets
 import dev.equalparts.glyph_catch.util.useItemOnPokemon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -106,8 +110,12 @@ fun InventoryItemDetailScreen(
     if (showConfirmation && pendingPokemon != null && item != null) {
         val selectedPokemon = pendingPokemon!!
         val itemName = stringResource(item.nameRes())
-        val speciesName = Pokemon[selectedPokemon.speciesId]?.name ?: stringResource(R.string.common_unknown)
+        val speciesName = Pokemon[selectedPokemon.speciesId]?.displayName ?: stringResource(R.string.common_unknown)
         val displayName = selectedPokemon.nickname ?: speciesName
+        val choices = remember(selectedPokemon, item) {
+            if (item == Item.LINKING_CORD) tradeTargets(selectedPokemon) else emptyList()
+        }
+        var chosenTarget by remember(selectedPokemon) { mutableStateOf<Int?>(null) }
 
         AlertDialog(
             onDismissRequest = {
@@ -118,13 +126,14 @@ fun InventoryItemDetailScreen(
             },
             confirmButton = {
                 TextButton(
-                    enabled = !isProcessingSelection,
+                    enabled = !isProcessingSelection && (choices.size < 2 || chosenTarget != null),
                     onClick = {
                         if (isProcessingSelection) return@TextButton
                         scope.launch {
                             isProcessingSelection = true
                             try {
-                                val result = useItemOnPokemon(db, preferencesManager, item, selectedPokemon.id)
+                                val result =
+                                    useItemOnPokemon(db, preferencesManager, item, selectedPokemon.id, chosenTarget)
                                 when (result) {
                                     is ItemUsageResult.Success -> {
                                         Toast.makeText(
@@ -179,7 +188,21 @@ fun InventoryItemDetailScreen(
                 Text(stringResource(R.string.item_usage_confirm_title, itemName))
             },
             text = {
-                Text(stringResource(R.string.item_usage_confirm_message, itemName, displayName))
+                Column(verticalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium)) {
+                    Text(stringResource(R.string.item_usage_confirm_message, itemName, displayName))
+                    if (choices.size > 1) {
+                        Text(stringResource(R.string.evolution_choose_prompt))
+                        Row(horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)) {
+                            choices.forEach { target ->
+                                FilterChip(
+                                    selected = chosenTarget == target.id,
+                                    onClick = { chosenTarget = target.id },
+                                    label = { Text(target.displayName) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
         )
     }

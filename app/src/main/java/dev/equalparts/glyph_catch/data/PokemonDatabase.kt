@@ -22,10 +22,12 @@ import dev.equalparts.glyph_catch.debug.DebugEvent
 import dev.equalparts.glyph_catch.debug.DebugEventDao
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
 
 /**
  * Pokémon caught by the user.
  */
+@Serializable
 @Entity(tableName = "caught_pokemon")
 data class CaughtPokemon(
     @PrimaryKey val id: String = UUID.randomUUID().toString(),
@@ -40,24 +42,39 @@ data class CaughtPokemon(
     val spawnPoolName: String? = null,
     val isSpecialSpawn: Boolean = false,
     val isConditionalSpawn: Boolean = false,
-    @ColumnInfo(defaultValue = "0") val screenOffDurationMinutes: Int = 0
+    @ColumnInfo(defaultValue = "0") val screenOffDurationMinutes: Int = 0,
+    @ColumnInfo(defaultValue = "0") val isShiny: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val evolutionLocked: Boolean = false,
+    val form: String? = null
 )
 
 /**
  * Pokédex record. One per species ID.
  */
 @Entity(tableName = "pokedex_records")
-data class PokedexRecord(@PrimaryKey val speciesId: Int)
+data class PokedexRecord(
+    @PrimaryKey val speciesId: Int,
+    @ColumnInfo(defaultValue = "0") val shinyCaught: Boolean = false
+)
+
+/**
+ * A form of a species the player has found (see [Forms]).
+ */
+@Serializable
+@Entity(tableName = "pokedex_forms", primaryKeys = ["speciesId", "form"])
+data class PokedexForm(val speciesId: Int, val form: String)
 
 /**
  * Item collected by the user.
  */
+@Serializable
 @Entity(tableName = "inventory")
 data class InventoryItem(@PrimaryKey val itemId: Int, val quantity: Int = 0)
 
 /**
  * Item used by the user.
  */
+@Serializable
 @Entity(tableName = "active_items")
 data class ActiveItem(
     @PrimaryKey val itemId: Int,
@@ -129,11 +146,46 @@ interface PokemonDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertPokedexRecord(record: PokedexRecord)
 
+    @Query("UPDATE pokedex_records SET shinyCaught = 1 WHERE speciesId = :speciesId")
+    suspend fun markShinyCaught(speciesId: Int)
+
     @Transaction
-    suspend fun recordPokedexEntry(speciesId: Int) {
+    suspend fun recordPokedexEntry(speciesId: Int, shiny: Boolean = false, form: String? = null) {
         if (!hasPokedexEntry(speciesId)) {
-            upsertPokedexRecord(PokedexRecord(speciesId = speciesId))
+            upsertPokedexRecord(PokedexRecord(speciesId = speciesId, shinyCaught = shiny))
+        } else if (shiny) {
+            markShinyCaught(speciesId)
         }
+        if (form != null) {
+            insertForm(PokedexForm(speciesId, form))
+        }
+    }
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertForm(form: PokedexForm)
+
+    @Query("SELECT form FROM pokedex_forms WHERE speciesId = :speciesId")
+    fun watchFormsFound(speciesId: Int): Flow<List<String>>
+
+    @Query("SELECT speciesId FROM pokedex_records WHERE shinyCaught = 1")
+    fun watchShinySpeciesIds(): Flow<List<Int>>
+
+    @Query("UPDATE caught_pokemon SET evolutionLocked = :locked WHERE id = :pokemonId")
+    suspend fun updateEvolutionLocked(pokemonId: String, locked: Boolean)
+
+    @Query("UPDATE caught_pokemon SET form = :form WHERE id = :pokemonId")
+    suspend fun updateForm(pokemonId: String, form: String?)
+
+    /**
+     * Evolves a caught Pokémon, keeping its form when the evolution shares it, and registers
+     * the new species (and its shininess) in the Pokédex.
+     */
+    @Transaction
+    suspend fun evolveCaught(pokemon: CaughtPokemon, targetSpeciesId: Int, newLevel: Int, newExp: Int) {
+        evolvePokemon(pokemon.id, targetSpeciesId, newLevel, newExp)
+        val form = Forms.formAfterEvolution(pokemon.form, targetSpeciesId)
+        updateForm(pokemon.id, form)
+        recordPokedexEntry(targetSpeciesId, pokemon.isShiny, form)
     }
 
     @Query(
@@ -147,8 +199,41 @@ interface PokemonDao {
     @Query("UPDATE caught_pokemon SET isFavorite = :isFavorite WHERE id = :pokemonId")
     suspend fun updateFavorite(pokemonId: String, isFavorite: Boolean)
 
+    @Query("DELETE FROM caught_pokemon WHERE id IN (:pokemonIds)")
+    suspend fun deleteCaught(pokemonIds: List<String>)
+
     @Query("SELECT COUNT(*) FROM caught_pokemon WHERE level >= :minLevel")
     suspend fun countPokemonAtLevel(minLevel: Int): Int
+
+    @Query("SELECT * FROM caught_pokemon")
+    suspend fun getAllCaught(): List<CaughtPokemon>
+
+    @Query("SELECT speciesId FROM pokedex_records")
+    suspend fun getPokedexSpeciesIds(): List<Int>
+
+    @Query("SELECT speciesId FROM pokedex_records WHERE shinyCaught = 1")
+    suspend fun getShinyPokedexSpeciesIds(): List<Int>
+
+    @Query("SELECT * FROM pokedex_forms")
+    suspend fun getAllForms(): List<PokedexForm>
+
+    @Query("DELETE FROM pokedex_forms")
+    suspend fun deleteAllForms()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllForms(forms: List<PokedexForm>)
+
+    @Query("DELETE FROM caught_pokemon")
+    suspend fun deleteAllCaught()
+
+    @Query("DELETE FROM pokedex_records")
+    suspend fun deleteAllPokedexRecords()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllCaught(pokemon: List<CaughtPokemon>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllPokedexRecords(records: List<PokedexRecord>)
 }
 
 @Dao
@@ -170,6 +255,15 @@ interface InventoryDao {
 
     @Query("UPDATE inventory SET quantity = quantity - 1 WHERE itemId = :itemId AND quantity > 0")
     suspend fun useItem(itemId: Int)
+
+    @Query("SELECT * FROM inventory")
+    suspend fun getAllItems(): List<InventoryItem>
+
+    @Query("DELETE FROM inventory")
+    suspend fun deleteAllItems()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllItems(items: List<InventoryItem>)
 }
 
 @Dao
@@ -191,6 +285,15 @@ interface ActiveItemDao {
 
     @Query("DELETE FROM active_items WHERE itemId = :itemId")
     suspend fun deactivateItem(itemId: Int)
+
+    @Query("SELECT * FROM active_items")
+    suspend fun getAllRaw(): List<ActiveItem>
+
+    @Query("DELETE FROM active_items")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(items: List<ActiveItem>)
 }
 
 @Database(
@@ -199,15 +302,18 @@ interface ActiveItemDao {
         PokedexRecord::class,
         InventoryItem::class,
         ActiveItem::class,
+        PokedexForm::class,
         DebugEvent::class
     ],
-    version = 10,
+    version = 12,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7, spec = DebugEventsMigration6To7::class),
-        AutoMigration(from = 7, to = 8)
+        AutoMigration(from = 7, to = 8),
+        AutoMigration(from = 10, to = 11),
+        AutoMigration(from = 11, to = 12)
     ]
 )
 abstract class PokemonDatabase : RoomDatabase() {

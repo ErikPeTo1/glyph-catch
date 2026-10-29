@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import dev.equalparts.glyph_catch.AppSizes
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.ndotFontFamily
+import dev.equalparts.glyph_catch.screens.settings.BackupSettingsScreen
 import dev.equalparts.glyph_catch.screens.settings.DebugSettingsScreen
 import dev.equalparts.glyph_catch.screens.settings.GraphicsSettingsScreen
 import dev.equalparts.glyph_catch.screens.settings.SettingsDestination
@@ -128,6 +129,7 @@ private fun SettingsContent(
         SettingsDestination.Weather -> WeatherSettingsScreen(modifier = modifier)
         SettingsDestination.Sleep -> SleepSettingsScreen(modifier = modifier)
         SettingsDestination.Graphics -> GraphicsSettingsScreen(modifier = modifier)
+        SettingsDestination.Backup -> BackupSettingsScreen(modifier = modifier)
         SettingsDestination.Debug -> DebugSettingsScreen(modifier = modifier)
     }
 }

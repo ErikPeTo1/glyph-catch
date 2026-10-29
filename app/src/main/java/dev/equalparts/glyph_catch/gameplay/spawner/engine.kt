@@ -4,6 +4,7 @@ import dev.equalparts.glyph_catch.data.PokemonSpecies
 import dev.equalparts.glyph_catch.gameplay.spawner.models.ModifierEffect
 import dev.equalparts.glyph_catch.gameplay.spawner.models.SpawnPool
 import dev.equalparts.glyph_catch.gameplay.spawner.models.SpawnRules
+import dev.equalparts.glyph_catch.util.EventHelpers
 import kotlin.random.Random
 
 /**
@@ -45,7 +46,8 @@ class SpawnRulesEngine(val rules: SpawnRules, private val random: Random = Rando
             pokemon,
             pool,
             screenOffDurationMinutes,
-            System.currentTimeMillis()
+            System.currentTimeMillis(),
+            isShiny = random.nextInt(EventHelpers.shinyOdds()) == 0
         )
     }
 
@@ -133,5 +135,7 @@ data class SpawnResult(
     val pokemon: PokemonSpecies,
     val pool: SpawnPool,
     val screenOffDurationMinutes: Int,
-    val spawnedAtMillis: Long
+    val spawnedAtMillis: Long,
+    val isShiny: Boolean = false,
+    val form: String? = null
 )

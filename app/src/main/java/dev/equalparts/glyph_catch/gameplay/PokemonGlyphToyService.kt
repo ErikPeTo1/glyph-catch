@@ -1,6 +1,9 @@
 package dev.equalparts.glyph_catch.gameplay
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.PowerManager
 import android.text.format.DateFormat
 import android.util.Log
@@ -10,11 +13,13 @@ import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphMatrixObject
 import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.EvolutionRequirement
+import dev.equalparts.glyph_catch.data.Forms
 import dev.equalparts.glyph_catch.data.InventoryItem
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.data.Stat
 import dev.equalparts.glyph_catch.debug.DebugCaptureManager
 import dev.equalparts.glyph_catch.debug.DebugExceptionTracker
 import dev.equalparts.glyph_catch.debug.DebugSnapshot
@@ -28,6 +33,7 @@ import dev.equalparts.glyph_catch.gameplay.spawner.SpawnResult
 import dev.equalparts.glyph_catch.gameplay.spawner.SpawnRulesEngine
 import dev.equalparts.glyph_catch.gameplay.spawner.createSpawnRules
 import dev.equalparts.glyph_catch.util.GlyphMatrixService
+import dev.equalparts.glyph_catch.util.findLevelEvolutionTarget
 import java.util.Calendar
 import java.util.Locale
 import kotlin.math.floor
@@ -56,7 +62,9 @@ data class PersistentSpawn(
     val isSpecial: Boolean,
     val isConditional: Boolean,
     val screenOffDurationMinutes: Int,
-    val spawnedAtMillis: Long = System.currentTimeMillis()
+    val spawnedAtMillis: Long = System.currentTimeMillis(),
+    val isShiny: Boolean = false,
+    val form: String? = null
 )
 
 /**
@@ -124,6 +132,19 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         )
 
         debugCapture = DebugCaptureManager.shared(applicationContext)
+
+        registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_PRESENT), RECEIVER_NOT_EXPORTED)
+    }
+
+    /**
+     * Notices every unlock, even ones that happen between two minute ticks.
+     */
+    private val unlockReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (::gameplayContext.isInitialized) {
+                gameplayContext.phone.unlockedSinceLastTick = true
+            }
+        }
     }
 
     /**
@@ -131,6 +152,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      */
     override fun onDestroy() {
         super.onDestroy()
+        runCatching { unregisterReceiver(unlockReceiver) }
         if (::animationCoordinator.isInitialized) {
             animationCoordinator.cancelActive()
         }
@@ -205,6 +227,9 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     private fun tick() {
         gameplayContext.phone.refresh()
         gameplayContext.trainer.refresh()
+        if (!gameplayContext.phone.isInteractive) {
+            preferencesManager.dailyStats.add(Stat.MINUTES)
+        }
 
         if (gameplayContext.phone.isInteractive) {
             spawnHistory.resetAfterScreenOn()
@@ -254,7 +279,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         }
 
         if (spawned != null) {
-            addToQueue(spawned)
+            addToQueue(spawned.copy(form = Forms.formFor(spawned.pokemon.id, currentFormConditions())))
         }
 
         coroutineScope?.launch {
@@ -307,6 +332,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         val result = LevelCalculator.expResult(active.level, active.exp, gainedExp) ?: return
         dao.updateTrainingProgress(active.id, result.exp, result.level)
         if (result.leveledUp) {
+            preferencesManager.dailyStats.add(Stat.LEVELS, result.level - active.level)
             maybeTriggerEvolution(active.copy(level = result.level, exp = result.exp))
         }
     }
@@ -316,22 +342,28 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      */
     private suspend fun maybeTriggerEvolution(pokemon: CaughtPokemon) {
         val species = Pokemon[pokemon.speciesId] ?: return
-        val target = species.evolvesTo
-            .mapNotNull { Pokemon[it] }
-            .firstOrNull { candidate ->
-                val requirement = candidate.evolutionRequirement as? EvolutionRequirement.Level
-                requirement != null && pokemon.level >= requirement.level
-            } ?: return
-        db.pokemonDao().evolvePokemon(
-            pokemonId = pokemon.id,
-            newSpeciesId = target.id,
-            newLevel = pokemon.level,
-            newExp = pokemon.exp
-        )
-        db.pokemonDao().recordPokedexEntry(target.id)
+        val target = findLevelEvolutionTarget(pokemon) ?: return
+        db.pokemonDao().evolveCaught(pokemon, target.id, pokemon.level, pokemon.exp)
+        preferencesManager.dailyStats.add(Stat.EVOLUTIONS)
         preferencesManager.enqueueEvolutionNotification(
             previousSpeciesId = species.id,
             newSpeciesId = target.id
+        )
+    }
+
+    private fun currentFormConditions(): Forms.Conditions {
+        val weather = gameplayContext.weather
+        val season = gameplayContext.season
+        return Forms.Conditions(
+            sunny = weather.clear,
+            rainy = weather.rain || weather.thunderstorm,
+            snowy = weather.snow,
+            season = when {
+                season.winter -> "winter"
+                season.summer -> "summer"
+                season.autumn -> "autumn"
+                else -> "spring"
+            }
         )
     }
 
@@ -343,7 +375,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
         synchronized(spawnQueue) {
             if (spawnQueue.size >= MAX_QUEUE_SIZE) {
-                val indexToRemove = spawnQueue.indexOfFirst { !it.pool.isSpecial }
+                val indexToRemove = spawnQueue.indexOfFirst { !it.pool.isSpecial && !it.isShiny }
                 if (indexToRemove != -1) {
                     removed = spawnQueue.removeAt(indexToRemove)
                     Log.d(TAG, "Removed ${removed.pokemon.name} from queue (not special)")
@@ -393,6 +425,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             compareBy(
                 { !it.pool.isSpecial }, // Special spawns first (false < true)
                 { !it.pool.isConditional }, // Then conditional spawns
+                { !it.isShiny }, // Then shinies
+                { it.pool.basePercentage }, // Then rarest pools first
                 { -it.pokemon.id } // Then by descending Pokédex number
             )
         )
@@ -416,7 +450,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         if (currentSpawn != null) {
             if (displayedSpawn !== currentSpawn) {
                 val scope = coroutineScope
-                if (scope != null) {
+                // No flashing on the back of the phone while the player sleeps
+                if (scope != null && !gameplayContext.sleep.isBedtime) {
                     animationCoordinator.playSpawn(
                         scope = scope,
                         spawn = currentSpawn,
@@ -443,7 +478,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Show the sprite of a spawned Pokémon on the Glyph Matrix.
      */
     private fun showPokemon(spawn: SpawnResult, brightnessFactor: Float?) {
-        animationCoordinator.showPokemon(spawn.pokemon.id, brightnessFactor)
+        animationCoordinator.showPokemon(spawn.pokemon.id, brightnessFactor, spawn.isShiny, spawn.form)
         displayedSpawn = spawn
     }
 
@@ -547,13 +582,20 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
                 screenOffDurationMinutes = spawn.screenOffDurationMinutes,
                 spawnPoolName = spawn.pool.name,
                 isSpecialSpawn = spawn.pool.name.contains("special", ignoreCase = true),
-                isConditionalSpawn = spawn.pool.name.contains("event", ignoreCase = true)
+                isConditionalSpawn = spawn.pool.name.contains("event", ignoreCase = true),
+                isShiny = spawn.isShiny,
+                form = spawn.form
             )
             db.pokemonDao().insert(caughtPokemon)
-            db.pokemonDao().recordPokedexEntry(spawn.pokemon.id)
+            db.pokemonDao().recordPokedexEntry(spawn.pokemon.id, spawn.isShiny, spawn.form)
             Log.d(TAG, "Successfully saved ${spawn.pokemon.name} to database")
 
             maybeAwardItems(spawn.pokemon.id, alreadyDiscovered)
+            with(preferencesManager.dailyStats) {
+                add(Stat.CATCHES)
+                if (!alreadyDiscovered) add(Stat.NEW_SPECIES)
+                if (spawn.pool.name in ROD_POOLS) add(Stat.ROD_CATCHES)
+            }
 
             val queueSnapshot = synchronized(spawnQueue) {
                 spawnQueue.remove(spawn)
@@ -597,7 +639,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             logItemAward(Item.RARE_CANDY, "duplicate", speciesId)
         }
 
-        val totalCaught = db.pokemonDao().getTotalCaughtCount()
+        val totalCaught = db.pokemonDao().getTotalCaughtCount() + preferencesManager.releasedCount
         val linkingCordGuaranteed = totalCaught > 0 && totalCaught % LINKING_CORD_MILESTONE == 0
         val linkingCordRoll = Random.nextDouble() < LINKING_CORD_DROP_CHANCE
 
@@ -690,7 +732,9 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
                     isSpecial = spawn.pool.isSpecial,
                     isConditional = spawn.pool.isConditional,
                     screenOffDurationMinutes = spawn.screenOffDurationMinutes,
-                    spawnedAtMillis = spawn.spawnedAtMillis
+                    spawnedAtMillis = spawn.spawnedAtMillis,
+                    isShiny = spawn.isShiny,
+                    form = spawn.form
                 )
             }
 
@@ -728,7 +772,9 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
                             pokemon = pokemon,
                             pool = pool,
                             screenOffDurationMinutes = persistent.screenOffDurationMinutes,
-                            spawnedAtMillis = persistent.spawnedAtMillis
+                            spawnedAtMillis = persistent.spawnedAtMillis,
+                            isShiny = persistent.isShiny,
+                            form = persistent.form
                         )
                         spawnQueue.add(spawn)
                     }
@@ -808,7 +854,9 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
     companion object {
         private const val TAG = "PokemonGlyphToy"
-        private const val MAX_QUEUE_SIZE = 4
+
+        private const val MAX_QUEUE_SIZE = 9
+        private val ROD_POOLS = setOf("Old Rod", "Good Rod", "Super Rod")
         private const val PREFS_NAME = "pokemon_glyph_toy_prefs"
         private const val PREFS_KEY_SPAWN_QUEUE = "spawn_queue"
         private const val SLEEP_BONUS_DURATION_MILLIS = 24L * 60 * 60 * 1000
@@ -831,7 +879,12 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             Item.WATER_STONE,
             Item.THUNDER_STONE,
             Item.LEAF_STONE,
-            Item.MOON_STONE
+            Item.MOON_STONE,
+            Item.SUN_STONE,
+            Item.SHINY_STONE,
+            Item.DUSK_STONE,
+            Item.DAWN_STONE,
+            Item.ICE_STONE
         )
     }
 }

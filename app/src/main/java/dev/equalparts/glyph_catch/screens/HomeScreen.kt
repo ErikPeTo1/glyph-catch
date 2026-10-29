@@ -1,5 +1,6 @@
 package dev.equalparts.glyph_catch.screens
 
+import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -32,14 +33,17 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.equalparts.glyph_catch.AppBadge
 import dev.equalparts.glyph_catch.AppCard
@@ -55,19 +59,26 @@ import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.data.Stat
+import dev.equalparts.glyph_catch.data.displayName
+import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.gameplay.LevelCalculator
 import dev.equalparts.glyph_catch.gameplay.spawner.Weather
 import dev.equalparts.glyph_catch.gameplay.spawner.WeatherProvider
 import dev.equalparts.glyph_catch.ndotFontFamily
+import dev.equalparts.glyph_catch.screens.formatDuration
 import dev.equalparts.glyph_catch.util.ActiveItemStatus
+import dev.equalparts.glyph_catch.util.AvailableUpdate
 import dev.equalparts.glyph_catch.util.EventHelpers
 import dev.equalparts.glyph_catch.util.TrainerTipsProvider
+import dev.equalparts.glyph_catch.util.UpdateChecker
 import dev.equalparts.glyph_catch.util.rememberActiveItemStatus
 import dev.equalparts.glyph_catch.util.rememberSleepBonusStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -81,7 +92,9 @@ fun HomeScreen(
     onPokemonClick: (CaughtPokemon) -> Unit,
     onPokedexClick: () -> Unit,
     onBagClick: () -> Unit,
-    onWeatherSettingsClick: () -> Unit
+    onWeatherSettingsClick: () -> Unit,
+    onStatsClick: () -> Unit = {},
+    onMissionsClick: () -> Unit = {}
 ) {
     val recentCatches by db.pokemonDao().watchRecentCatches(5).collectAsStateWithLifecycle(emptyList())
     val uniqueSpecies by db.pokemonDao().watchPokedexProgress().collectAsStateWithLifecycle(0)
@@ -97,7 +110,14 @@ fun HomeScreen(
     val showRepelIndicator by repelIndicatorFlow.collectAsStateWithLifecycle(
         initialValue = preferencesManager.shouldShowRepelIndicator()
     )
+    val oldRodStatus by rememberActiveItemStatus(db, Item.OLD_ROD)
+    val goodRodStatus by rememberActiveItemStatus(db, Item.GOOD_ROD)
     val superRodStatus by rememberActiveItemStatus(db, Item.SUPER_ROD)
+    val activeRod = listOf(
+        Item.OLD_ROD to oldRodStatus,
+        Item.GOOD_ROD to goodRodStatus,
+        Item.SUPER_ROD to superRodStatus
+    ).firstOrNull { it.second.isActive }
     val isSleepBonusActive by rememberSleepBonusStatus(preferencesManager)
 
     val evolutionNotificationsFlow =
@@ -106,7 +126,8 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val currentEvolution = pendingEvolutionNotifications.firstOrNull()
 
-    val progressPercentage = remember(uniqueSpecies) { ((uniqueSpecies * 100) / 151).coerceAtMost(100) }
+    val progressPercentage =
+        remember(uniqueSpecies) { ((uniqueSpecies * 100) / Pokemon.POKEDEX_SIZE).coerceAtMost(100) }
     val dailyTip = remember(tipsProvider) { tipsProvider.getDailyTip() }
     val weatherFlow = remember(weatherProvider) { weatherProvider.watchWeather() }
     val weather by weatherFlow.collectAsStateWithLifecycle(initialValue = weatherProvider.getCurrentWeather())
@@ -119,8 +140,10 @@ fun HomeScreen(
     }
 
     LaunchedEffect(totalCaught) {
-        if (totalCaught >= SUPER_ROD_UNLOCK_COUNT) {
-            ensureSuperRodUnlocked(db, preferencesManager)
+        ROD_UNLOCK_COUNTS.forEach { (rod, count) ->
+            if (totalCaught + preferencesManager.releasedCount >= count) {
+                ensureRodUnlocked(db, preferencesManager, rod)
+            }
         }
     }
 
@@ -141,13 +164,14 @@ fun HomeScreen(
         ) {
             Header(onSettingsClick = onSettingsClick)
             Spacer(modifier = Modifier.height(AppSizes.spacingXLarge))
+            UpdateBanner()
             if (!glyphToyHasTicked) {
                 OnboardingCard()
             } else {
                 StatusBanners(
                     showSuperRodIndicator = showSuperRodIndicator,
                     showRepelIndicator = showRepelIndicator,
-                    superRodStatus = superRodStatus,
+                    activeRod = activeRod,
                     isSleepBonusActive = isSleepBonusActive,
                     isHalloween = EventHelpers.isHalloween(),
                     isChristmas = EventHelpers.isChristmas(),
@@ -175,6 +199,13 @@ fun HomeScreen(
                     )
                 }
                 Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
+                HomeShortcuts(
+                    db = db,
+                    preferencesManager = preferencesManager,
+                    onStatsClick = onStatsClick,
+                    onMissionsClick = onMissionsClick
+                )
+                Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
                 TrainerTipCard(dailyTip = dailyTip)
                 Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
                 RecentCatches(
@@ -194,6 +225,101 @@ fun HomeScreen(
                 }
             )
         }
+    }
+}
+
+/**
+ * Shown when a newer version has been published on GitHub; opens the release page.
+ */
+@Composable
+private fun UpdateBanner() {
+    val context = LocalContext.current
+    val update by produceState<AvailableUpdate?>(initialValue = null, context) {
+        value = UpdateChecker.check(context)
+    }
+    update?.let { available ->
+        HomeStatusBanner(
+            text = stringResource(R.string.home_update_banner, available.version),
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { context.startActivity(Intent(Intent.ACTION_VIEW, available.url.toUri())) },
+            highlight = true,
+            badge = stringResource(R.string.home_update_badge)
+        )
+        Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
+    }
+}
+
+/**
+ * Today's time without unlocking and mission progress, each opening its own screen.
+ */
+@Composable
+private fun HomeShortcuts(
+    db: PokemonDatabase,
+    preferencesManager: PreferencesManager,
+    onStatsClick: () -> Unit,
+    onMissionsClick: () -> Unit
+) {
+    val minutesToday by produceState(
+        initialValue = preferencesManager.dailyStats.get(Stat.MINUTES),
+        preferencesManager
+    ) {
+        while (true) {
+            value = preferencesManager.dailyStats.get(Stat.MINUTES)
+            delay(30_000)
+        }
+    }
+    val missions by rememberMissionProgress(db, preferencesManager)
+    val boostMinutesLeft by produceState(initialValue = 0, preferencesManager) {
+        while (true) {
+            value = ((preferencesManager.rarityBoostUntil - System.currentTimeMillis()) / 60_000L).toInt() + 1
+            delay(30_000)
+        }
+    }
+
+    Row(horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium)) {
+        AppCard(modifier = Modifier.weight(1f), onClick = onStatsClick) {
+            Column(modifier = Modifier.padding(AppSizes.spacingLarge)) {
+                Text(text = formatDuration(minutesToday), style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = stringResource(R.string.home_stats_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+        AppCard(modifier = Modifier.weight(1f), onClick = onMissionsClick) {
+            Column(modifier = Modifier.padding(AppSizes.spacingLarge)) {
+                val ready = missions.count { it.canClaim }
+                Text(
+                    text = "${missions.count { it.isComplete }}/${missions.size}",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = if (ready > 0) {
+                        stringResource(R.string.home_missions_ready, ready)
+                    } else {
+                        stringResource(R.string.home_missions_label)
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (ready >
+                        0
+                    ) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+        }
+    }
+    if (boostMinutesLeft > 0 && preferencesManager.isRarityBoostActive) {
+        Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
+        HomeStatusBanner(
+            text = stringResource(R.string.home_rarity_boost_banner),
+            modifier = Modifier.fillMaxWidth(),
+            highlight = true,
+            badge = stringResource(R.string.home_super_rod_active_badge, boostMinutesLeft)
+        )
     }
 }
 
@@ -392,7 +518,9 @@ private fun TrainingBanner(partner: CaughtPokemon, onPartnerClick: (CaughtPokemo
         ) {
             PokemonSpriteCircle(
                 pokemonId = partner.speciesId,
-                pokemonName = species?.name ?: stringResource(R.string.common_unknown)
+                pokemonName = species?.displayName ?: stringResource(R.string.common_unknown),
+                shiny = partner.isShiny,
+                form = partner.form
             )
 
             Column(
@@ -400,7 +528,7 @@ private fun TrainingBanner(partner: CaughtPokemon, onPartnerClick: (CaughtPokemo
                 verticalArrangement = Arrangement.spacedBy(AppSizes.spacingTiny)
             ) {
                 Text(
-                    text = partner.nickname ?: species?.name ?: stringResource(R.string.common_unknown),
+                    text = partner.nickname ?: species?.displayName ?: stringResource(R.string.common_unknown),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -524,7 +652,7 @@ private fun EvolutionNotificationOverlay(notification: EvolutionNotification, on
                     PokemonSpriteCircle(
                         modifier = Modifier.size(AppSizes.homeTileHeight),
                         pokemonId = notification.newSpeciesId,
-                        pokemonName = newSpecies?.name ?: stringResource(R.string.common_unknown)
+                        pokemonName = newSpecies?.displayName ?: stringResource(R.string.common_unknown)
                     )
 
                     Text(
@@ -535,8 +663,8 @@ private fun EvolutionNotificationOverlay(notification: EvolutionNotification, on
                     Text(
                         text = stringResource(
                             R.string.home_evolution_congrats_message,
-                            previousSpecies?.name ?: stringResource(R.string.common_unknown),
-                            newSpecies?.name ?: stringResource(R.string.common_unknown)
+                            previousSpecies?.displayName ?: stringResource(R.string.common_unknown),
+                            newSpecies?.displayName ?: stringResource(R.string.common_unknown)
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -558,7 +686,7 @@ private fun EvolutionNotificationOverlay(notification: EvolutionNotification, on
 private fun StatusBanners(
     showSuperRodIndicator: Boolean,
     showRepelIndicator: Boolean,
-    superRodStatus: ActiveItemStatus,
+    activeRod: Pair<Item, ActiveItemStatus>?,
     isSleepBonusActive: Boolean,
     isHalloween: Boolean,
     isChristmas: Boolean,
@@ -570,13 +698,19 @@ private fun StatusBanners(
         if (isHalloween) add(stringResource(R.string.home_event_halloween))
         if (isChristmas) add(stringResource(R.string.home_event_christmas))
         if (isFullMoon) add(stringResource(R.string.home_event_full_moon))
+        if (EventHelpers.isValentines()) add(stringResource(R.string.home_event_valentines))
+        if (EventHelpers.isPokemonDay()) add(stringResource(R.string.home_event_pokemon_day))
+        if (EventHelpers.isNewYear()) add(stringResource(R.string.home_event_new_year))
+        if (EventHelpers.isSanJuan()) add(stringResource(R.string.home_event_san_juan))
+        val shinyBoost = EventHelpers.shinyBoost()
+        if (shinyBoost > 1) add(stringResource(R.string.home_event_shiny_boost, shinyBoost))
     }
     val hasActiveEvent = activeEvents.isNotEmpty()
 
     if (
         showSuperRodIndicator ||
         showRepelIndicator ||
-        superRodStatus.isActive ||
+        activeRod != null ||
         isSleepBonusActive ||
         hasActiveEvent
     ) {
@@ -602,12 +736,13 @@ private fun StatusBanners(
                     badge = stringResource(R.string.home_repel_new_badge)
                 )
             }
-            if (superRodStatus.isActive) {
+            if (activeRod != null) {
+                val (rod, status) = activeRod
                 HomeStatusBanner(
-                    text = stringResource(R.string.home_super_rod_active_banner),
+                    text = stringResource(R.string.home_super_rod_active_banner, stringResource(rod.nameRes())),
                     modifier = Modifier.fillMaxWidth(),
                     highlight = true,
-                    badge = stringResource(R.string.home_super_rod_active_badge, superRodStatus.remainingMinutes)
+                    badge = stringResource(R.string.home_super_rod_active_badge, status.remainingMinutes)
                 )
             }
             if (hasActiveEvent) {
@@ -693,13 +828,15 @@ private fun RecentCatchCard(pokemon: CaughtPokemon, referenceTimeMillis: Long, o
                 PokemonSpriteCircle(
                     modifier = Modifier,
                     pokemonId = pokemon.speciesId,
-                    pokemonName = species?.name ?: stringResource(R.string.common_unknown)
+                    pokemonName = species?.displayName ?: stringResource(R.string.common_unknown),
+                    shiny = pokemon.isShiny,
+                    form = pokemon.form
                 )
 
                 Spacer(modifier = Modifier.height(AppSizes.spacingTiny))
 
                 Text(
-                    text = species?.name ?: "???",
+                    text = species?.displayName ?: "???",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurface
@@ -777,15 +914,15 @@ private suspend fun grantStarterStoneGiftIfEligible(db: PokemonDatabase, prefere
     preferencesManager.hasReceivedStarterStoneGift = true
 }
 
-private suspend fun ensureSuperRodUnlocked(db: PokemonDatabase, preferencesManager: PreferencesManager) {
+private suspend fun ensureRodUnlocked(db: PokemonDatabase, preferencesManager: PreferencesManager, rod: Item) {
     val created = withContext(Dispatchers.IO) {
         val inventoryDao = db.inventoryDao()
-        val existing = inventoryDao.getItem(Item.SUPER_ROD.ordinal)
+        val existing = inventoryDao.getItem(rod.ordinal)
 
         if (existing != null) {
             false
         } else {
-            inventoryDao.insertItem(InventoryItem(itemId = Item.SUPER_ROD.ordinal, quantity = 1))
+            inventoryDao.insertItem(InventoryItem(itemId = rod.ordinal, quantity = 1))
             true
         }
     }
@@ -818,7 +955,7 @@ private val STARTER_STONE_GIFT_ITEMS = listOf(
     Item.THUNDER_STONE
 )
 private const val RECENT_CATCH_WINDOW_MILLIS = 24 * 60 * 60 * 1000L
-private const val SUPER_ROD_UNLOCK_COUNT = 15
+private val ROD_UNLOCK_COUNTS = listOf(Item.OLD_ROD to 15, Item.GOOD_ROD to 45, Item.SUPER_ROD to 100)
 private const val REPEL_UNLOCK_SPECIES_COUNT = 50
 
 private fun CaughtPokemon.isRecent(referenceTimeMillis: Long): Boolean =

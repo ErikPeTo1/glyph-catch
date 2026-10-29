@@ -19,9 +19,12 @@ import dev.equalparts.glyph_catch.screens.CaughtPokemonDetailScreen
 import dev.equalparts.glyph_catch.screens.CaughtScreen
 import dev.equalparts.glyph_catch.screens.HomeScreen
 import dev.equalparts.glyph_catch.screens.InventoryScreen
+import dev.equalparts.glyph_catch.screens.MissionsScreen
 import dev.equalparts.glyph_catch.screens.PokedexScreen
 import dev.equalparts.glyph_catch.screens.PokemonSelectionScreen
+import dev.equalparts.glyph_catch.screens.RumorsScreen
 import dev.equalparts.glyph_catch.screens.SettingsScreen
+import dev.equalparts.glyph_catch.screens.StatsScreen
 import dev.equalparts.glyph_catch.screens.inventory.InventoryItemDetailScreen
 import dev.equalparts.glyph_catch.util.TrainerTipsProvider
 
@@ -66,16 +69,30 @@ fun AppNavigationGraph(navController: NavHostController, db: PokemonDatabase) {
                 },
                 onWeatherSettingsClick = {
                     navController.navigate(AppScreen.Settings.route)
-                }
+                },
+                onStatsClick = { navController.navigate("home/stats") },
+                onMissionsClick = { navController.navigate("home/missions") }
             )
+        }
+        composable("home/stats") {
+            StatsScreen(db = db, preferencesManager = preferencesManager, onBackClick = { navController.navigateUp() })
+        }
+        composable("home/missions") {
+            MissionsScreen(db = db, preferencesManager = preferencesManager, onBackClick = {
+                navController.navigateUp()
+            })
         }
         composable(AppScreen.Pokedex.route) {
             PokedexScreen(
                 db = db,
                 onPokemonClick = { speciesId ->
                     navController.navigateToPokemon(speciesId)
-                }
+                },
+                onRumorsClick = { navController.navigate("pokedex/rumors") }
             )
+        }
+        composable("pokedex/rumors") {
+            RumorsScreen(db = db, onBackClick = { navController.navigateUp() })
         }
         composable(
             route = AppScreen.Caught.route,

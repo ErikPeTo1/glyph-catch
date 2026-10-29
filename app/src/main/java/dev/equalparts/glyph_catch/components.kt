@@ -28,13 +28,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -134,7 +140,8 @@ fun PokedexSpriteCircle(
     pokemonId: Int,
     pokemonName: String,
     caught: Boolean,
-    size: Dp? = AppSizes.pokemonImageSize
+    size: Dp? = AppSizes.pokemonImageSize,
+    shinyCaught: Boolean = false
 ) {
     val background = if (caught) CatchColors.Black else CatchColors.MediumGray
     PokemonSpriteCircle(
@@ -143,7 +150,8 @@ fun PokedexSpriteCircle(
         pokemonName = pokemonName,
         backgroundColor = background,
         showSprite = caught,
-        size = size
+        size = size,
+        showShinyBadge = shinyCaught
     )
 }
 
@@ -166,8 +174,21 @@ fun ItemGlyphCircle(
         val resourceId = remember(item, context) {
             ItemSpriteUtils.getMatrixResourceId(context, item)
         }
+        val colorResourceId = remember(item, context) {
+            ItemSpriteUtils.getColorResourceId(context, item)
+        }
 
-        if (resourceId != 0) {
+        if (LocalColorSprites.current && colorResourceId != 0) {
+            Image(
+                bitmap = ImageBitmap.imageResource(colorResourceId),
+                contentDescription = contentDescription,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(AppSizes.spacingSmall),
+                contentScale = ContentScale.Fit,
+                filterQuality = FilterQuality.None
+            )
+        } else if (resourceId != 0) {
             Image(
                 painter = painterResource(resourceId),
                 contentDescription = contentDescription,
@@ -186,6 +207,11 @@ fun ItemGlyphCircle(
     }
 }
 
+/**
+ * Whether the app shows Pokémon in color instead of the Glyph Matrix style.
+ */
+val LocalColorSprites = compositionLocalOf { false }
+
 @Composable
 fun PokemonSpriteCircle(
     modifier: Modifier = Modifier,
@@ -194,32 +220,85 @@ fun PokemonSpriteCircle(
     backgroundColor: Color = CatchColors.Black,
     showSprite: Boolean = true,
     contentPadding: Dp = AppSizes.spacingTiny,
-    size: Dp? = AppSizes.pokemonImageSize
+    size: Dp? = AppSizes.pokemonImageSize,
+    shiny: Boolean = false,
+    form: String? = null,
+    showShinyBadge: Boolean = shiny
+) {
+    Box(modifier = modifier.then(if (size != null) Modifier.size(size) else Modifier)) {
+        PokemonSpriteCircleContent(pokemonId, pokemonName, backgroundColor, showSprite, contentPadding, shiny, form)
+        if (showShinyBadge && showSprite) {
+            Text(
+                text = "✨",
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.align(Alignment.TopEnd)
+            )
+        }
+    }
+}
+
+@Composable
+private fun PokemonSpriteCircleContent(
+    pokemonId: Int,
+    pokemonName: String,
+    backgroundColor: Color,
+    showSprite: Boolean,
+    contentPadding: Dp,
+    shiny: Boolean,
+    form: String?
 ) {
     Box(
-        modifier = modifier
-            .then(if (size != null) Modifier.size(size) else Modifier)
+        modifier = Modifier
+            .fillMaxSize()
             .clip(CircleShape)
             .background(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
         val context = LocalContext.current
-        val resourceId = remember(pokemonId, context) {
-            PokemonSpriteUtils.getMatrixResourceId(context, pokemonId)
+        val colorSprites = LocalColorSprites.current
+        val colorResourceId = remember(pokemonId, shiny, form, context) {
+            PokemonSpriteUtils.getColorResourceId(context, pokemonId, shiny, form)
+        }
+        val resourceId = remember(pokemonId, form, context) {
+            PokemonSpriteUtils.getMatrixResourceId(context, pokemonId, form)
         }
 
-        if (showSprite && resourceId != 0) {
+        if (showSprite && colorSprites && colorResourceId != 0) {
+            Image(
+                bitmap = ImageBitmap.imageResource(colorResourceId),
+                contentDescription = pokemonName,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(AppSizes.spacingSmall),
+                contentScale = ContentScale.Fit,
+                filterQuality = FilterQuality.None
+            )
+        } else if (showSprite && resourceId != 0) {
             Image(
                 painter = painterResource(resourceId),
                 contentDescription = pokemonName,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding),
-                contentScale = ContentScale.Fit
+                contentScale = ContentScale.Fit,
+                // Shinies use the negative image, just like on the Glyph Matrix
+                colorFilter = if (shiny) InvertColorFilter else null
             )
         }
     }
 }
+
+private val InvertColorFilter = ColorFilter.colorMatrix(
+    ColorMatrix(
+        floatArrayOf(
+            -1f, 0f, 0f, 0f, 255f,
+            0f, -1f, 0f, 0f, 255f,
+            0f, 0f, -1f, 0f, 255f,
+            0f, 0f, 0f, 1f, 0f
+        )
+    )
+)
 
 @Composable
 fun PokemonTypeChips(types: List<String>, modifier: Modifier = Modifier) {
@@ -242,7 +321,7 @@ fun PokemonTypeChip(modifier: Modifier = Modifier, type: String) {
             .padding(horizontal = AppSizes.spacingSmall, vertical = AppSizes.spacingMicro)
     ) {
         Text(
-            text = type.lowercase().replaceFirstChar { it.uppercase() },
+            text = type,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

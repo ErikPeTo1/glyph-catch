@@ -22,6 +22,22 @@ class PreferencesManager(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
 
+    val dailyStats = DailyStats(prefs)
+
+    /**
+     * Mission reward: Uncommon, Rare and Very Rare Pokémon are more likely until this moment.
+     */
+    var rarityBoostUntil: Long
+        get() = prefs.getLong(KEY_RARITY_BOOST_UNTIL, 0L)
+        set(value) = prefs.edit { putLong(KEY_RARITY_BOOST_UNTIL, value) }
+
+    val isRarityBoostActive: Boolean
+        get() = rarityBoostUntil > System.currentTimeMillis()
+
+    var claimedMissions: Set<String>
+        get() = prefs.getStringSet(KEY_CLAIMED_MISSIONS, emptySet()).orEmpty()
+        set(value) = prefs.edit { putStringSet(KEY_CLAIMED_MISSIONS, value) }
+
     init {
         synchronized(pendingEvolutionNotificationsLock) {
             val persisted = getPendingEvolutionNotifications()
@@ -101,6 +117,19 @@ class PreferencesManager(context: Context) {
     var isRepelIndicatorDismissed: Boolean
         get() = prefs.getBoolean(KEY_REPEL_INDICATOR_DISMISSED, false)
         set(value) = prefs.edit { putBoolean(KEY_REPEL_INDICATOR_DISMISSED, value) }
+
+    var colorSprites: Boolean
+        get() = prefs.getBoolean(KEY_COLOR_SPRITES, false)
+        set(value) = prefs.edit { putBoolean(KEY_COLOR_SPRITES, value) }
+
+    fun watchColorSprites(): Flow<Boolean> = preferenceFlow(
+        shouldEmit = { key -> key == KEY_COLOR_SPRITES },
+        currentValue = { colorSprites }
+    )
+
+    var releasedCount: Int
+        get() = prefs.getInt(KEY_RELEASED_COUNT, 0)
+        set(value) = prefs.edit { putInt(KEY_RELEASED_COUNT, value) }
 
     var hasReceivedStarterStoneGift: Boolean
         get() = prefs.getBoolean(KEY_STARTER_STONE_GIFT, false)
@@ -354,6 +383,10 @@ class PreferencesManager(context: Context) {
 
     companion object {
         private const val PREFS_NAME = "glyph_catch_prefs"
+        private const val KEY_RELEASED_COUNT = "released_count"
+        private const val KEY_COLOR_SPRITES = "color_sprites"
+        private const val KEY_RARITY_BOOST_UNTIL = "rarity_boost_until"
+        private const val KEY_CLAIMED_MISSIONS = "claimed_missions"
         private const val KEY_OPENWEATHER_API = "openweather_api_key"
         private const val KEY_USE_OPENWEATHER = "use_openweather"
         private const val KEY_WEATHER_LAT = "weather_latitude"

@@ -39,11 +39,21 @@ fun GraphicsSettingsScreen(modifier: Modifier) {
     val lowerBrightness by produceState(initialValue = prefs.glyphToyLowerBrightness, key1 = prefs) {
         prefs.watchGlyphToyLowerBrightness().collect { value = it }
     }
+    val colorSprites by produceState(initialValue = prefs.colorSprites, key1 = prefs) {
+        prefs.watchColorSprites().collect { value = it }
+    }
 
     Column(
         modifier = modifier.verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(AppSizes.spacingLarge)
     ) {
+        VisualToggleCard(
+            title = stringResource(R.string.settings_graphics_color_title),
+            subtitle = stringResource(R.string.settings_graphics_color_subtitle),
+            checked = colorSprites,
+            onCheckedChange = { enabled -> prefs.colorSprites = enabled }
+        )
+
         VisualToggleCard(
             title = stringResource(R.string.settings_graphics_clock_title),
             subtitle = stringResource(R.string.settings_graphics_clock_subtitle),

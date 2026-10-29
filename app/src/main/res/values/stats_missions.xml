@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stats_title">Statistics</string>
+    <string name="stats_today">Today</string>
+    <string name="stats_week">Last 7 days</string>
+    <string name="stats_best_day">Best day</string>
+    <string name="stats_catches_week">Caught in 7 days</string>
+    <string name="stats_pokedex">Pokédex</string>
+    <string name="stats_shinies">Shiny species</string>
+    <string name="stats_chart_title">Time without unlocking</string>
+    <string name="stats_duration">%1$dh %2$02dm</string>
+    <string name="stats_catches_short">%1$d caught</string>
+    <string name="home_stats_label">Without unlocking today</string>
+    <string name="home_missions_label">Missions</string>
+    <string name="home_missions_ready">%1$d ready to claim!</string>
+    <string name="home_rarity_boost_banner">Rarity boost ✨</string>
+    <string name="home_update_banner">Version %1$s is available</string>
+    <string name="home_update_badge">Update</string>
+
+    <string name="missions_title">Missions</string>
+    <string name="missions_description">New missions every day, and a bigger one every Monday. Rewards include items and a rarity boost for rarer Pokémon.</string>
+    <string name="missions_daily">DAILY</string>
+    <string name="missions_weekly">WEEKLY</string>
+    <string name="missions_reward">%1$d× %2$s + %3$d min rarity boost</string>
+    <string name="missions_claim">Claim</string>
+    <string name="missions_done">Done ✓</string>
+    <string name="missions_claimed_toast">Reward claimed!</string>
+    <plurals name="mission_minutes">
+        <item quantity="one">Go %1$d hour without unlocking your phone</item>
+        <item quantity="other">Go %1$d hours without unlocking your phone</item>
+    </plurals>
+    <plurals name="mission_catches">
+        <item quantity="one">Catch %1$d Pokémon</item>
+        <item quantity="other">Catch %1$d Pokémon</item>
+    </plurals>
+    <plurals name="mission_new_species">
+        <item quantity="one">Register %1$d new species in your Pokédex</item>
+        <item quantity="other">Register %1$d new species in your Pokédex</item>
+    </plurals>
+    <plurals name="mission_rod_catches">
+        <item quantity="one">Catch %1$d Pokémon with a fishing rod</item>
+        <item quantity="other">Catch %1$d Pokémon with a fishing rod</item>
+    </plurals>
+    <plurals name="mission_levels">
+        <item quantity="one">Level up your Pokémon %1$d time</item>
+        <item quantity="other">Level up your Pokémon %1$d times</item>
+    </plurals>
+    <plurals name="mission_evolutions">
+        <item quantity="one">Evolve %1$d Pokémon</item>
+        <item quantity="other">Evolve %1$d Pokémon</item>
+    </plurals>
+    <plurals name="mission_items">
+        <item quantity="one">Use %1$d item on a Pokémon</item>
+        <item quantity="other">Use %1$d items on your Pokémon</item>
+    </plurals>
+</resources>

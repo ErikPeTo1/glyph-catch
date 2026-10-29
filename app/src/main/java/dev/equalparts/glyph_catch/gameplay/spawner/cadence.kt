@@ -16,10 +16,10 @@ class SpawnCadenceController(private val spawnEngine: SpawnRulesEngine, private 
         .toMap()
 
     private val screenOffChanceRules = listOf(
-        ScreenOffChanceRule(minMinutesAccumulated = 15, baseChance = 0.04),
-        ScreenOffChanceRule(minMinutesAccumulated = 30, baseChance = 0.08),
-        ScreenOffChanceRule(minMinutesAccumulated = 45, baseChance = 0.20),
-        ScreenOffChanceRule(minMinutesAccumulated = 60, baseChance = 1.00)
+        ScreenOffChanceRule(minMinutesAccumulated = 8, baseChance = 0.04),
+        ScreenOffChanceRule(minMinutesAccumulated = 15, baseChance = 0.08),
+        ScreenOffChanceRule(minMinutesAccumulated = 22, baseChance = 0.20),
+        ScreenOffChanceRule(minMinutesAccumulated = 30, baseChance = 1.00)
     )
 
     private val rerollRules = listOf(
@@ -96,11 +96,8 @@ class SpawnCadenceController(private val spawnEngine: SpawnRulesEngine, private 
             ?.baseChance
             ?: return 0.0
 
-        return if (context.isBedtime) {
-            baseChance.coerceAtMost(MAX_SLEEP_WINDOW_CHANCE)
-        } else {
-            baseChance
-        }
+        // Pokémon keep appearing while you sleep; they show up without animation
+        return baseChance
     }
 
     private fun spawnWithReroll(nowMillis: Long, screenOffMinutes: Int, rerollOptions: RerollOptions?): SpawnOutcome {
@@ -191,7 +188,6 @@ class SpawnCadenceController(private val spawnEngine: SpawnRulesEngine, private 
 
     companion object {
         private const val FIRST_CATCH_CHANCE = 0.2
-        private const val MAX_SLEEP_WINDOW_CHANCE = 0.005
         private const val MIN_SCREEN_OFF_MINUTES_FOR_REROLL = 30
     }
 }

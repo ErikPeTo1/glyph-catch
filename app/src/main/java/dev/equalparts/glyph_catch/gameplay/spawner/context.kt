@@ -1,7 +1,9 @@
 package dev.equalparts.glyph_catch.gameplay.spawner
 
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.Context.BATTERY_SERVICE
+import android.content.Context.KEYGUARD_SERVICE
 import android.content.Context.POWER_SERVICE
 import android.os.BatteryManager
 import android.os.PowerManager
@@ -111,6 +113,18 @@ data class GameplayContext(
 
         val fullMoon: Boolean
             get() = EventHelpers.isFullMoon()
+
+        val valentines: Boolean
+            get() = EventHelpers.isValentines()
+
+        val pokemonDay: Boolean
+            get() = EventHelpers.isPokemonDay()
+
+        val newYear: Boolean
+            get() = EventHelpers.isNewYear()
+
+        val sanJuan: Boolean
+            get() = EventHelpers.isSanJuan()
     }
 
     /**
@@ -119,7 +133,18 @@ data class GameplayContext(
     inner class PhoneState {
         var minutesOff: Int = 0
         var battery: Int = 100
+
+        /**
+         * `true` while the phone is unlocked and in use. Turning on the screen without
+         * unlocking (lock screen, notifications) does not count as using the phone.
+         */
         var isInteractive: Boolean = false
+
+        /**
+         * Set when the phone was unlocked between two ticks, so short unlocks aren't missed.
+         */
+        @Volatile
+        var unlockedSinceLastTick: Boolean = false
 
         val minutesOffOutsideBedtime: Int
             get() = sleep.minutesOffOutsideBedtime
@@ -133,7 +158,10 @@ data class GameplayContext(
 
             battery = batteryManager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: 100
 
-            val interactive = powerManager.isInteractive
+            val keyguardManager = applicationContext.getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
+            val unlockedNow = powerManager.isInteractive && keyguardManager?.isKeyguardLocked == false
+            val interactive = unlockedNow || unlockedSinceLastTick
+            unlockedSinceLastTick = false
             isInteractive = interactive
 
             if (interactive) {
@@ -153,7 +181,7 @@ data class GameplayContext(
     inner class SleepState {
         private val prefs = PreferencesManager(applicationContext)
         private val sleepDurationMinutes = 8 * 60
-        private val sleepGoalMinutes = 450
+        private val sleepGoalMinutes = 360
 
         private var cachedBedtimeMinutes = prefs.bedtimeMinutes
         private var previousBedtimeStart: ZonedDateTime? = null
@@ -306,6 +334,12 @@ data class GameplayContext(
             val inventoryItem = db.inventoryDao().getItem(item.ordinal)
             (inventoryItem?.quantity ?: 0) > 0
         }
+
+        /**
+         * Yields `true` while a mission reward makes rarer Pokémon more likely.
+         */
+        val hasRarityBoost: Boolean
+            get() = preferences.isRarityBoostActive
 
         /**
          * Yields `true` if the effect of the given item is currently active.

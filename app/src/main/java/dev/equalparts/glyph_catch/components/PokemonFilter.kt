@@ -1,5 +1,7 @@
 package dev.equalparts.glyph_catch.components
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -28,14 +31,50 @@ import dev.equalparts.glyph_catch.AppSizes
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.Pokemon
+import dev.equalparts.glyph_catch.data.displayName
+
+/**
+ * Sort orders for Pokémon lists, modelled after the box sorting options of the main games.
+ */
+enum class PokemonSort(@StringRes val labelRes: Int) {
+    RECENT(R.string.pokemon_sort_recent),
+    OLDEST(R.string.pokemon_sort_oldest),
+    POKEDEX(R.string.pokemon_sort_pokedex),
+    LEVEL_HIGH(R.string.pokemon_sort_level_high),
+    LEVEL_LOW(R.string.pokemon_sort_level_low),
+    NAME(R.string.pokemon_sort_name),
+    TYPE(R.string.pokemon_sort_type),
+    FAVORITES(R.string.pokemon_sort_favorites)
+}
 
 data class PokemonFilterState(
     val searchQuery: String = "",
     val showFavoritesOnly: Boolean = false,
-    val showEventOnly: Boolean = false
+    val showEventOnly: Boolean = false,
+    val showShinyOnly: Boolean = false,
+    val sort: PokemonSort = PokemonSort.RECENT
 ) {
     val hasActiveFilters: Boolean
-        get() = searchQuery.isNotBlank() || showFavoritesOnly || showEventOnly
+        get() = searchQuery.isNotBlank() || showFavoritesOnly || showEventOnly || showShinyOnly
+}
+
+private fun CaughtPokemon.sortName(): String = nickname ?: Pokemon[speciesId]?.displayName.orEmpty()
+
+private fun PokemonSort.comparator(): Comparator<CaughtPokemon> {
+    val newestFirst = compareByDescending<CaughtPokemon> { it.caughtAt }
+    val byPokedex = compareBy<CaughtPokemon> { it.speciesId }
+    return when (this) {
+        PokemonSort.RECENT -> newestFirst
+        PokemonSort.OLDEST -> compareBy { it.caughtAt }
+        PokemonSort.POKEDEX -> byPokedex.thenByDescending { it.level }
+        PokemonSort.LEVEL_HIGH -> compareByDescending<CaughtPokemon> { it.level }.then(byPokedex)
+        PokemonSort.LEVEL_LOW -> compareBy<CaughtPokemon> { it.level }.then(byPokedex)
+        PokemonSort.NAME -> compareBy<CaughtPokemon, String>(String.CASE_INSENSITIVE_ORDER) { it.sortName() }
+            .then(byPokedex)
+        PokemonSort.TYPE -> compareBy<CaughtPokemon> { Pokemon[it.speciesId]?.type1?.ordinal ?: Int.MAX_VALUE }
+            .then(byPokedex)
+        PokemonSort.FAVORITES -> compareByDescending<CaughtPokemon> { it.isFavorite }.then(newestFirst)
+    }
 }
 
 fun List<CaughtPokemon>.applyFilters(state: PokemonFilterState): List<CaughtPokemon> = filter { pokemon ->
@@ -44,12 +83,14 @@ fun List<CaughtPokemon>.applyFilters(state: PokemonFilterState): List<CaughtPoke
         true
     } else {
         (pokemon.nickname?.contains(state.searchQuery, ignoreCase = true) == true) ||
-            (species?.name?.contains(state.searchQuery, ignoreCase = true) == true)
+            (species?.name?.contains(state.searchQuery, ignoreCase = true) == true) ||
+            (species?.displayName?.contains(state.searchQuery, ignoreCase = true) == true)
     }
     val matchesFavorite = !state.showFavoritesOnly || pokemon.isFavorite
     val matchesEvent = !state.showEventOnly || pokemon.isSpecialSpawn || pokemon.isConditionalSpawn
-    matchesSearch && matchesFavorite && matchesEvent
-}.sortedByDescending { it.caughtAt }
+    val matchesShiny = !state.showShinyOnly || pokemon.isShiny
+    matchesSearch && matchesFavorite && matchesEvent && matchesShiny
+}.sortedWith(state.sort.comparator())
 
 @Composable
 fun PokemonFilterControls(
@@ -58,7 +99,9 @@ fun PokemonFilterControls(
     onClearSearch: () -> Unit,
     onToggleFavorites: () -> Unit,
     onToggleEvent: () -> Unit,
-    modifier: Modifier = Modifier
+    onSortChange: (PokemonSort) -> Unit,
+    modifier: Modifier = Modifier,
+    onToggleShiny: () -> Unit = {}
 ) {
     Column(modifier = modifier) {
         PokemonFilterSearchField(
@@ -74,7 +117,11 @@ fun PokemonFilterControls(
             showFavoritesOnly = state.showFavoritesOnly,
             onToggleFavorites = onToggleFavorites,
             showEventOnly = state.showEventOnly,
-            onToggleEvent = onToggleEvent
+            onToggleEvent = onToggleEvent,
+            showShinyOnly = state.showShinyOnly,
+            onToggleShiny = onToggleShiny,
+            sort = state.sort,
+            onSortChange = onSortChange
         )
     }
 }
@@ -115,6 +162,10 @@ private fun PokemonFilterChips(
     onToggleFavorites: () -> Unit,
     showEventOnly: Boolean,
     onToggleEvent: () -> Unit,
+    showShinyOnly: Boolean,
+    onToggleShiny: () -> Unit,
+    sort: PokemonSort,
+    onSortChange: (PokemonSort) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val chipColors = FilterChipDefaults.filterChipColors(
@@ -123,9 +174,18 @@ private fun PokemonFilterChips(
     )
 
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)
     ) {
+        SortChip(
+            selected = sort,
+            options = PokemonSort.entries,
+            label = { stringResource(it.labelRes) },
+            onSelect = onSortChange
+        )
+
         ToggleFilterChip(
             label = stringResource(R.string.caught_screen_filter_favorites),
             icon = Icons.Default.Favorite,
@@ -139,6 +199,13 @@ private fun PokemonFilterChips(
             icon = Icons.Default.Star,
             selected = showEventOnly,
             onClick = onToggleEvent,
+            colors = chipColors
+        )
+
+        FilterChip(
+            selected = showShinyOnly,
+            onClick = onToggleShiny,
+            label = { Text(stringResource(R.string.caught_screen_filter_shiny)) },
             colors = chipColors
         )
     }

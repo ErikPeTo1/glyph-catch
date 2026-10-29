@@ -16,4 +16,11 @@ object ItemSpriteUtils {
         val resourceName = "matrix_item_${item.name.lowercase()}"
         return context.resources.getIdentifier(resourceName, "drawable", context.packageName)
     }
+
+    @DrawableRes
+    @SuppressLint("DiscouragedApi")
+    fun getColorResourceId(context: Context, item: Item): Int {
+        val resourceName = "item_color_${item.name.lowercase()}"
+        return context.resources.getIdentifier(resourceName, "drawable", context.packageName)
+    }
 }

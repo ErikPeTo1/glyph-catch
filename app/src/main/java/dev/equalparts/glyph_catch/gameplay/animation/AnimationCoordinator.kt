@@ -42,8 +42,8 @@ internal class AnimationCoordinator(
     /**
      * Shows a static Pokémon image.
      */
-    fun showPokemon(pokemonId: Int, brightnessFactor: Float?) {
-        val baseFrame = glyphFrameHelper.renderPokemonFrame(pokemonId)
+    fun showPokemon(pokemonId: Int, brightnessFactor: Float?, isShiny: Boolean = false, form: String? = null) {
+        val baseFrame = glyphFrameHelper.renderPokemonFrame(pokemonId, invertColors = isShiny, form = form)
         val frame = brightnessFactor?.let { glyphFrameHelper.adjustBrightness(baseFrame, it) } ?: baseFrame
         glyphMatrixManagerProvider().setMatrixFrame(frame)
     }
@@ -63,7 +63,7 @@ internal class AnimationCoordinator(
             onAnimationStart()
 
             try {
-                val frames = glyphFrameHelper.createSpawnFrames(spawn.pokemon.id)
+                val frames = glyphFrameHelper.createSpawnFrames(spawn.pokemon.id, spawn.isShiny, spawn.form)
                 val primary = brightnessFactor?.let { glyphFrameHelper.adjustBrightness(frames.primaryFrame, it) }
                     ?: frames.primaryFrame
                 val flash = brightnessFactor?.let { glyphFrameHelper.adjustBrightness(frames.flashFrame, it) }
@@ -71,7 +71,7 @@ internal class AnimationCoordinator(
 
                 glyphMatrixManagerProvider().setMatrixFrame(primary)
 
-                repeat(SPAWN_FLASH_COUNT) {
+                repeat(if (spawn.isShiny) SHINY_SPAWN_FLASH_COUNT else SPAWN_FLASH_COUNT) {
                     delay(SPAWN_FLASH_INTERVAL_MS)
                     glyphMatrixManagerProvider().setMatrixFrame(flash)
 
@@ -202,6 +202,7 @@ internal class AnimationCoordinator(
 
     companion object {
         private const val SPAWN_FLASH_COUNT = 2
+        private const val SHINY_SPAWN_FLASH_COUNT = 6
         private const val SPAWN_FLASH_INTERVAL_MS = 100L
 
         private const val CATCH_INITIAL_FLASH_MS = 300L

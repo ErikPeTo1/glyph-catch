@@ -22,16 +22,16 @@ internal class GlyphMatrixHelper(private val context: Context, val matrixSize: I
     /**
      * Load a Pokémon sprite as a [Bitmap].
      */
-    fun getPokemonBitmap(pokemonId: Int): Bitmap {
-        val resourceId = PokemonSpriteUtils.getSpriteResourceId(context, pokemonId)
+    fun getPokemonBitmap(pokemonId: Int, form: String? = null): Bitmap {
+        val resourceId = PokemonSpriteUtils.getSpriteResourceId(context, pokemonId, form)
         return loadBitmap(resourceId)
     }
 
     /**
      * Render a Pokémon sprite to display on the Glyph Matrix.
      */
-    fun renderPokemonFrame(pokemonId: Int, invertColors: Boolean = false): IntArray {
-        val base = getPokemonBitmap(pokemonId)
+    fun renderPokemonFrame(pokemonId: Int, invertColors: Boolean = false, form: String? = null): IntArray {
+        val base = getPokemonBitmap(pokemonId, form)
         val bitmap = if (invertColors) inverted(base) else base
         return renderBitmapFrame(bitmap)
     }
@@ -105,9 +105,9 @@ internal class GlyphMatrixHelper(private val context: Context, val matrixSize: I
 
     class SpriteFrames(val primaryFrame: IntArray, val flashFrame: IntArray)
 
-    fun createSpawnFrames(pokemonId: Int): SpriteFrames {
-        val primary = renderPokemonFrame(pokemonId)
-        val flash = renderPokemonFrame(pokemonId, invertColors = true)
+    fun createSpawnFrames(pokemonId: Int, isShiny: Boolean = false, form: String? = null): SpriteFrames {
+        val primary = renderPokemonFrame(pokemonId, invertColors = isShiny, form = form)
+        val flash = renderPokemonFrame(pokemonId, invertColors = !isShiny, form = form)
         return SpriteFrames(primaryFrame = primary, flashFrame = flash)
     }
 

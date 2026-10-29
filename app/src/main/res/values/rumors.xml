@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rumors_title">Rumors</string>
+    <string name="rumors_button">📜 Rumors</string>
+    <string name="rumors_progress">%1$d of %2$d rumors heard</string>
+    <string name="rumors_unknown_name">\?\?\?</string>
+    <string name="rumors_locked">Keep filling your Pokédex to hear this rumor (%1$d entries).</string>
+
+    <string name="rumor_zapdos">Hikers swear a great electric bird rides the thunderstorms, but it only shows itself to trainers with some experience.</string>
+    <string name="rumor_articuno">In the depths of winter, a bird of ice visits phones that have been left resting for a while.</string>
+    <string name="rumor_moltres">On long summer days, a bird of fire visits phones that have been left resting for a while.</string>
+    <string name="rumor_mewtwo">A scientist\'s notes speak of a creature that only respects trainers who have raised six Pokémon to level 70.</string>
+    <string name="rumor_raikou">Thunder answers thunder: a beast with a stormy roar appears when lightning fills the sky.</string>
+    <string name="rumor_entei">A volcanic beast roams under clear daytime skies, near phones left untouched for an hour or more.</string>
+    <string name="rumor_suicune">A beast with a crystal-clear mane runs with the rain. Look for it on wet days.</string>
+    <string name="rumor_lugia">Sailors tell of a guardian of the seas that rises on rainy nights, after long hours of silence.</string>
+    <string name="rumor_ho_oh">Once the three legendary beasts are together, a rainbow-colored bird lights up clear days.</string>
+    <string name="rumor_regirock">An ancient golem of stone stirs on clear days, but only after a long time of stillness.</string>
+    <string name="rumor_regice">An ancient golem of ice wakes up when it snows. Some say long winter nights are enough.</string>
+    <string name="rumor_registeel">An ancient golem of steel walks under grey, cloudy skies after a long time of stillness.</string>
+    <string name="rumor_latias">A red dragon appears by day to trainers who have trained the same partner for five days in a row.</string>
+    <string name="rumor_latios">A blue dragon appears by night to trainers who have trained the same partner for five days in a row.</string>
+    <string name="rumor_celebi">A forest spirit travels through time in spring. Very rarely, it has been seen in other seasons too.</string>
+    <string name="rumor_jirachi">Wish upon a star: on clear nights, a sleeping Pokémon may wake up to grant your wish.</string>
+    <string name="rumor_uxie">The being of knowledge only appears to trainers who have raised three Pokémon to level 50.</string>
+    <string name="rumor_mesprit">The being of emotion dances under the full moon.</string>
+    <string name="rumor_azelf">The being of willpower tests your resolve: train the same partner for seven days in a row.</string>
+    <string name="rumor_dialga">Once the three lake guardians are found, the master of time appears by day after two hours of stillness.</string>
+    <string name="rumor_palkia">Once the three lake guardians are found, the master of space appears by night after two hours of stillness.</string>
+    <string name="rumor_mew">A mythical Pokémon is said to appear to trainers whose Pokédex has reached 300 entries.</string>
+    <string name="rumor_kyogre">When the rain won\'t stop and the phone has rested for a long while, the ruler of the seas awakens.</string>
+    <string name="rumor_groudon">Under a scorching clear sky, after a long rest, the ruler of the land awakens.</string>
+    <string name="rumor_rayquaza">When the rulers of sea and land have both been found, the sky dragon descends to calm them.</string>
+    <string name="rumor_regigigas">With the three golems of stone, ice and steel at your side, their colossal master begins to move.</string>
+    <string name="rumor_heatran">Something lives in the heat of summer volcanoes. On clear days, the ground trembles.</string>
+    <string name="rumor_deoxys">A meteor fell on a clear night. Something came with it from outer space.</string>
+    <string name="rumor_cresselia">On full-moon nights, a lunar Pokémon brings sweet dreams.</string>
+    <string name="rumor_darkrai">Once the lunar Pokémon is with you, beware of nightmares while you sleep.</string>
+    <string name="rumor_manaphy">The prince of the sea only bites the line of a Super Rod.</string>
+    <string name="rumor_phione">After meeting the prince of the sea, its smaller kin may follow the Super Rod again and again.</string>
+    <string name="rumor_shaymin">Flowers bloom in spring, and on clear days a tiny hedgehog rides the breeze.</string>
+    <string name="rumor_giratina">When time and space have both been found, a shadow from another world appears on Halloween night.</string>
+    <string name="rumor_victini">The Pokémon of victory appears to trainers who raise a Pokémon all the way to level 100.</string>
+    <string name="rumor_cobalion">A steel sword wanders under cloudy skies.</string>
+    <string name="rumor_terrakion">A rock sword charges under clear skies.</string>
+    <string name="rumor_virizion">A grass sword dances in the rain.</string>
+    <string name="rumor_keldeo">Once the three swords stand together, a young colt follows them through the rain.</string>
+    <string name="rumor_tornadus">A genie of whirlwinds flies over cloudy skies after a couple of hours of stillness.</string>
+    <string name="rumor_thundurus">A genie of lightning rides the thunderstorms.</string>
+    <string name="rumor_landorus">When both genies have been found, the guardian of the land brings a bountiful harvest.</string>
+    <string name="rumor_arceus">Legend says the creator of everything only shows itself to those who have seen nearly every Pokémon.</string>
+    <string name="rumor_reshiram">The white dragon of truth tests strong trainers by day: raise three Pokémon to level 70.</string>
+    <string name="rumor_zekrom">The black dragon of ideals tests strong trainers by night: raise three Pokémon to level 70.</string>
+    <string name="rumor_kyurem">When truth and ideals have both been found, a frozen dragon appears in the snow, or in the depths of winter.</string>
+    <string name="rumor_meloetta">A melody drifts on full-moon nights, but only veteran trainers can hear it.</string>
+    <string name="rumor_genesect">An ancient insect, rebuilt by humans, appears to trainers with a truly massive Pokédex.</string>
+</resources>

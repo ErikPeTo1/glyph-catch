@@ -6,6 +6,7 @@ import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PokemonSpecies
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.data.Stat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -31,7 +32,8 @@ suspend fun useItemOnPokemon(
     db: PokemonDatabase,
     preferencesManager: PreferencesManager,
     item: Item,
-    pokemonId: String
+    pokemonId: String,
+    targetSpeciesId: Int? = null
 ): ItemUsageResult = withContext(Dispatchers.IO) {
     val pokemonDao = db.pokemonDao()
     val current = pokemonDao.getCaughtPokemon(pokemonId)
@@ -39,15 +41,20 @@ suspend fun useItemOnPokemon(
 
     when (item) {
         Item.RARE_CANDY -> applyRareCandy(db, preferencesManager, current)
-        Item.LINKING_CORD -> applyEvolutionItem(db, preferencesManager, Item.LINKING_CORD, current) {
-            findTradeEvolutionTarget(it)
+        Item.LINKING_CORD -> applyEvolutionItem(db, preferencesManager, Item.LINKING_CORD, current) { pokemon ->
+            val targets = tradeTargets(pokemon)
+            targets.firstOrNull { it.id == targetSpeciesId } ?: findTradeEvolutionTarget(pokemon)
         }
         Item.FIRE_STONE,
         Item.WATER_STONE,
         Item.THUNDER_STONE,
         Item.LEAF_STONE,
         Item.MOON_STONE,
-        Item.SUN_STONE -> applyEvolutionItem(db, preferencesManager, item, current) { pokemon ->
+        Item.SUN_STONE,
+        Item.SHINY_STONE,
+        Item.DUSK_STONE,
+        Item.DAWN_STONE,
+        Item.ICE_STONE -> applyEvolutionItem(db, preferencesManager, item, current) { pokemon ->
             findStoneEvolutionTarget(pokemon, item)
         }
         else -> ItemUsageResult.Error(ItemUsageError.ITEM_NOT_CONSUMABLE, current)
@@ -76,13 +83,9 @@ private suspend fun applyEvolutionItem(
         ?: return@withTransaction ItemUsageResult.Error(ItemUsageError.NO_APPLICABLE_EVOLUTION, refreshed)
 
     inventoryDao.useItem(item.ordinal)
-    pokemonDao.evolvePokemon(
-        pokemonId = refreshed.id,
-        newSpeciesId = target.id,
-        newLevel = refreshed.level,
-        newExp = refreshed.exp
-    )
-    pokemonDao.recordPokedexEntry(target.id)
+    pokemonDao.evolveCaught(refreshed, target.id, refreshed.level, refreshed.exp)
+    preferencesManager.dailyStats.add(Stat.ITEMS_USED)
+    preferencesManager.dailyStats.add(Stat.EVOLUTIONS)
 
     val updated = pokemonDao.getCaughtPokemon(refreshed.id) ?: refreshed.copy(speciesId = target.id)
     preferencesManager.enqueueEvolutionNotification(refreshed.speciesId, target.id)
@@ -117,16 +120,13 @@ private suspend fun applyRareCandy(
 
     inventoryDao.useItem(Item.RARE_CANDY.ordinal)
     pokemonDao.updateTrainingProgress(refreshed.id, newExp, newLevel)
+    preferencesManager.dailyStats.add(Stat.ITEMS_USED)
+    preferencesManager.dailyStats.add(Stat.LEVELS)
 
     val evolution = findLevelEvolutionTarget(refreshed.copy(level = newLevel, exp = newExp))
     if (evolution != null) {
-        pokemonDao.evolvePokemon(
-            pokemonId = refreshed.id,
-            newSpeciesId = evolution.id,
-            newLevel = newLevel,
-            newExp = newExp
-        )
-        pokemonDao.recordPokedexEntry(evolution.id)
+        pokemonDao.evolveCaught(refreshed, evolution.id, newLevel, newExp)
+        preferencesManager.dailyStats.add(Stat.EVOLUTIONS)
         val updated = pokemonDao.getCaughtPokemon(refreshed.id)
             ?: refreshed.copy(speciesId = evolution.id, level = newLevel, exp = newExp)
         preferencesManager.enqueueEvolutionNotification(refreshed.speciesId, evolution.id)

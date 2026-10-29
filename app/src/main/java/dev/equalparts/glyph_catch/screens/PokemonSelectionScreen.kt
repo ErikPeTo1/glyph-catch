@@ -31,11 +31,13 @@ import dev.equalparts.glyph_catch.PokemonSpriteCircle
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.components.PokemonFilterControls
 import dev.equalparts.glyph_catch.components.PokemonFilterState
+import dev.equalparts.glyph_catch.components.PokemonSort
 import dev.equalparts.glyph_catch.components.applyFilters
 import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
+import dev.equalparts.glyph_catch.data.displayName
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.util.canUseItemOn
 
@@ -52,11 +54,13 @@ fun PokemonSelectionScreen(
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showFavoritesOnly by remember { mutableStateOf(false) }
     var showEventOnly by remember { mutableStateOf(false) }
+    var sort by rememberSaveable { mutableStateOf(PokemonSort.LEVEL_HIGH) }
 
     val filterState = PokemonFilterState(
         searchQuery = searchQuery,
         showFavoritesOnly = showFavoritesOnly,
-        showEventOnly = showEventOnly
+        showEventOnly = showEventOnly,
+        sort = sort
     )
 
     val allValidTargets by remember(caughtPokemon, item) {
@@ -82,7 +86,8 @@ fun PokemonSelectionScreen(
                 onSearchChange = { searchQuery = it },
                 onClearSearch = { searchQuery = "" },
                 onToggleFavorites = { showFavoritesOnly = !showFavoritesOnly },
-                onToggleEvent = { showEventOnly = !showEventOnly }
+                onToggleEvent = { showEventOnly = !showEventOnly },
+                onSortChange = { sort = it }
             )
 
             if (allValidTargets.isEmpty()) {
@@ -118,7 +123,7 @@ fun PokemonSelectionScreen(
 @Composable
 private fun PokemonSelectionRow(pokemon: CaughtPokemon, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val species = Pokemon[pokemon.speciesId] ?: return
-    val displayName = pokemon.nickname ?: species.name
+    val displayName = pokemon.nickname ?: species.displayName
 
     AppCard(
         modifier = modifier.fillMaxWidth(),
@@ -133,8 +138,10 @@ private fun PokemonSelectionRow(pokemon: CaughtPokemon, onClick: () -> Unit, mod
         ) {
             PokemonSpriteCircle(
                 pokemonId = pokemon.speciesId,
-                pokemonName = species.name,
-                modifier = Modifier.size(AppSizes.pokemonImageSize)
+                pokemonName = species.displayName,
+                modifier = Modifier.size(AppSizes.pokemonImageSize),
+                shiny = pokemon.isShiny,
+                form = pokemon.form
             )
 
             Column(

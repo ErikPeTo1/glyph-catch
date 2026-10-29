@@ -14,11 +14,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -26,6 +29,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.equalparts.glyph_catch.data.PokemonDatabase
+import dev.equalparts.glyph_catch.data.PokemonNames
+import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.debug.DebugExceptionTracker
 import dev.equalparts.glyph_catch.navigation.AppNavigationGraph
 import dev.equalparts.glyph_catch.navigation.AppScreen
@@ -37,9 +42,16 @@ class MainActivity : ComponentActivity() {
         DebugExceptionTracker.install(applicationContext)
         val db = PokemonDatabase.getInstance(this)
 
+        PokemonNames.init(this)
+
         setContent {
             AppTheme {
-                MainScreen(db)
+                val preferencesManager = remember { PreferencesManager(this) }
+                val colorSprites by preferencesManager.watchColorSprites()
+                    .collectAsStateWithLifecycle(initialValue = preferencesManager.colorSprites)
+                CompositionLocalProvider(LocalColorSprites provides colorSprites) {
+                    MainScreen(db)
+                }
             }
         }
     }

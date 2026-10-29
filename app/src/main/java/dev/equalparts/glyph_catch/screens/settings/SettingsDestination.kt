@@ -8,5 +8,6 @@ enum class SettingsDestination(@field:StringRes val titleRes: Int) {
     Graphics(R.string.settings_graphics_title),
     Weather(R.string.settings_weather_title),
     Sleep(R.string.settings_sleep_title),
+    Backup(R.string.settings_backup_title),
     Debug(R.string.settings_debug_title)
 }
