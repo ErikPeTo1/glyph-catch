@@ -26,6 +26,7 @@ import dev.equalparts.glyph_catch.screens.RumorsScreen
 import dev.equalparts.glyph_catch.screens.SettingsScreen
 import dev.equalparts.glyph_catch.screens.StatsScreen
 import dev.equalparts.glyph_catch.screens.inventory.InventoryItemDetailScreen
+import dev.equalparts.glyph_catch.screens.professor.PokegearScreen
 import dev.equalparts.glyph_catch.util.TrainerTipsProvider
 
 @Composable
@@ -71,8 +72,14 @@ fun AppNavigationGraph(navController: NavHostController, db: PokemonDatabase) {
                     navController.navigate(AppScreen.Settings.route)
                 },
                 onStatsClick = { navController.navigate("home/stats") },
-                onMissionsClick = { navController.navigate("home/missions") }
+                onMissionsClick = { navController.navigate("home/missions") },
+                onPokegearClick = { navController.navigate("home/pokegear") }
             )
+        }
+        composable("home/pokegear") {
+            PokegearScreen(db = db, preferencesManager = preferencesManager, onBackClick = {
+                navController.navigateUp()
+            })
         }
         composable("home/stats") {
             StatsScreen(db = db, preferencesManager = preferencesManager, onBackClick = { navController.navigateUp() })

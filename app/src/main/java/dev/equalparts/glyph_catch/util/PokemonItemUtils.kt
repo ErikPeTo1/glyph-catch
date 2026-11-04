@@ -81,6 +81,15 @@ fun tradeTargets(pokemon: CaughtPokemon): List<PokemonSpecies> {
 }
 
 /**
+ * What the item would evolve this Pokémon into (two options for Clamperl).
+ */
+fun itemEvolutionTargets(item: Item, pokemon: CaughtPokemon): List<PokemonSpecies> = when {
+    item == Item.LINKING_CORD -> tradeTargets(pokemon)
+    canUseItemOn(item, pokemon) && item != Item.RARE_CANDY -> listOfNotNull(findStoneEvolutionTarget(pokemon, item))
+    else -> emptyList()
+}
+
+/**
  * Whether the Everstone toggle makes sense for this Pokémon.
  */
 fun canHoldEverstone(pokemon: CaughtPokemon): Boolean {
@@ -88,3 +97,9 @@ fun canHoldEverstone(pokemon: CaughtPokemon): Boolean {
     val species = Pokemon[pokemon.speciesId] ?: return false
     return species.evolutionTargets().any { it.evolutionRequirement is EvolutionRequirement.Level }
 }
+
+/**
+ * How many Rare Candies can be used at once: all you have, but never past level 100.
+ */
+fun maxRareCandies(pokemon: CaughtPokemon, owned: Int): Int =
+    minOf(owned, MAX_POKEMON_LEVEL - pokemon.level).coerceAtLeast(0)

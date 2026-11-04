@@ -14,6 +14,8 @@
     <string name="home_missions_label">Missions</string>
     <string name="home_missions_ready">%1$d à récupérer !</string>
     <string name="home_rarity_boost_banner">Bonus de rareté ✨</string>
+    <string name="home_eggs_title">Œufs (%1$d/%2$d)</string>
+    <string name="home_eggs_empty">Pas encore d\'œufs. Tu en trouveras peut-être un en capturant un Pokémon.</string>
     <string name="home_update_banner">La version %1$s est disponible</string>
     <string name="home_update_badge">Mettre à jour</string>
     <string name="missions_title">Missions</string>

@@ -135,6 +135,34 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_STARTER_STONE_GIFT, false)
         set(value) = prefs.edit { putBoolean(KEY_STARTER_STONE_GIFT, value) }
 
+    /** The player has chosen between color and Glyph Matrix style sprites. */
+    var colorChoiceAsked: Boolean
+        get() = prefs.getBoolean(KEY_COLOR_CHOICE_ASKED, false)
+        set(value) = prefs.edit { putBoolean(KEY_COLOR_CHOICE_ASKED, value) }
+
+    /** The Shiny Charm can be switched off from the Bag. */
+    var shinyCharmEnabled: Boolean
+        get() = prefs.getBoolean(KEY_SHINY_CHARM_ENABLED, true)
+        set(value) = prefs.edit { putBoolean(KEY_SHINY_CHARM_ENABLED, value) }
+
+    /** Professor Oak has welcomed the player. */
+    var professorIntroSeen: Boolean
+        get() = prefs.getBoolean(KEY_PROFESSOR_INTRO_SEEN, false)
+        set(value) = prefs.edit { putBoolean(KEY_PROFESSOR_INTRO_SEEN, value) }
+
+    /** Regions switched off with the Town Map. */
+    var disabledRegions: Set<String>
+        get() = prefs.getStringSet(KEY_DISABLED_REGIONS, emptySet()).orEmpty()
+        set(value) = prefs.edit { putStringSet(KEY_DISABLED_REGIONS, value) }
+
+    /** Which rumor a professor tells next on the Pokégear; each call moves to the next one. */
+    fun nextRumorTurn(professor: String): Int {
+        val key = KEY_RUMOR_TURN_PREFIX + professor
+        val turn = prefs.getInt(key, 0)
+        prefs.edit { putInt(key, turn + 1) }
+        return turn
+    }
+
     var isRepelActive: Boolean
         get() = prefs.getBoolean(KEY_REPEL_ACTIVE, false)
         set(value) = prefs.edit { putBoolean(KEY_REPEL_ACTIVE, value) }
@@ -404,6 +432,11 @@ class PreferencesManager(context: Context) {
         private const val KEY_REPEL_DISCOVERED = "repel_discovered"
         private const val KEY_REPEL_INDICATOR_DISMISSED = "repel_indicator_dismissed"
         private const val KEY_REPEL_ACTIVE = "repel_active"
+        private const val KEY_PROFESSOR_INTRO_SEEN = "professor_intro_seen"
+        private const val KEY_SHINY_CHARM_ENABLED = "shiny_charm_enabled"
+        private const val KEY_COLOR_CHOICE_ASKED = "color_choice_asked"
+        private const val KEY_DISABLED_REGIONS = "disabled_regions"
+        private const val KEY_RUMOR_TURN_PREFIX = "rumor_turn_"
         private const val KEY_STARTER_STONE_GIFT = "starter_stone_gift"
         private const val KEY_SLEEP_BONUS_EXPIRES_AT = "sleep_bonus_expires_at"
         private const val KEY_DEBUG_CAPTURE_ENABLED = "debug_capture_enabled"

@@ -27,9 +27,11 @@ import dev.equalparts.glyph_catch.PokedexSpriteCircle
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
+import dev.equalparts.glyph_catch.data.Region
 import dev.equalparts.glyph_catch.data.Rumor
 import dev.equalparts.glyph_catch.data.Rumors
 import dev.equalparts.glyph_catch.data.displayName
+import dev.equalparts.glyph_catch.screens.professor.ownedItems
 
 /**
  * Hints about legendary and mythical Pokémon, unlocked as the Pokédex grows.
@@ -39,6 +41,8 @@ fun RumorsScreen(db: PokemonDatabase, onBackClick: () -> Unit) {
     val pokedexCount by db.pokemonDao().watchPokedexProgress().collectAsStateWithLifecycle(0)
     val caughtSpeciesIds by db.pokemonDao().watchCaughtSpeciesIds().collectAsStateWithLifecycle(emptyList())
     val caughtSet = remember(caughtSpeciesIds) { caughtSpeciesIds.toSet() }
+    val inventory by db.inventoryDao().watchAllItems().collectAsStateWithLifecycle(emptyList())
+    val openRegions = Region.active(inventory.ownedItems(), emptySet())
     val unlocked = Rumors.all.count { pokedexCount >= it.unlockAt }
 
     AppScaffoldWithTopBar(
@@ -63,6 +67,7 @@ fun RumorsScreen(db: PokemonDatabase, onBackClick: () -> Unit) {
             items(Rumors.all, key = { it.speciesId }) { rumor ->
                 RumorCard(
                     rumor = rumor,
+                    regionOpen = Region.of(rumor.speciesId) in openRegions,
                     unlocked = pokedexCount >= rumor.unlockAt,
                     found = rumor.speciesId in caughtSet
                 )
@@ -73,7 +78,7 @@ fun RumorsScreen(db: PokemonDatabase, onBackClick: () -> Unit) {
 }
 
 @Composable
-private fun RumorCard(rumor: Rumor, unlocked: Boolean, found: Boolean) {
+private fun RumorCard(rumor: Rumor, regionOpen: Boolean, unlocked: Boolean, found: Boolean) {
     val species = Pokemon[rumor.speciesId]
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -95,7 +100,12 @@ private fun RumorCard(rumor: Rumor, unlocked: Boolean, found: Boolean) {
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = if (unlocked) {
+                    text = if (!regionOpen) {
+                        stringResource(
+                            R.string.rumors_region_locked,
+                            stringResource(Region.of(rumor.speciesId).nameRes)
+                        )
+                    } else if (unlocked) {
                         stringResource(rumor.textRes)
                     } else {
                         stringResource(R.string.rumors_locked, rumor.unlockAt)

@@ -8,9 +8,12 @@ import android.content.Context.POWER_SERVICE
 import android.os.BatteryManager
 import android.os.PowerManager
 import dev.equalparts.glyph_catch.data.Item
+import dev.equalparts.glyph_catch.data.LEGENDARY_SPECIES
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PokemonSpecies
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.data.Region
+import dev.equalparts.glyph_catch.data.canSpawnSpecies
 import dev.equalparts.glyph_catch.util.EventHelpers
 import java.time.LocalTime
 import java.time.ZonedDateTime
@@ -287,18 +290,39 @@ data class GameplayContext(
 
         var pokedexCount: Int = 0
         var currentPartnerDays: Int = 0
+        var ownedItems: Set<Item> = emptySet()
+        var activeRegions: Set<Region> = Region.entries.toSet()
 
         /**
          * Yields `true` if the given Pokémon species is not in the current spawn queue
-         * and has not been caught before.
+         * and has not been caught before. Legendary Pokémon only need to be missing from the
+         * PC, so a released one can be met again (one at a time).
          */
         fun hasNotFound(species: PokemonSpecies): Boolean = runBlocking {
-            val db = PokemonDatabase.getInstance(applicationContext)
-            if (db.pokemonDao().hasPokedexEntry(species.id)) {
+            val dao = PokemonDatabase.getInstance(applicationContext).pokemonDao()
+            val found = if (species.id in LEGENDARY_SPECIES) {
+                dao.isSpeciesOwned(species.id)
+            } else {
+                dao.hasPokedexEntry(species.id)
+            }
+            if (found) {
                 return@runBlocking false
             }
             return@runBlocking spawnQueue.none { it.pokemon.id == species.id }
         }
+
+        /**
+         * Yields `true` if the species is in the Pokédex, even if it was released later.
+         */
+        fun hasRegistered(species: PokemonSpecies): Boolean = runBlocking {
+            PokemonDatabase.getInstance(applicationContext).pokemonDao().hasPokedexEntry(species.id)
+        }
+
+        /**
+         * Yields `true` if the species' region is active and, for legendaries, the player has
+         * the key item it needs.
+         */
+        fun canSpawn(speciesId: Int): Boolean = canSpawnSpecies(speciesId, ownedItems, activeRegions)
 
         /**
          * Yields `true` if the given Pokémon species are not in the current spawn queue
@@ -360,6 +384,12 @@ data class GameplayContext(
 
             runBlocking {
                 pokedexCount = dao.getUniqueSpeciesCount()
+                ownedItems = database.inventoryDao().getAllItems()
+                    .filter { it.quantity > 0 }
+                    .mapNotNull { Item.entries.getOrNull(it.itemId) }
+                    .toSet()
+                activeRegions = Region.active(ownedItems, preferences.disabledRegions)
+                EventHelpers.hasShinyCharm = Item.SHINY_CHARM in ownedItems && preferences.shinyCharmEnabled
 
                 val activePartner = dao.getActiveTrainingPartner()
                 if (activePartner == null) {

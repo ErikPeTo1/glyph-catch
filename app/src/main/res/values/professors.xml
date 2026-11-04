@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Professors -->
+    <string name="professor_oak">Prof. Oak</string>
+    <string name="professor_elm">Prof. Elm</string>
+    <string name="professor_birch">Prof. Birch</string>
+    <string name="professor_rowan">Prof. Rowan</string>
+    <string name="professor_juniper">Prof. Juniper</string>
+    <string name="professor_gift_received">You received the %1$s!</string>
+
+    <!-- First launch -->
+    <string name="color_choice_title">How do you want to see your Pokémon?</string>
+    <string name="color_choice_color">In color</string>
+    <string name="color_choice_matrix">Black and white, like the Glyph Matrix</string>
+    <string name="color_choice_hint">You can change it whenever you like in Settings.</string>
+
+    <!-- Professor Oak's welcome -->
+    <string name="oak_intro_1">Hello there! Welcome to the world of Pokémon!</string>
+    <string name="oak_intro_2">My name is Oak! People call me the Pokémon Professor!</string>
+    <string name="oak_intro_3">This world is inhabited by creatures called Pokémon! For some people, Pokémon are pets. Others use them for battles.</string>
+    <string name="oak_intro_4">Myself… I study Pokémon as a profession. And you\'re going to help me!</string>
+    <string name="oak_intro_5">Leave your phone face-down and locked. Pokémon will appear on your Glyph Matrix, and you can catch them with a long press.</string>
+    <string name="oak_kanto_gift">Take this: your very own Pokédex! It records every Pokémon you register.</string>
+    <string name="oak_forgot">Oh! I almost forgot to give you something…</string>
+    <string name="oak_intro_6">For now, only Pokémon from Kanto will show up. Keep filling your Pokédex and other professors will want to meet you.</string>
+    <string name="oak_intro_7">I\'ve saved my number in your Pokégear. Give me a call and I\'ll tell you about any rumors I hear.</string>
+    <string name="oak_intro_8">Your very own Pokémon legend is about to unfold! A world of dreams and adventures with Pokémon awaits! Let\'s go!</string>
+
+    <!-- Regional Pokédexes -->
+    <string name="professor_elm_hello">Hi! I\'m Professor Elm, from New Bark Town in Johto. Professor Oak has told me all about you!</string>
+    <string name="professor_birch_hello">Hey there! I\'m Professor Birch, from Littleroot Town in Hoenn. I\'d much rather be out in the field than stuck in a lab!</string>
+    <string name="professor_rowan_hello">Hmm… So you\'re the trainer Oak keeps talking about. I am Rowan, from Sandgem Town in Sinnoh. I study how Pokémon evolve.</string>
+    <string name="professor_juniper_hello">Hello! I\'m Professor Juniper, from Nuvema Town in Unova. I research the origins of Pokémon.</string>
+    <string name="professor_pokedex_count">You\'ve already registered %1$d Pokémon. Impressive!</string>
+    <string name="professor_pokedex_gift">Take this: the %1$s Pokédex. From now on, Pokémon from %1$s can appear too!</string>
+    <string name="professor_number">I\'ve saved my number in your Pokégear. Call me whenever you like!</string>
+    <string name="oak_map_1">Ho! You\'ve collected all four regional Pokédexes! You\'re a true researcher.</string>
+    <string name="oak_map_2">Take this Town Map. With it, you can choose which regions\' Pokémon appear.</string>
+    <string name="oak_charm_1">Incredible! You\'ve registered all %1$d Pokémon. The national Pokédex is complete!</string>
+    <string name="oak_charm_2">Take this Shiny Charm. They say it attracts shiny Pokémon.</string>
+    <string name="oak_charm_3">From now on, shinies will be three times as common. Keep looking!</string>
+    <string name="oak_map_3">You\'ll find it in your Bag. Keep up the good work!</string>
+
+    <!-- Key items for legendary Pokémon -->
+    <string name="professor_gift_hello">Hello! It\'s %1$s. I\'ve heard something you\'ll want to know…</string>
+    <string name="professor_gift_item">Take this: the %1$s. They say %2$s won\'t show up without it.</string>
+    <string name="professor_gift_bye">Good luck! Call me if you find anything.</string>
+
+    <!-- Pokégear -->
+    <string name="pokegear_title">Pokégear</string>
+    <string name="pokegear_call">Call</string>
+    <string name="call_hello">Hello? Oh, it\'s you! %1$s here.</string>
+    <string name="call_progress">You\'ve registered %1$d of the %2$d Pokémon from %3$s.</string>
+    <string name="call_eval_low">There\'s still a lot to discover. Keep that phone face-down!</string>
+    <string name="call_eval_mid">You\'re making good progress. Keep it up!</string>
+    <string name="call_eval_high">Amazing! You\'re almost there.</string>
+    <string name="call_eval_complete">You\'ve completed it! I\'m speechless.</string>
+    <string name="call_rumor">By the way, I heard a rumor…</string>
+    <string name="call_no_rumor">I haven\'t heard any rumors yet. Grow your Pokédex and I\'m sure something will come up.</string>
+    <string name="call_bye">Talk to you later!</string>
+    <string name="rumors_region_locked">You need the %1$s Pokédex to hear about this one.</string>
+
+    <!-- Key items -->
+    <string name="inventory_key_item">Key item</string>
+    <string name="region_filter_title">Regions</string>
+    <string name="region_filter_hint">Only Pokémon from the selected regions can appear. At least one must stay on.</string>
+    <string name="item_pokedex_description">A gift from %1$s. Pokémon from %2$s can appear.</string>
+    <string name="item_town_map_description">A gift from Professor Oak. Choose which regions\' Pokémon can appear.</string>
+    <string name="item_legendary_description">A key item from %1$s. Without it, %2$s won\'t appear.</string>
+    <string name="item_shiny_charm_name">Shiny Charm</string>
+    <string name="item_shiny_charm_description">The reward from Professor Oak for completing the Pokédex. Shiny Pokémon are three times as common.</string>
+    <string name="item_shiny_charm_toggle_label">Use Shiny Charm</string>
+    <string name="item_shiny_charm_toggle_subtitle">Shiny Pokémon three times as common</string>
+    <string name="item_pokedex_kanto_name">Kanto Pokédex</string>
+    <string name="item_pokedex_johto_name">Johto Pokédex</string>
+    <string name="item_pokedex_hoenn_name">Hoenn Pokédex</string>
+    <string name="item_pokedex_sinnoh_name">Sinnoh Pokédex</string>
+    <string name="item_pokedex_unova_name">Unova Pokédex</string>
+    <string name="item_town_map_name">Town Map</string>
+    <string name="item_old_sea_map_name">Old Sea Map</string>
+    <string name="item_tidal_bell_name">Tidal Bell</string>
+    <string name="item_clear_bell_name">Clear Bell</string>
+    <string name="item_meteorite_name">Meteorite</string>
+    <string name="item_eon_ticket_name">Eon Ticket</string>
+    <string name="item_blue_orb_name">Blue Orb</string>
+    <string name="item_red_orb_name">Red Orb</string>
+    <string name="item_jade_orb_name">Jade Orb</string>
+    <string name="item_adamant_orb_name">Adamant Orb</string>
+    <string name="item_lustrous_orb_name">Lustrous Orb</string>
+    <string name="item_griseous_orb_name">Griseous Orb</string>
+    <string name="item_lunar_wing_name">Lunar Wing</string>
+    <string name="item_magma_stone_name">Magma Stone</string>
+    <string name="item_member_card_name">Member Card</string>
+    <string name="item_oaks_letter_name">Oak’s Letter</string>
+    <string name="item_azure_flute_name">Azure Flute</string>
+    <string name="item_liberty_pass_name">Liberty Pass</string>
+    <string name="item_light_stone_name">Light Stone</string>
+    <string name="item_dark_stone_name">Dark Stone</string>
+    <string name="item_dna_splicers_name">DNA Splicers</string>
+    <string name="item_reveal_glass_name">Reveal Glass</string>
+</resources>

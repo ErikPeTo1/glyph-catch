@@ -13,10 +13,17 @@ object EventHelpers {
     const val BASE_SHINY_ODDS = 512
 
     /**
-     * One in this many wild Pokémon is shiny: 1/512 normally, doubled during the Halloween
-     * and Christmas weeks and quadrupled on the big days.
+     * The Shiny Charm, the reward for completing the Pokédex, makes shinies three times as
+     * common while it's owned and switched on.
      */
-    fun shinyOdds(date: LocalDate = LocalDate.now()): Int {
+    @Volatile
+    var hasShinyCharm: Boolean = false
+
+    /**
+     * One in this many wild Pokémon is shiny: 1/512 normally, doubled during the Halloween
+     * and Christmas weeks and quadrupled on the big days. The Shiny Charm triples them on top.
+     */
+    fun shinyOdds(date: LocalDate = LocalDate.now(), charm: Boolean = hasShinyCharm): Int {
         val day = MonthDay.from(date)
         val bigDays = setOf(
             MonthDay.of(Month.OCTOBER, 31), // Halloween
@@ -27,17 +34,21 @@ object EventHelpers {
         )
         val isEventWeek = (date.month == Month.OCTOBER && date.dayOfMonth in 25..31) ||
             (date.month == Month.DECEMBER && date.dayOfMonth in 19..26)
-        return when {
+        val odds = when {
             day in bigDays -> BASE_SHINY_ODDS / 4
             isEventWeek -> BASE_SHINY_ODDS / 2
             else -> BASE_SHINY_ODDS
         }
+        return if (charm) odds / SHINY_CHARM_FACTOR else odds
     }
 
     /**
-     * How many times more likely shinies are today, or 1 when there's no boost.
+     * How many times more likely shinies are today thanks to events, or 1 when there's no
+     * event. The Shiny Charm isn't counted, so the events banner only shows events.
      */
-    fun shinyBoost(): Int = BASE_SHINY_ODDS / shinyOdds()
+    fun shinyBoost(): Int = BASE_SHINY_ODDS / shinyOdds(charm = false)
+
+    private const val SHINY_CHARM_FACTOR = 3
 
     fun isHalloween(): Boolean {
         val cal = Calendar.getInstance()

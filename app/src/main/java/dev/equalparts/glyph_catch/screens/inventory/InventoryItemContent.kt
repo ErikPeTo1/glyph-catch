@@ -32,13 +32,18 @@ import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.ActiveItem
 import dev.equalparts.glyph_catch.data.FISHING_RODS
 import dev.equalparts.glyph_catch.data.Item
+import dev.equalparts.glyph_catch.data.LegendaryItems
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.data.Region
 import dev.equalparts.glyph_catch.data.descriptionRes
 import dev.equalparts.glyph_catch.data.effectDurationMinutes
 import dev.equalparts.glyph_catch.data.isFishingRod
+import dev.equalparts.glyph_catch.data.isKeyItem
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.ndotFontFamily
+import dev.equalparts.glyph_catch.screens.professor.ownedItems
+import dev.equalparts.glyph_catch.util.EventHelpers
 import dev.equalparts.glyph_catch.util.rememberActiveItemStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,7 +58,7 @@ fun InventoryItemContent(
     onSelectPokemonClick: (Item) -> Unit
 ) {
     val name = stringResource(item.nameRes())
-    val description = stringResource(item.descriptionRes())
+    val description = itemDescription(item)
     val durationMinutes = item.effectDurationMinutes()
 
     InventoryItemInfoCard(
@@ -66,6 +71,9 @@ fun InventoryItemContent(
     when {
         durationMinutes != null -> TimedItemActions(db, item, name, durationMinutes)
         item == Item.REPEL -> RepelToggleCard(preferencesManager)
+        item == Item.TOWN_MAP -> RegionFilterCard(db, preferencesManager)
+        item == Item.SHINY_CHARM -> ShinyCharmToggleCard(preferencesManager)
+        item.isKeyItem -> Unit
         else -> UseOnPokemonButton(name, quantity) { onSelectPokemonClick(item) }
     }
 }
@@ -94,7 +102,11 @@ private fun InventoryItemInfoCard(item: Item, name: String, description: String,
             )
 
             Text(
-                text = stringResource(R.string.inventory_item_quantity, quantity),
+                text = if (item.isKeyItem) {
+                    stringResource(R.string.inventory_key_item)
+                } else {
+                    stringResource(R.string.inventory_item_quantity, quantity)
+                },
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontFamily = ndotFontFamily
@@ -217,5 +229,109 @@ private suspend fun activateItem(db: PokemonDatabase, item: Item, durationMinute
                 expiresAt = expiresAt
             )
         )
+    }
+}
+
+/**
+ * Key items explain who gave them and what they're for.
+ */
+@Composable
+private fun itemDescription(item: Item): String {
+    val pokedexRegion = Region.ofPokedex(item)
+    return when {
+        pokedexRegion != null -> stringResource(
+            item.descriptionRes(),
+            stringResource(pokedexRegion.professor.nameRes),
+            stringResource(pokedexRegion.nameRes)
+        )
+        item in LegendaryItems.species -> stringResource(
+            item.descriptionRes(),
+            stringResource(LegendaryItems.region(item).professor.nameRes),
+            LegendaryItems.speciesNames(item)
+        )
+        else -> stringResource(item.descriptionRes())
+    }
+}
+
+/**
+ * The Town Map: choose which of the open regions' Pokémon can appear.
+ */
+@Composable
+private fun RegionFilterCard(db: PokemonDatabase, preferencesManager: PreferencesManager) {
+    val inventory by db.inventoryDao().watchAllItems().collectAsStateWithLifecycle(emptyList())
+    val owned = inventory.ownedItems()
+    val unlocked = Region.entries.filter { it.pokedex == null || it.pokedex in owned }
+    var disabled by remember { mutableStateOf(preferencesManager.disabledRegions) }
+
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSizes.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)
+        ) {
+            Text(text = stringResource(R.string.region_filter_title), style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(R.string.region_filter_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            unlocked.forEach { region ->
+                val enabled = region.name !in disabled
+                val isLast = enabled && unlocked.count { it.name !in disabled } == 1
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(region.nameRes),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = enabled,
+                        enabled = !isLast,
+                        onCheckedChange = { on ->
+                            disabled = if (on) disabled - region.name else disabled + region.name
+                            preferencesManager.disabledRegions = disabled
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The Shiny Charm can be switched off, for anyone who prefers the usual odds.
+ */
+@Composable
+private fun ShinyCharmToggleCard(preferencesManager: PreferencesManager) {
+    var enabled by remember { mutableStateOf(preferencesManager.shinyCharmEnabled) }
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSizes.spacingLarge),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.item_shiny_charm_toggle_label),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = stringResource(R.string.item_shiny_charm_toggle_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(
+                checked = enabled,
+                onCheckedChange = { on ->
+                    enabled = on
+                    preferencesManager.shinyCharmEnabled = on
+                    EventHelpers.hasShinyCharm = on
+                }
+            )
+        }
     }
 }

@@ -9,14 +9,19 @@ import kotlin.random.Random
 
 /**
  * Evaluates a [SpawnRules] structure and selects Pokemon based on the current game state.
+ * Species rejected by [speciesFilter] (locked regions, missing key items) never appear.
  */
-class SpawnRulesEngine(val rules: SpawnRules, private val random: Random = Random.Default) {
+class SpawnRulesEngine(
+    val rules: SpawnRules,
+    private val random: Random = Random.Default,
+    private val speciesFilter: (PokemonSpecies) -> Boolean = { true }
+) {
     /**
      * Gets a map of pool names to effective percentages.
      */
     fun getCurrentPoolProbabilities(): Map<String, Float> {
         val activePools = rules.pools
-            .filter { it.isActive() }
+            .filter { it.isActive() && getPokemonProbabilities(it).isNotEmpty() }
             .map { pool -> PoolToDistribute(pool, pool.getDesiredProbability()) }
 
         return PoolPercentageRedistributor
@@ -90,7 +95,9 @@ class SpawnRulesEngine(val rules: SpawnRules, private val random: Random = Rando
     }
 
     private fun getPokemonProbabilities(pool: SpawnPool): Map<PokemonSpecies, Float> {
-        val eligibleInhabitants = pool.inhabitants.filter { it.condition?.invoke() != false }
+        val eligibleInhabitants = pool.inhabitants.filter {
+            it.condition?.invoke() != false && speciesFilter(it.pokemon)
+        }
         if (eligibleInhabitants.isEmpty()) {
             return emptyMap()
         }
@@ -117,7 +124,7 @@ class SpawnRulesEngine(val rules: SpawnRules, private val random: Random = Rando
                     }
                 }
                 is ModifierEffect.AddPokemon -> {
-                    weights[effect.pokemon] = effect.weight
+                    if (speciesFilter(effect.pokemon)) weights[effect.pokemon] = effect.weight
                 }
             }
         }

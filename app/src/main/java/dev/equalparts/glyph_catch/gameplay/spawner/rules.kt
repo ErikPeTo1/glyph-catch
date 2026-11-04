@@ -1,5 +1,6 @@
 package dev.equalparts.glyph_catch.gameplay.spawner
 
+import dev.equalparts.glyph_catch.data.Eggs
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.Type
@@ -218,6 +219,16 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.VULLABY at 1.0f
         }
 
+        // Eggs
+        // ====
+        //
+        // Baby Pokémon only hatch from eggs (see Eggs). This pool never spawns on its own;
+        // hatched eggs are added to the queue with it.
+
+        pool(Eggs.POOL_NAME) {
+            Eggs.species.forEach { it at 1.0f }
+        }
+
         // Fishing
         // =======
         //
@@ -258,7 +269,6 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.CLAMPERL at 1.0f
             Pokemon.ALOMOMOLA at 0.7f
             Pokemon.BASCULIN at 0.7f
-            Pokemon.MANTYKE at 0.5f
             Pokemon.RELICANTH at 0.3f
             Pokemon.DRATINI at 0.3f
         }
@@ -304,10 +314,6 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.EEVEE at 1.0f
 
             // Johto - Unova
-            Pokemon.PICHU at 0.5f
-            Pokemon.CLEFFA at 0.5f
-            Pokemon.IGGLYBUFF at 0.5f
-            Pokemon.TOGEPI at 0.5f
             Pokemon.YANMA at 1.0f
             Pokemon.GIRAFARIG at 1.0f
             Pokemon.GLIGAR at 1.0f
@@ -315,26 +321,13 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.TEDDIURSA at 1.0f
             Pokemon.HOUNDOUR at 1.0f
             Pokemon.PHANPY at 1.0f
-            Pokemon.TYROGUE at 0.5f
-            Pokemon.SMOOCHUM at 0.5f
-            Pokemon.ELEKID at 0.5f
-            Pokemon.MAGBY at 0.5f
-            Pokemon.AZURILL at 0.5f
             Pokemon.ELECTRIKE at 1.0f
             Pokemon.TORKOAL at 1.0f
             Pokemon.ZANGOOSE at 1.0f
             Pokemon.SEVIPER at 1.0f
-            Pokemon.WYNAUT at 0.5f
-            Pokemon.BUDEW at 0.5f
             Pokemon.BURMY at 1.0f
             Pokemon.COMBEE at 1.0f
             Pokemon.DRIFLOON at 2.0f during time::night
-            Pokemon.CHINGLING at 0.5f
-            Pokemon.BONSLY at 0.5f
-            Pokemon.MIME_JR at 0.5f
-            Pokemon.HAPPINY at 0.5f
-            Pokemon.MUNCHLAX at 0.5f
-            Pokemon.RIOLU at 0.5f
             Pokemon.HIPPOPOTAS at 1.0f
             Pokemon.SKORUPI at 1.0f
             Pokemon.CROAGUNK at 1.0f
@@ -512,7 +505,6 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.CLEFAIRY at 1.0f
             Pokemon.SNUBBULL at 1.0f
             Pokemon.SKITTY at 1.0f
-            Pokemon.TOGEPI at 0.5f
             Pokemon.ALOMOMOLA at 0.5f
         }
 
@@ -559,7 +551,6 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.LITWICK at 1.0f
             Pokemon.DARUMAKA at 1.0f
             Pokemon.VOLTORB at 1.0f
-            Pokemon.ELEKID at 1.0f
             Pokemon.PLUSLE at 1.0f
             Pokemon.MINUN at 1.0f
             Pokemon.EMOLGA at 1.0f
@@ -740,7 +731,7 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         // An empty shell is left behind after Nincada evolves into Ninjask.
 
         special(Pokemon.SHEDINJA) {
-            activate(20.percent) given { trainer.hasNotFound(it) && !trainer.hasNotFound(Pokemon.NINJASK) }
+            activate(20.percent) given { trainer.hasNotFound(it) && trainer.hasRegistered(Pokemon.NINJASK) }
         }
 
         // Extra spooky & stormy spawns
@@ -798,9 +789,9 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         special(Pokemon.HO_OH) {
             activate(30.percent) during weather::clear during time::day given {
                 trainer.hasNotFound(it) &&
-                    !trainer.hasNotFound(Pokemon.RAIKOU) &&
-                    !trainer.hasNotFound(Pokemon.ENTEI) &&
-                    !trainer.hasNotFound(Pokemon.SUICUNE)
+                    trainer.hasRegistered(Pokemon.RAIKOU) &&
+                    trainer.hasRegistered(Pokemon.ENTEI) &&
+                    trainer.hasRegistered(Pokemon.SUICUNE)
             }
         }
 
@@ -862,8 +853,8 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         special(Pokemon.RAYQUAZA) {
             activate(20.percent) given {
                 trainer.hasNotFound(it) &&
-                    !trainer.hasNotFound(Pokemon.KYOGRE) &&
-                    !trainer.hasNotFound(Pokemon.GROUDON)
+                    trainer.hasRegistered(Pokemon.KYOGRE) &&
+                    trainer.hasRegistered(Pokemon.GROUDON)
             }
         }
 
@@ -917,8 +908,8 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         special(Pokemon.GIRATINA) {
             activate(30.percent) during events::halloween during time::night given {
                 trainer.hasNotFound(it) &&
-                    !trainer.hasNotFound(Pokemon.DIALGA) &&
-                    !trainer.hasNotFound(Pokemon.PALKIA)
+                    trainer.hasRegistered(Pokemon.DIALGA) &&
+                    trainer.hasRegistered(Pokemon.PALKIA)
             }
             activate(3.percent) during time::night given {
                 trainer.pokedexCount >= 420 && trainer.hasNotFound(it)
@@ -949,7 +940,7 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
 
         special(Pokemon.DARKRAI) {
             activate(10.percent) during sleep::isBedtime given {
-                trainer.hasNotFound(it) && !trainer.hasNotFound(Pokemon.CRESSELIA)
+                trainer.hasNotFound(it) && trainer.hasRegistered(Pokemon.CRESSELIA)
             }
         }
 
@@ -960,7 +951,7 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         }
 
         special(Pokemon.PHIONE) {
-            activate(5.percent) given { trainer.isUsingItem(Item.SUPER_ROD) && !trainer.hasNotFound(Pokemon.MANAPHY) }
+            activate(5.percent) given { trainer.isUsingItem(Item.SUPER_ROD) && trainer.hasRegistered(Pokemon.MANAPHY) }
         }
 
         special(Pokemon.SHAYMIN) {
@@ -1019,8 +1010,8 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         special(Pokemon.LANDORUS) {
             activate(20.percent) given {
                 trainer.hasNotFound(it) &&
-                    !trainer.hasNotFound(Pokemon.TORNADUS) &&
-                    !trainer.hasNotFound(Pokemon.THUNDURUS)
+                    trainer.hasRegistered(Pokemon.TORNADUS) &&
+                    trainer.hasRegistered(Pokemon.THUNDURUS)
             }
         }
 
@@ -1039,13 +1030,13 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         special(Pokemon.KYUREM) {
             activate(30.percent) during weather::snow given {
                 trainer.hasNotFound(it) &&
-                    !trainer.hasNotFound(Pokemon.RESHIRAM) &&
-                    !trainer.hasNotFound(Pokemon.ZEKROM)
+                    trainer.hasRegistered(Pokemon.RESHIRAM) &&
+                    trainer.hasRegistered(Pokemon.ZEKROM)
             }
             activate(5.percent) during season::winter given {
                 trainer.hasNotFound(it) &&
-                    !trainer.hasNotFound(Pokemon.RESHIRAM) &&
-                    !trainer.hasNotFound(Pokemon.ZEKROM)
+                    trainer.hasRegistered(Pokemon.RESHIRAM) &&
+                    trainer.hasRegistered(Pokemon.ZEKROM)
             }
         }
 

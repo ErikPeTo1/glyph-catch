@@ -49,7 +49,37 @@ enum class Item {
     DAWN_STONE,
     ICE_STONE,
     OLD_ROD,
-    GOOD_ROD
+    GOOD_ROD,
+
+    // Key items: regional Pokédexes, the Town Map and the items legendary Pokémon need
+    POKEDEX_JOHTO,
+    POKEDEX_HOENN,
+    POKEDEX_SINNOH,
+    POKEDEX_UNOVA,
+    TOWN_MAP,
+    OLD_SEA_MAP,
+    TIDAL_BELL,
+    CLEAR_BELL,
+    METEORITE,
+    EON_TICKET,
+    BLUE_ORB,
+    RED_ORB,
+    JADE_ORB,
+    ADAMANT_ORB,
+    LUSTROUS_ORB,
+    GRISEOUS_ORB,
+    LUNAR_WING,
+    MAGMA_STONE,
+    MEMBER_CARD,
+    OAKS_LETTER,
+    AZURE_FLUTE,
+    LIBERTY_PASS,
+    LIGHT_STONE,
+    DARK_STONE,
+    DNA_SPLICERS,
+    REVEAL_GLASS,
+    POKEDEX_KANTO,
+    SHINY_CHARM
 }
 
 /**

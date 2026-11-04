@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -53,6 +54,7 @@ import dev.equalparts.glyph_catch.PokemonLevelChip
 import dev.equalparts.glyph_catch.PokemonSpriteCircle
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.CaughtPokemon
+import dev.equalparts.glyph_catch.data.Eggs
 import dev.equalparts.glyph_catch.data.EvolutionNotification
 import dev.equalparts.glyph_catch.data.InventoryItem
 import dev.equalparts.glyph_catch.data.Item
@@ -67,6 +69,8 @@ import dev.equalparts.glyph_catch.gameplay.spawner.Weather
 import dev.equalparts.glyph_catch.gameplay.spawner.WeatherProvider
 import dev.equalparts.glyph_catch.ndotFontFamily
 import dev.equalparts.glyph_catch.screens.formatDuration
+import dev.equalparts.glyph_catch.screens.professor.ProfessorEventHost
+import dev.equalparts.glyph_catch.screens.professor.ownedItems
 import dev.equalparts.glyph_catch.util.ActiveItemStatus
 import dev.equalparts.glyph_catch.util.AvailableUpdate
 import dev.equalparts.glyph_catch.util.EventHelpers
@@ -94,7 +98,8 @@ fun HomeScreen(
     onBagClick: () -> Unit,
     onWeatherSettingsClick: () -> Unit,
     onStatsClick: () -> Unit = {},
-    onMissionsClick: () -> Unit = {}
+    onMissionsClick: () -> Unit = {},
+    onPokegearClick: () -> Unit = {}
 ) {
     val recentCatches by db.pokemonDao().watchRecentCatches(5).collectAsStateWithLifecycle(emptyList())
     val uniqueSpecies by db.pokemonDao().watchPokedexProgress().collectAsStateWithLifecycle(0)
@@ -155,6 +160,8 @@ fun HomeScreen(
 
     val scrollState = rememberScrollState()
 
+    ProfessorEventHost(db = db, preferencesManager = preferencesManager)
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -162,7 +169,10 @@ fun HomeScreen(
                 .padding(horizontal = AppSizes.spacingLarge)
                 .verticalScroll(scrollState)
         ) {
-            Header(onSettingsClick = onSettingsClick)
+            Header(
+                onSettingsClick = onSettingsClick,
+                onPokegearClick = onPokegearClick.takeIf { preferencesManager.professorIntroSeen }
+            )
             Spacer(modifier = Modifier.height(AppSizes.spacingXLarge))
             UpdateBanner()
             if (!glyphToyHasTicked) {
@@ -205,6 +215,7 @@ fun HomeScreen(
                     onStatsClick = onStatsClick,
                     onMissionsClick = onMissionsClick
                 )
+                EggsCard(db = db)
                 Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
                 TrainerTipCard(dailyTip = dailyTip)
                 Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
@@ -224,6 +235,54 @@ fun HomeScreen(
                     }
                 }
             )
+        }
+    }
+}
+
+/**
+ * Eggs being incubated and how long each one still needs. The species stays a surprise.
+ * Hidden until the Johto Pokédex: every baby Pokémon comes from Johto or later.
+ */
+@Composable
+private fun EggsCard(db: PokemonDatabase) {
+    val inventory by db.inventoryDao().watchAllItems().collectAsStateWithLifecycle(emptyList())
+    if (Item.POKEDEX_JOHTO !in inventory.ownedItems()) return
+    val eggs by db.eggDao().watchEggs().collectAsStateWithLifecycle(emptyList())
+    Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(AppSizes.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)
+        ) {
+            Text(
+                text = stringResource(R.string.home_eggs_title, eggs.size, Eggs.MAX_EGGS),
+                style = MaterialTheme.typography.titleMedium
+            )
+            if (eggs.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.home_eggs_empty),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            eggs.forEach { egg ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium)
+                ) {
+                    Text(text = "🥚", style = MaterialTheme.typography.titleMedium)
+                    LinearProgressIndicator(
+                        progress = { (egg.minutesProgress.toFloat() / egg.minutesNeeded).coerceIn(0f, 1f) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = formatDuration(egg.minutesProgress.coerceAtMost(egg.minutesNeeded)) + " / " +
+                            formatDuration(egg.minutesNeeded),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
@@ -324,7 +383,7 @@ private fun HomeShortcuts(
 }
 
 @Composable
-private fun Header(onSettingsClick: () -> Unit) {
+private fun Header(onSettingsClick: () -> Unit, onPokegearClick: (() -> Unit)?) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -339,11 +398,19 @@ private fun Header(onSettingsClick: () -> Unit) {
             fontWeight = FontWeight.Normal
         )
 
-        IconButton(onClick = onSettingsClick) {
-            Icon(
-                Icons.Default.Settings,
-                contentDescription = stringResource(R.string.nav_settings)
-            )
+        Row {
+            // The Pokégear, to call the professors (after meeting Professor Oak)
+            if (onPokegearClick != null) {
+                IconButton(onClick = onPokegearClick) {
+                    Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.pokegear_title))
+                }
+            }
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = stringResource(R.string.nav_settings)
+                )
+            }
         }
     }
 }

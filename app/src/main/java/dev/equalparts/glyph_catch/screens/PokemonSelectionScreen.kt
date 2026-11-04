@@ -1,6 +1,7 @@
 package dev.equalparts.glyph_catch.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +21,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.equalparts.glyph_catch.AppCard
 import dev.equalparts.glyph_catch.AppEmptyState
@@ -37,9 +40,11 @@ import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
+import dev.equalparts.glyph_catch.data.PokemonSpecies
 import dev.equalparts.glyph_catch.data.displayName
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.util.canUseItemOn
+import dev.equalparts.glyph_catch.util.itemEvolutionTargets
 
 @Composable
 fun PokemonSelectionScreen(
@@ -50,6 +55,8 @@ fun PokemonSelectionScreen(
 ) {
     val pokemonDao = remember(db) { db.pokemonDao() }
     val caughtPokemon by pokemonDao.watchAllCaught().collectAsStateWithLifecycle(emptyList())
+    val pokedexIds by pokemonDao.watchCaughtSpeciesIds().collectAsStateWithLifecycle(emptyList())
+    val discovered = remember(pokedexIds) { pokedexIds.toSet() }
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showFavoritesOnly by remember { mutableStateOf(false) }
@@ -67,7 +74,8 @@ fun PokemonSelectionScreen(
         derivedStateOf { caughtPokemon.filter { canUseItemOn(item, it) } }
     }
     val filteredTargets by remember(allValidTargets, filterState) {
-        derivedStateOf { allValidTargets.applyFilters(filterState) }
+        // The training partner goes first when the item can be used on it
+        derivedStateOf { allValidTargets.applyFilters(filterState).sortedByDescending { it.isTraining } }
     }
 
     AppScaffoldWithTopBar(
@@ -111,6 +119,8 @@ fun PokemonSelectionScreen(
                     ) { pokemon ->
                         PokemonSelectionRow(
                             pokemon = pokemon,
+                            evolutions = itemEvolutionTargets(item, pokemon),
+                            discovered = discovered,
                             onClick = { onPokemonSelected(pokemon) }
                         )
                     }
@@ -121,7 +131,13 @@ fun PokemonSelectionScreen(
 }
 
 @Composable
-private fun PokemonSelectionRow(pokemon: CaughtPokemon, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun PokemonSelectionRow(
+    pokemon: CaughtPokemon,
+    evolutions: List<PokemonSpecies>,
+    discovered: Set<Int>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val species = Pokemon[pokemon.speciesId] ?: return
     val displayName = pokemon.nickname ?: species.displayName
 
@@ -156,6 +172,42 @@ private fun PokemonSelectionRow(pokemon: CaughtPokemon, onClick: () -> Unit, mod
 
                 PokemonLevelChip(level = pokemon.level)
             }
+
+            if (evolutions.isNotEmpty()) {
+                Text(text = "→", style = MaterialTheme.typography.titleMedium)
+                evolutions.forEach { target ->
+                    EvolutionTarget(target = target, known = target.id in discovered)
+                }
+            }
         }
+    }
+}
+
+/**
+ * The evolution the item leads to: its sprite if it's already in the Pokédex, or a mystery
+ * silhouette marked as new.
+ */
+@Composable
+private fun EvolutionTarget(target: PokemonSpecies, known: Boolean) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(AppSizes.spacingTiny)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            PokemonSpriteCircle(
+                pokemonId = target.id,
+                pokemonName = target.displayName,
+                showSprite = known,
+                size = 44.dp
+            )
+            if (!known) {
+                Text(text = "?", style = MaterialTheme.typography.titleLarge, color = Color.White)
+            }
+        }
+        Text(
+            text = if (known) "✓ " + target.displayName else stringResource(R.string.evolution_new),
+            style = MaterialTheme.typography.labelSmall,
+            color = if (known) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary
+        )
     }
 }

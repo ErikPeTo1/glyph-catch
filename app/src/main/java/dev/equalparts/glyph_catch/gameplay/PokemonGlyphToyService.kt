@@ -12,6 +12,7 @@ import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphMatrixObject
 import dev.equalparts.glyph_catch.data.CaughtPokemon
+import dev.equalparts.glyph_catch.data.Eggs
 import dev.equalparts.glyph_catch.data.EvolutionRequirement
 import dev.equalparts.glyph_catch.data.Forms
 import dev.equalparts.glyph_catch.data.InventoryItem
@@ -47,6 +48,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
@@ -121,7 +123,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
         val weatherProvider = WeatherProviderFactory.create(applicationContext)
         gameplayContext = GameplayContext(applicationContext, weatherProvider, spawnQueue)
-        spawnEngine = SpawnRulesEngine(createSpawnRules(gameplayContext))
+        spawnEngine = SpawnRulesEngine(createSpawnRules(gameplayContext)) { gameplayContext.trainer.canSpawn(it.id) }
         spawnHistory = SpawnHistoryTracker(preferences = preferencesManager, pokemonDao = db.pokemonDao())
         cadenceController = SpawnCadenceController(spawnEngine = spawnEngine, history = spawnHistory)
 
@@ -229,6 +231,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         gameplayContext.trainer.refresh()
         if (!gameplayContext.phone.isInteractive) {
             preferencesManager.dailyStats.add(Stat.MINUTES)
+            coroutineScope?.launch { advanceEggs() }
         }
 
         if (gameplayContext.phone.isInteractive) {
@@ -351,6 +354,31 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         )
     }
 
+    /**
+     * Eggs advance one minute per locked minute; hatched ones appear on the Glyph Matrix.
+     */
+    private suspend fun advanceEggs() {
+        val eggDao = db.eggDao()
+        eggDao.advanceEggs()
+        val hatched = eggDao.getHatched()
+        if (hatched.isEmpty()) return
+        val eggPool = spawnEngine.rules.pools.first { it.name == Eggs.POOL_NAME }
+        hatched.forEach { egg ->
+            eggDao.deleteEgg(egg.id)
+            val species = Pokemon[egg.speciesId] ?: return@forEach
+            addToQueue(
+                SpawnResult(
+                    pokemon = species,
+                    pool = eggPool,
+                    screenOffDurationMinutes = gameplayContext.phone.minutesOff,
+                    spawnedAtMillis = System.currentTimeMillis(),
+                    isShiny = Random.nextInt(Eggs.shinyOdds()) == 0
+                )
+            )
+        }
+        withContext(Dispatchers.Main) { updateGlyphMatrix() }
+    }
+
     private fun currentFormConditions(): Forms.Conditions {
         val weather = gameplayContext.weather
         val season = gameplayContext.season
@@ -375,7 +403,10 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
         synchronized(spawnQueue) {
             if (spawnQueue.size >= MAX_QUEUE_SIZE) {
-                val indexToRemove = spawnQueue.indexOfFirst { !it.pool.isSpecial && !it.isShiny }
+                // Legendaries, shinies and hatched eggs are never pushed out
+                val indexToRemove = spawnQueue.indexOfFirst {
+                    !it.pool.isSpecial && !it.isShiny && it.pool.name != Eggs.POOL_NAME
+                }
                 if (indexToRemove != -1) {
                     removed = spawnQueue.removeAt(indexToRemove)
                     Log.d(TAG, "Removed ${removed.pokemon.name} from queue (not special)")
@@ -628,6 +659,16 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Called after a Pokémon is caught to possibly drop one or more items.
      */
     private suspend fun maybeAwardItems(speciesId: Int, wasDuplicate: Boolean) {
+        if (Random.nextDouble() < Eggs.DROP_CHANCE) {
+            // With a full incubator (or no baby from an open region), the egg becomes a Rare Candy
+            val egg = Eggs.newEgg { gameplayContext.trainer.canSpawn(it) }
+            if (egg != null && db.eggDao().countEggs() < Eggs.MAX_EGGS) {
+                db.eggDao().insertEgg(egg)
+            } else {
+                grantItem(Item.RARE_CANDY)
+            }
+        }
+
         if (Random.nextDouble() < EVOLUTION_STONE_DROP_CHANCE) {
             val stone = EVOLUTION_STONES.random()
             grantItem(stone)

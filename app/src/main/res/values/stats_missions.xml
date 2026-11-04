@@ -14,6 +14,8 @@
     <string name="home_missions_label">Missions</string>
     <string name="home_missions_ready">%1$d ready to claim!</string>
     <string name="home_rarity_boost_banner">Rarity boost ✨</string>
+    <string name="home_eggs_title">Eggs (%1$d/%2$d)</string>
+    <string name="home_eggs_empty">No eggs yet. You might find one when you catch a Pokémon.</string>
     <string name="home_update_banner">Version %1$s is available</string>
     <string name="home_update_badge">Update</string>
 

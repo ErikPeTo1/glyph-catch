@@ -58,6 +58,19 @@ data class PokedexRecord(
 )
 
 /**
+ * An egg waiting to hatch (see [Eggs]). The species stays a surprise until it hatches.
+ */
+@Serializable
+@Entity(tableName = "eggs")
+data class Egg(
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
+    val speciesId: Int,
+    val minutesNeeded: Int,
+    val minutesProgress: Int = 0,
+    val obtainedAt: Long = System.currentTimeMillis()
+)
+
+/**
  * A form of a species the player has found (see [Forms]).
  */
 @Serializable
@@ -139,6 +152,9 @@ interface PokemonDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM pokedex_records WHERE speciesId = :speciesId)")
     suspend fun hasPokedexEntry(speciesId: Int): Boolean
+
+    @Query("SELECT EXISTS(SELECT 1 FROM caught_pokemon WHERE speciesId = :speciesId)")
+    suspend fun isSpeciesOwned(speciesId: Int): Boolean
 
     @Query("SELECT * FROM pokedex_records WHERE speciesId = :speciesId LIMIT 1")
     suspend fun getPokedexRecord(speciesId: Int): PokedexRecord?
@@ -267,6 +283,36 @@ interface InventoryDao {
 }
 
 @Dao
+interface EggDao {
+    @Query("SELECT * FROM eggs ORDER BY obtainedAt")
+    fun watchEggs(): Flow<List<Egg>>
+
+    @Query("SELECT * FROM eggs ORDER BY obtainedAt")
+    suspend fun getEggs(): List<Egg>
+
+    @Query("SELECT COUNT(*) FROM eggs")
+    suspend fun countEggs(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertEgg(egg: Egg)
+
+    @Query("UPDATE eggs SET minutesProgress = minutesProgress + 1")
+    suspend fun advanceEggs()
+
+    @Query("SELECT * FROM eggs WHERE minutesProgress >= minutesNeeded")
+    suspend fun getHatched(): List<Egg>
+
+    @Query("DELETE FROM eggs WHERE id = :eggId")
+    suspend fun deleteEgg(eggId: String)
+
+    @Query("DELETE FROM eggs")
+    suspend fun deleteAll()
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(eggs: List<Egg>)
+}
+
+@Dao
 interface ActiveItemDao {
     @Query("SELECT * FROM active_items WHERE itemId = :itemId AND expiresAt > :now")
     suspend fun getActiveItem(itemId: Int, now: Long = System.currentTimeMillis()): ActiveItem?
@@ -303,9 +349,10 @@ interface ActiveItemDao {
         InventoryItem::class,
         ActiveItem::class,
         PokedexForm::class,
+        Egg::class,
         DebugEvent::class
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 4, to = 5),
@@ -313,13 +360,15 @@ interface ActiveItemDao {
         AutoMigration(from = 6, to = 7, spec = DebugEventsMigration6To7::class),
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 10, to = 11),
-        AutoMigration(from = 11, to = 12)
+        AutoMigration(from = 11, to = 12),
+        AutoMigration(from = 12, to = 13)
     ]
 )
 abstract class PokemonDatabase : RoomDatabase() {
     abstract fun pokemonDao(): PokemonDao
     abstract fun inventoryDao(): InventoryDao
     abstract fun activeItemDao(): ActiveItemDao
+    abstract fun eggDao(): EggDao
     abstract fun debugEventDao(): DebugEventDao
 
     companion object {

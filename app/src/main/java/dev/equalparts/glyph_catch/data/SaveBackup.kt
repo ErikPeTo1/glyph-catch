@@ -32,6 +32,7 @@ data class SaveFile(
     val pokedex: List<Int>,
     val shinyPokedex: List<Int> = emptyList(),
     val forms: List<PokedexForm> = emptyList(),
+    val eggs: List<Egg> = emptyList(),
     val inventory: List<InventoryItem>,
     val activeItems: List<ActiveItem>,
     val preferences: Map<String, JsonElement>
@@ -60,6 +61,7 @@ object SaveBackup {
             pokedex = db.pokemonDao().getPokedexSpeciesIds(),
             shinyPokedex = db.pokemonDao().getShinyPokedexSpeciesIds(),
             forms = db.pokemonDao().getAllForms(),
+            eggs = db.eggDao().getEggs(),
             inventory = db.inventoryDao().getAllItems(),
             activeItems = db.activeItemDao().getAllRaw(),
             preferences = exportPreferences(context)
@@ -102,6 +104,9 @@ object SaveBackup {
 
             db.inventoryDao().deleteAllItems()
             db.inventoryDao().insertAllItems(save.inventory.filter { it.itemId in validItems })
+
+            db.eggDao().deleteAll()
+            db.eggDao().insertAll(save.eggs.filter { it.speciesId in Eggs.hatchHours }.take(Eggs.MAX_EGGS))
 
             db.activeItemDao().deleteAll()
             db.activeItemDao().insertAll(save.activeItems.filter { it.itemId in validItems })

@@ -1,6 +1,8 @@
 package dev.equalparts.glyph_catch.screens.inventory
 
 import android.widget.Toast
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,15 +10,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -34,9 +41,11 @@ import dev.equalparts.glyph_catch.data.displayName
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.util.ItemUsageError
 import dev.equalparts.glyph_catch.util.ItemUsageResult
+import dev.equalparts.glyph_catch.util.maxRareCandies
 import dev.equalparts.glyph_catch.util.tradeTargets
 import dev.equalparts.glyph_catch.util.useItemOnPokemon
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -116,6 +125,13 @@ fun InventoryItemDetailScreen(
             if (item == Item.LINKING_CORD) tradeTargets(selectedPokemon) else emptyList()
         }
         var chosenTarget by remember(selectedPokemon) { mutableStateOf<Int?>(null) }
+        val pokedexIds by db.pokemonDao().watchCaughtSpeciesIds().collectAsStateWithLifecycle(emptyList())
+        val maxCandies = if (item == Item.RARE_CANDY) {
+            maxRareCandies(selectedPokemon, inventoryEntry?.quantity ?: 0)
+        } else {
+            1
+        }
+        var candyAmount by remember(selectedPokemon) { mutableIntStateOf(1) }
 
         AlertDialog(
             onDismissRequest = {
@@ -133,7 +149,14 @@ fun InventoryItemDetailScreen(
                             isProcessingSelection = true
                             try {
                                 val result =
-                                    useItemOnPokemon(db, preferencesManager, item, selectedPokemon.id, chosenTarget)
+                                    useItemOnPokemon(
+                                        db,
+                                        preferencesManager,
+                                        item,
+                                        selectedPokemon.id,
+                                        chosenTarget,
+                                        candyAmount
+                                    )
                                 when (result) {
                                     is ItemUsageResult.Success -> {
                                         Toast.makeText(
@@ -190,6 +213,37 @@ fun InventoryItemDetailScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium)) {
                     Text(stringResource(R.string.item_usage_confirm_message, itemName, displayName))
+                    if (maxCandies > 1) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)
+                        ) {
+                            RepeatingButton(label = "−", enabled = candyAmount > 1) {
+                                candyAmount = (candyAmount - 1).coerceAtLeast(1)
+                            }
+                            Text(text = "×$candyAmount", style = MaterialTheme.typography.titleMedium)
+                            RepeatingButton(label = "+", enabled = candyAmount < maxCandies) {
+                                candyAmount = (candyAmount + 1).coerceAtMost(maxCandies)
+                            }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)) {
+                            TextButton(onClick = { candyAmount = 1 }, enabled = candyAmount > 1) {
+                                Text(stringResource(R.string.rare_candy_min))
+                            }
+                            TextButton(onClick = { candyAmount = maxCandies }, enabled = candyAmount < maxCandies) {
+                                Text(stringResource(R.string.rare_candy_max))
+                            }
+                        }
+                        Text(
+                            text = stringResource(
+                                R.string.rare_candy_levels,
+                                selectedPokemon.level,
+                                selectedPokemon.level + candyAmount
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     if (choices.size > 1) {
                         Text(stringResource(R.string.evolution_choose_prompt))
                         Row(horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)) {
@@ -197,7 +251,15 @@ fun InventoryItemDetailScreen(
                                 FilterChip(
                                     selected = chosenTarget == target.id,
                                     onClick = { chosenTarget = target.id },
-                                    label = { Text(target.displayName) }
+                                    label = {
+                                        Text(
+                                            if (target.id in pokedexIds) {
+                                                "✓ " + target.displayName
+                                            } else {
+                                                target.displayName + " · " + stringResource(R.string.evolution_new)
+                                            }
+                                        )
+                                    }
                                 )
                             }
                         }
@@ -205,5 +267,41 @@ fun InventoryItemDetailScreen(
                 }
             }
         )
+    }
+}
+
+/**
+ * A button that repeats its action while held down, speeding up the longer it's held.
+ */
+@Composable
+private fun RepeatingButton(label: String, enabled: Boolean, onStep: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+    val currentOnStep by rememberUpdatedState(onStep)
+    var repeated by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pressed, enabled) {
+        if (!pressed || !enabled) return@LaunchedEffect
+        repeated = false
+        delay(400)
+        var interval = 150L
+        while (true) {
+            repeated = true
+            currentOnStep()
+            delay(interval)
+            interval = (interval - 15).coerceAtLeast(40)
+        }
+    }
+
+    OutlinedButton(
+        onClick = {
+            // A long press already stepped while held; don't add one more on release
+            if (!repeated) currentOnStep()
+            repeated = false
+        },
+        enabled = enabled,
+        interactionSource = interactionSource
+    ) {
+        Text(label)
     }
 }

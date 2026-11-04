@@ -151,6 +151,7 @@
     <string name="settings_graphics_color_subtitle">Muestra los Pokémon a color en la app. La matriz Glyph siempre es en blanco y negro.</string>
     <string name="evolution_ready_title">¡Listo para evolucionar!</string>
     <string name="evolution_choose_prompt">Elige en qué evoluciona:</string>
+    <string name="evolution_new">¡Nueva!</string>
     <string name="everstone_title">Piedra Eterna</string>
     <string name="everstone_description">No evolucionará al subir de nivel. Las piedras y el Cordón Unión siguen funcionando.</string>
     <string name="form_label">Forma</string>
@@ -212,6 +213,7 @@
     <string name="pool_uncommon">Poco común</string>
     <string name="pool_rare">Raro</string>
     <string name="pool_very_rare">Muy raro</string>
+    <string name="pool_egg">Huevo</string>
     <string name="caught_detail_empty_title">No se ha encontrado el Pokémon</string>
     <string name="caught_detail_empty_subtitle">Vuelve a intentarlo desde la lista de capturados.</string>
     <plurals name="caught_detail_screen_off_minutes">
@@ -270,6 +272,9 @@
     <string name="item_usage_confirm_title">¿Usar %1$s?</string>
     <string name="item_usage_confirm_message">¿Usar %1$s con %2$s? No se puede deshacer.</string>
     <string name="item_usage_confirm_button">Usar objeto</string>
+    <string name="rare_candy_min">Mín.</string>
+    <string name="rare_candy_max">Máx.</string>
+    <string name="rare_candy_levels">Nivel %1$d → %2$d</string>
     <string name="item_usage_cancel_button">Cancelar</string>
     <string name="item_usage_success">¡Has usado %1$s!</string>
     <string name="item_usage_success_level_up">¡%1$s ha subido al nivel %2$d!</string>

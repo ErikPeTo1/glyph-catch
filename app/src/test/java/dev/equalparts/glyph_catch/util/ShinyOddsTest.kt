@@ -29,4 +29,11 @@ class ShinyOddsTest {
         assertEquals(128, EventHelpers.shinyOdds(LocalDate.of(2027, 1, 1)))
         assertEquals(128, EventHelpers.shinyOdds(LocalDate.of(2027, 2, 27)))
     }
+
+    @Test
+    fun `the Shiny Charm triples the odds, holidays included`() {
+        assertEquals(170, EventHelpers.shinyOdds(LocalDate.of(2026, 3, 10), charm = true))
+        assertEquals(85, EventHelpers.shinyOdds(LocalDate.of(2026, 10, 25), charm = true))
+        assertEquals(42, EventHelpers.shinyOdds(LocalDate.of(2026, 10, 31), charm = true))
+    }
 }

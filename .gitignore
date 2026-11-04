@@ -44,3 +44,6 @@ keystore.properties
 # Personal helper to build and install on my own phone
 actualizar.bat
 actualizar.ps1
+
+# Personal sprite viewer for the Glyph Matrix (development tool)
+viewer/

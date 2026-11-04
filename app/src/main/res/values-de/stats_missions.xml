@@ -14,6 +14,8 @@
     <string name="home_missions_label">Missionen</string>
     <string name="home_missions_ready">%1$d bereit zum Abholen!</string>
     <string name="home_rarity_boost_banner">Seltenheits-Boost ✨</string>
+    <string name="home_eggs_title">Eier (%1$d/%2$d)</string>
+    <string name="home_eggs_empty">Noch keine Eier. Vielleicht findest du eins, wenn du ein Pokémon fängst.</string>
     <string name="home_update_banner">Version %1$s ist verfügbar</string>
     <string name="home_update_badge">Aktualisieren</string>
     <string name="missions_title">Missionen</string>

@@ -151,6 +151,7 @@
     <string name="settings_graphics_color_subtitle">Zeigt Pokémon in der App in Farbe. Die Glyph-Matrix bleibt immer schwarz-weiß.</string>
     <string name="evolution_ready_title">Bereit zur Entwicklung!</string>
     <string name="evolution_choose_prompt">Wähle, wozu es sich entwickelt:</string>
+    <string name="evolution_new">Neu!</string>
     <string name="everstone_title">Ewigstein</string>
     <string name="everstone_description">Entwickelt sich beim Levelaufstieg nicht. Steine und die Verbindungsschnur funktionieren weiterhin.</string>
     <string name="form_label">Form</string>
@@ -212,6 +213,7 @@
     <string name="pool_uncommon">Ungewöhnlich</string>
     <string name="pool_rare">Selten</string>
     <string name="pool_very_rare">Sehr selten</string>
+    <string name="pool_egg">Ei</string>
     <string name="caught_detail_empty_title">Pokémon nicht gefunden</string>
     <string name="caught_detail_empty_subtitle">Versuch es noch einmal über die Liste der gefangenen Pokémon.</string>
     <plurals name="caught_detail_screen_off_minutes">
@@ -270,6 +272,9 @@
     <string name="item_usage_confirm_title">%1$s verwenden?</string>
     <string name="item_usage_confirm_message">%1$s bei %2$s verwenden? Das kann nicht rückgängig gemacht werden.</string>
     <string name="item_usage_confirm_button">Item verwenden</string>
+    <string name="rare_candy_min">Min.</string>
+    <string name="rare_candy_max">Max.</string>
+    <string name="rare_candy_levels">Level %1$d → %2$d</string>
     <string name="item_usage_cancel_button">Abbrechen</string>
     <string name="item_usage_success">%1$s verwendet!</string>
     <string name="item_usage_success_level_up">%1$s ist auf Level %2$d gestiegen!</string>
