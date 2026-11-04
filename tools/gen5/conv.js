@@ -3,6 +3,8 @@ const RES='C:/Users/Paku/eclipse-workspace/GlyphCatch/app/src/main/res/drawable/
 const mask=PNG.sync.read(fs.readFileSync(RES+'sprite_0025.png'));
 const N=25;
 function lum(r,g,b){return 0.299*r+0.587*g+0.114*b;}
+// Brightness curve tuned on the Glyph Matrix with the viewer app: gamma 1.27, values under 16 switched off
+function matrixCurve(v){if(v<16)return 0;return Math.max(1,Math.min(255,Math.round(Math.pow(v/255,1.27)*255)));}
 function convert(file,opt={}){
   const S=opt.size||24, wMin=opt.wMin??0.5, gamma=opt.gamma??1.3;
   const p=PNG.sync.read(fs.readFileSync(file));
@@ -34,7 +36,7 @@ function convert(file,opt={}){
   const png=new PNG({width:N,height:N});
   for(let i=0;i<N*N;i++){let v=out[i];
     if(v<250){v=Math.max(0,Math.min(1,(v-lo)/Math.max(1,(hi-lo))));v=edgeSet.has(i)?Math.min(v,0.15)*(opt.top??250):Math.pow(v,g)*(opt.top??250);}
-    v=Math.round(v);const a=mask.data[i*4+3];png.data[i*4]=png.data[i*4+1]=png.data[i*4+2]=a?v:0;png.data[i*4+3]=a;}
+    v=matrixCurve(Math.round(v));const a=mask.data[i*4+3];png.data[i*4]=png.data[i*4+1]=png.data[i*4+2]=a?v:0;png.data[i*4+3]=a;}
   return png;}
 function preview(sp){const W=300;const png=new PNG({width:W,height:W});
   for(let y=0;y<W;y++)for(let x=0;x<W;x++){const cx=Math.floor(x/12),cy=Math.floor(y/12),j=(cy*N+cx)*4,i=(y*W+x)*4;
