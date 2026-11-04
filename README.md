@@ -9,7 +9,7 @@
 >
 > **Make sure to configure Glyph Catch as your Always-on Glyph Toy.**
 >
-> Latest version: v2.0.0 | 649 Pokémon, shinies, forms, missions and more
+> Latest version: v3.0.0 | Professors, regions, eggs and legendary key items
 >
 > The app lets you know when a new version is out. For automatic updates, add this repository to [Obtainium](https://github.com/ImranR98/Obtainium).
 
@@ -21,6 +21,8 @@ Glyph Catch is a fan-made Pokémon catching game for the Nothing Phone 3 that re
 
 **Pokémon appear based on real-world conditions.** Weather conditions boost certain Pokémon types. Zubat and Hoothoot come out at night. Phone running low on battery? Voltorb and its evolution might show up. Castform changes with the weather and Deerling with the season. Keep an eye on the daily Trainer Tips and the Rumors page for hints! **All 649 Pokémon from Kanto to Unova are obtainable.**
 
+**Every region has its professor.** Professor Oak welcomes you to Kanto, and as your Pokédex grows, Professors Elm, Birch, Rowan and Juniper hand over their regional Pokédex to open Johto, Hoenn, Sinnoh and Unova. Call them on the Pokégear to hear how you're doing and the latest rumors.
+
 **There's more to do than just catching.** Choose a Pokémon to level up, and it gains EXP while your phone is face-down. Pokémon evolve when they hit the right level, unless you give them an Everstone. You'll also find items, like evolution stones, Rare Candies for leveling, and three fishing rods to fish for aquatic species. Daily and weekly missions reward items and a temporary rarity boost.
 
 When there are no Pokémon around to catch, the Glyph Toy displays a handy digital clock instead.
@@ -29,7 +31,31 @@ When there are no Pokémon around to catch, the Glyph Toy displays a handy digit
 
 Glyph Catch was created by **[Equal Parts](https://github.com/equalparts/glyph-catch)**, including the original Kanto sprites hand-made for the Glyph Matrix. This fork continues the app with the original author's written permission and encouragement. Thank you, Equal Parts!
 
-Gen 2-5 sprites, Pokémon data and official names in each language come from [PokeAPI](https://pokeapi.co/).
+Gen 2-5 sprites, item sprites, Pokémon data and official names in each language come from [PokeAPI](https://pokeapi.co/). Professor sprites come from [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/), and the Pokédex sprite from [Bulbagarden Archives](https://archives.bulbagarden.net/).
+
+## What's new in 3.0
+
+**Professors and regions**
+- Professor Oak welcomes you and gives you the Kanto Pokédex. New players start with Pokémon from Kanto only.
+- Johto, Hoenn, Sinnoh and Unova open when their professor gives you the regional Pokédex, at 50, 120, 200 and 300 Pokémon.
+- The Pokégear: call the professors to hear how your regional Pokédex is going and a different rumor each time.
+- With all four regional Pokédexes, Professor Oak gives you the Town Map to choose which regions' Pokémon appear.
+- Existing saves receive everything they've already earned the first time they open the app.
+
+**Legendary Pokémon**
+- Many legendary Pokémon need their key item to appear, like the Eon Ticket for Latias and Latios or the Meteorite for Deoxys. Their professor gives it to you when you hear the rumor.
+- A released legendary Pokémon can appear again, one at a time, so you can hunt for its shiny.
+- Complete the national Pokédex to get the Shiny Charm: shinies are three times as common (it can be switched off in the Bag).
+
+**Eggs**
+- Baby Pokémon only hatch from Eggs. You might find one when you catch a Pokémon, from the Johto Pokédex on.
+- Carry up to three. They hatch after 2, 5 or 10 hours with the phone locked, and are four times as likely to be shiny.
+
+**Items and sprites**
+- Use several Rare Candies at once (hold + or − to go faster). Your training partner is listed first when an item works on it.
+- When giving an evolution item, you can see whether you've already registered the evolution.
+- Gen 2-5 sprites retuned for the Glyph Matrix, whose brightness isn't linear.
+- On first launch, choose between color sprites and the black-and-white Glyph Matrix style.
 
 ## What's new in 2.0
 
