@@ -59,7 +59,8 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
         //
         // The player can catch one of the three starter Pokémon shortly after
         // starting the game. The other two starters will be available from
-        // the rare spawn pool.
+        // the rare spawn pool. Until then, nothing else appears, except for a
+        // 1% chance of a pseudo-legendary's first stage.
 
         val starters = listOf(
             Pokemon.BULBASAUR,
@@ -69,8 +70,20 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
 
         starters.forEach {
             special(it) {
+                exclusive()
                 activate(33.percent) given { trainer.hasNotFoundAny(starters) }
             }
+        }
+
+        pool("Starter Pseudo") {
+            exclusive()
+            activate(1.percent) given { trainer.hasNotFoundAny(starters) }
+            Pokemon.DRATINI at 1.0f
+            Pokemon.LARVITAR at 1.0f
+            Pokemon.BAGON at 1.0f
+            Pokemon.BELDUM at 1.0f
+            Pokemon.GIBLE at 1.0f
+            Pokemon.DEINO at 1.0f
         }
 
         // Common Pokémon

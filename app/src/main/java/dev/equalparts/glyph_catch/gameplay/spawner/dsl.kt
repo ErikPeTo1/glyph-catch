@@ -153,6 +153,15 @@ open class SpawnPoolBuilder(
     private val modifiers = mutableListOf<Modifier>()
     internal var isSpecial: Boolean = false
     internal var isConditional: Boolean = false
+    private var isExclusive: Boolean = false
+
+    /**
+     * While this pool is active, every other non-exclusive pool is left out, e.g. the starters
+     * until the player has one.
+     */
+    fun exclusive() {
+        isExclusive = true
+    }
     private var pendingActivation: ActivationBuilder? = null
 
     private fun combineConditions(existing: (() -> Boolean)?, new: () -> Boolean): () -> Boolean =
@@ -294,7 +303,17 @@ open class SpawnPoolBuilder(
 
     fun build(): SpawnPool {
         pendingActivation?.build()
-        return SpawnPool(name, basePercentage, entries, activators, modifiers, baseModifier, isSpecial, isConditional)
+        return SpawnPool(
+            name,
+            basePercentage,
+            entries,
+            activators,
+            modifiers,
+            baseModifier,
+            isSpecial,
+            isConditional,
+            isExclusive
+        )
     }
 }
 

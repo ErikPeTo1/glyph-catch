@@ -20,8 +20,8 @@ class SpawnRulesEngine(
      * Gets a map of pool names to effective percentages.
      */
     fun getCurrentPoolProbabilities(): Map<String, Float> {
-        val activePools = rules.pools
-            .filter { it.isActive() && getPokemonProbabilities(it).isNotEmpty() }
+        val available = rules.pools.filter { it.isActive() && getPokemonProbabilities(it).isNotEmpty() }
+        val activePools = available.filter { it.isExclusive }.ifEmpty { available }
             .map { pool -> PoolToDistribute(pool, pool.getDesiredProbability()) }
 
         return PoolPercentageRedistributor

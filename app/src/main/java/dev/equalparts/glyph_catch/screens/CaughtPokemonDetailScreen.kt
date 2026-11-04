@@ -392,7 +392,7 @@ private fun poolLabel(pool: String): String = when (pool) {
     "Common" -> stringResource(R.string.pool_common)
     "Uncommon" -> stringResource(R.string.pool_uncommon)
     "Rare" -> stringResource(R.string.pool_rare)
-    "Very Rare" -> stringResource(R.string.pool_very_rare)
+    "Very Rare", "Starter Pseudo" -> stringResource(R.string.pool_very_rare)
     "Egg" -> stringResource(R.string.pool_egg)
     "Old Rod" -> stringResource(R.string.item_old_rod_name)
     "Good Rod" -> stringResource(R.string.item_good_rod_name)

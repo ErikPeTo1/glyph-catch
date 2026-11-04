@@ -395,8 +395,8 @@ module.exports = {
     "Cada vez que capturas un Pokémon, puede que encuentres un objeto nuevo en la Mochila.",
     "Los Pokémon bebé, como Pichu o Togepi, solo nacen de Huevos. Encontrarás los primeros cuando tengas la Pokédex de Johto. Puedes llevar tres a la vez, y eclosionan mientras el móvil sigue bloqueado.",
     "Cada profesor te da la Pokédex de su región a medida que crece la tuya: Johto con 50 Pokémon, Hoenn con 120, Sinnoh con 200 y Teselia con 300.",
-    "Toca el teléfono de arriba en Inicio para abrir el Pokégear y llamar a los profesores. Te contarán cómo va tu Pokédex y los últimos rumores.",
-    "Algunos Pokémon legendarios no aparecen sin su objeto clave, como el Ticket Eón. Los profesores te los dan cuando oyes su rumor.",
+    "Toca el teléfono de arriba en Inicio para abrir el Pokégear. Un punto rojo significa que un profesor tiene algo para ti; si no, te contará cómo va tu Pokédex y los últimos rumores.",
+    "Algunos Pokémon legendarios no aparecen sin su objeto clave, como el Ticket Eón. Cuando oyes su rumor, su profesor te lo guarda en el Pokégear.",
     "Un Pokémon legendario que liberes puede volver a aparecer, de uno en uno. ¡Buena noticia para los cazadores de variocolor!",
     "Con las cuatro Pokédex regionales, el Profesor Oak te da el Mapa para elegir de qué regiones aparecen Pokémon.",
     "Completa la Pokédex Nacional y el Profesor Oak te recompensará con el Amuleto Iris."

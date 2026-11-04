@@ -1,5 +1,6 @@
 package dev.equalparts.glyph_catch.screens.professor
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,13 +36,18 @@ import dev.equalparts.glyph_catch.data.Professor
 val MonochromeFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) })
 
 /**
- * Professor sprites follow the color setting: in color, or black and white like the Glyph Matrix.
+ * Character sprites follow the color setting: in color, or black and white like the Glyph Matrix.
  */
 @Composable
 fun ProfessorSprite(professor: Professor, modifier: Modifier = Modifier) {
+    CharacterSprite(professor.sprite, stringResource(professor.nameRes), modifier)
+}
+
+@Composable
+fun CharacterSprite(@DrawableRes sprite: Int, name: String, modifier: Modifier = Modifier) {
     Image(
-        bitmap = ImageBitmap.imageResource(professor.sprite),
-        contentDescription = stringResource(professor.nameRes),
+        bitmap = ImageBitmap.imageResource(sprite),
+        contentDescription = name,
         filterQuality = FilterQuality.None,
         colorFilter = if (LocalColorSprites.current) null else MonochromeFilter,
         modifier = modifier

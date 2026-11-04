@@ -140,6 +140,28 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_COLOR_CHOICE_ASKED, false)
         set(value) = prefs.edit { putBoolean(KEY_COLOR_CHOICE_ASKED, value) }
 
+    /** The Pokémon Breeder has explained how Eggs work. */
+    var breederMet: Boolean
+        get() = prefs.getBoolean(KEY_BREEDER_MET, false)
+        set(value) = prefs.edit { putBoolean(KEY_BREEDER_MET, value) }
+
+    /** Whether a character (clerk, breeder) is a woman in this save; chosen at random once. */
+    fun npcVariantFemale(npc: String): Boolean {
+        val key = KEY_NPC_VARIANT_PREFIX + npc
+        if (!prefs.contains(key)) prefs.edit { putBoolean(key, kotlin.random.Random.nextBoolean()) }
+        return prefs.getBoolean(key, false)
+    }
+
+    /** Hidden setting, revealed by tapping the version seven times in Settings. */
+    var hiddenSettingsUnlocked: Boolean
+        get() = prefs.getBoolean(KEY_HIDDEN_SETTINGS_UNLOCKED, false)
+        set(value) = prefs.edit { putBoolean(KEY_HIDDEN_SETTINGS_UNLOCKED, value) }
+
+    /** Pokémon, Eggs and training keep going while the phone is in use, as if it were locked. */
+    var playWhileInUse: Boolean
+        get() = prefs.getBoolean(KEY_PLAY_WHILE_IN_USE, false)
+        set(value) = prefs.edit { putBoolean(KEY_PLAY_WHILE_IN_USE, value) }
+
     /** The Shiny Charm can be switched off from the Bag. */
     var shinyCharmEnabled: Boolean
         get() = prefs.getBoolean(KEY_SHINY_CHARM_ENABLED, true)
@@ -433,6 +455,10 @@ class PreferencesManager(context: Context) {
         private const val KEY_REPEL_INDICATOR_DISMISSED = "repel_indicator_dismissed"
         private const val KEY_REPEL_ACTIVE = "repel_active"
         private const val KEY_PROFESSOR_INTRO_SEEN = "professor_intro_seen"
+        private const val KEY_BREEDER_MET = "breeder_met"
+        private const val KEY_NPC_VARIANT_PREFIX = "npc_variant_female_"
+        private const val KEY_HIDDEN_SETTINGS_UNLOCKED = "hidden_settings_unlocked"
+        private const val KEY_PLAY_WHILE_IN_USE = "play_while_in_use"
         private const val KEY_SHINY_CHARM_ENABLED = "shiny_charm_enabled"
         private const val KEY_COLOR_CHOICE_ASKED = "color_choice_asked"
         private const val KEY_DISABLED_REGIONS = "disabled_regions"

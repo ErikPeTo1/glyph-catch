@@ -16,7 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +64,7 @@ fun MainScreen(db: PokemonDatabase) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    var lastTap by remember { mutableStateOf("" to 0L) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -69,12 +72,19 @@ fun MainScreen(db: PokemonDatabase) {
             MainBottomBar(
                 currentDestination = currentDestination,
                 onNavigate = { targetRoute ->
+                    val now = System.currentTimeMillis()
+                    val doubleTap = lastTap.first == targetRoute && now - lastTap.second < DOUBLE_TAP_MILLIS
+                    lastTap = targetRoute to now
+                    val startId = navController.graph.findStartDestination().id
                     navController.navigate(targetRoute) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                        if (doubleTap) {
+                            // Double tap: back to the top of the section, forgetting where you were
+                            popUpTo(startId) { inclusive = targetRoute == AppScreen.Home.route }
+                        } else {
+                            popUpTo(startId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
@@ -142,6 +152,8 @@ private fun MainBottomBar(currentDestination: NavDestination?, onNavigate: (Stri
         }
     }
 }
+
+private const val DOUBLE_TAP_MILLIS = 500L
 
 private fun NavDestination?.isRouteSelected(screen: AppScreen): Boolean {
     if (this == null) return false

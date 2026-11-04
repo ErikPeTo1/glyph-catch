@@ -91,6 +91,10 @@ class SpawnCadenceController(private val spawnEngine: SpawnRulesEngine, private 
             return FIRST_CATCH_CHANCE
         }
 
+        if (context.fastSpawns) {
+            return if (minutesAccumulated >= FAST_SPAWN_MINUTES) 1.0 else 0.0
+        }
+
         val baseChance = screenOffChanceRules
             .lastOrNull { minutesAccumulated >= it.minMinutesAccumulated }
             ?.baseChance
@@ -188,6 +192,7 @@ class SpawnCadenceController(private val spawnEngine: SpawnRulesEngine, private 
 
     companion object {
         private const val FIRST_CATCH_CHANCE = 0.2
+        private const val FAST_SPAWN_MINUTES = 5
         private const val MIN_SCREEN_OFF_MINUTES_FOR_REROLL = 30
     }
 }
@@ -214,8 +219,15 @@ class SpawnHistoryTracker(private val preferences: PreferencesManager, private v
         return max(fromActiveQueue, fromDb)
     }
 
-    fun computeScreenOffMinutesAccumulated(currentMinutes: Int): Int =
-        (currentMinutes - lastSpawnScreenOffMinutes).coerceAtLeast(0)
+    fun computeScreenOffMinutesAccumulated(currentMinutes: Int): Int {
+        // The minute counter starts again at 0 when the app restarts (e.g. after an update),
+        // while the last spawn mark is saved: without this, no Pokémon would appear until the
+        // counter caught up with the old mark.
+        if (currentMinutes < lastSpawnScreenOffMinutes) {
+            updateLastSpawnScreenOffMinutes(0)
+        }
+        return (currentMinutes - lastSpawnScreenOffMinutes).coerceAtLeast(0)
+    }
 
     fun resetAfterScreenOn() {
         if (lastSpawnScreenOffMinutes != 0) {
@@ -239,7 +251,9 @@ data class SpawnContext(
     val phoneIsInteractive: Boolean,
     val phoneMinutesOff: Int,
     val trainerPokedexCount: Int,
-    val isBedtime: Boolean
+    val isBedtime: Boolean,
+    /** One Pokémon every few minutes, for the hidden "play while in use" setting. */
+    val fastSpawns: Boolean = false
 )
 
 data class SpawnDecision(val spawn: SpawnResult?, val debug: SpawnDecisionDebug)

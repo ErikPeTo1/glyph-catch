@@ -21,6 +21,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -71,6 +73,7 @@ import dev.equalparts.glyph_catch.ndotFontFamily
 import dev.equalparts.glyph_catch.screens.formatDuration
 import dev.equalparts.glyph_catch.screens.professor.ProfessorEventHost
 import dev.equalparts.glyph_catch.screens.professor.ownedItems
+import dev.equalparts.glyph_catch.screens.professor.rememberPendingCalls
 import dev.equalparts.glyph_catch.util.ActiveItemStatus
 import dev.equalparts.glyph_catch.util.AvailableUpdate
 import dev.equalparts.glyph_catch.util.EventHelpers
@@ -144,20 +147,6 @@ fun HomeScreen(
         grantStarterStoneGiftIfEligible(db, preferencesManager)
     }
 
-    LaunchedEffect(totalCaught) {
-        ROD_UNLOCK_COUNTS.forEach { (rod, count) ->
-            if (totalCaught + preferencesManager.releasedCount >= count) {
-                ensureRodUnlocked(db, preferencesManager, rod)
-            }
-        }
-    }
-
-    LaunchedEffect(uniqueSpecies) {
-        if (uniqueSpecies >= REPEL_UNLOCK_SPECIES_COUNT) {
-            ensureRepelUnlocked(db, preferencesManager)
-        }
-    }
-
     val scrollState = rememberScrollState()
 
     ProfessorEventHost(db = db, preferencesManager = preferencesManager)
@@ -171,7 +160,8 @@ fun HomeScreen(
         ) {
             Header(
                 onSettingsClick = onSettingsClick,
-                onPokegearClick = onPokegearClick.takeIf { preferencesManager.professorIntroSeen }
+                onPokegearClick = onPokegearClick.takeIf { preferencesManager.professorIntroSeen },
+                hasPendingCall = rememberPendingCalls(db, preferencesManager).isNotEmpty()
             )
             Spacer(modifier = Modifier.height(AppSizes.spacingXLarge))
             UpdateBanner()
@@ -273,7 +263,9 @@ private fun EggsCard(db: PokemonDatabase) {
                     Text(text = "🥚", style = MaterialTheme.typography.titleMedium)
                     LinearProgressIndicator(
                         progress = { (egg.minutesProgress.toFloat() / egg.minutesNeeded).coerceIn(0f, 1f) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        drawStopIndicator = { }
                     )
                     Text(
                         text = formatDuration(egg.minutesProgress.coerceAtMost(egg.minutesNeeded)) + " / " +
@@ -383,7 +375,7 @@ private fun HomeShortcuts(
 }
 
 @Composable
-private fun Header(onSettingsClick: () -> Unit, onPokegearClick: (() -> Unit)?) {
+private fun Header(onSettingsClick: () -> Unit, onPokegearClick: (() -> Unit)?, hasPendingCall: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -402,7 +394,10 @@ private fun Header(onSettingsClick: () -> Unit, onPokegearClick: (() -> Unit)?) 
             // The Pokégear, to call the professors (after meeting Professor Oak)
             if (onPokegearClick != null) {
                 IconButton(onClick = onPokegearClick) {
-                    Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.pokegear_title))
+                    // A dot when a professor has something for you
+                    BadgedBox(badge = { if (hasPendingCall) Badge() }) {
+                        Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.pokegear_title))
+                    }
                 }
             }
             IconButton(onClick = onSettingsClick) {
@@ -981,40 +976,6 @@ private suspend fun grantStarterStoneGiftIfEligible(db: PokemonDatabase, prefere
     preferencesManager.hasReceivedStarterStoneGift = true
 }
 
-private suspend fun ensureRodUnlocked(db: PokemonDatabase, preferencesManager: PreferencesManager, rod: Item) {
-    val created = withContext(Dispatchers.IO) {
-        val inventoryDao = db.inventoryDao()
-        val existing = inventoryDao.getItem(rod.ordinal)
-
-        if (existing != null) {
-            false
-        } else {
-            inventoryDao.insertItem(InventoryItem(itemId = rod.ordinal, quantity = 1))
-            true
-        }
-    }
-    if (created) {
-        preferencesManager.markSuperRodDiscovered()
-    }
-}
-
-private suspend fun ensureRepelUnlocked(db: PokemonDatabase, preferencesManager: PreferencesManager) {
-    val created = withContext(Dispatchers.IO) {
-        val inventoryDao = db.inventoryDao()
-        val existing = inventoryDao.getItem(Item.REPEL.ordinal)
-
-        if (existing != null) {
-            false
-        } else {
-            inventoryDao.insertItem(InventoryItem(itemId = Item.REPEL.ordinal, quantity = 1))
-            true
-        }
-    }
-    if (created) {
-        preferencesManager.markRepelDiscovered()
-    }
-}
-
 private val STARTER_STONE_GIFT_ITEMS = listOf(
     Item.FIRE_STONE,
     Item.WATER_STONE,
@@ -1022,8 +983,6 @@ private val STARTER_STONE_GIFT_ITEMS = listOf(
     Item.THUNDER_STONE
 )
 private const val RECENT_CATCH_WINDOW_MILLIS = 24 * 60 * 60 * 1000L
-private val ROD_UNLOCK_COUNTS = listOf(Item.OLD_ROD to 15, Item.GOOD_ROD to 45, Item.SUPER_ROD to 100)
-private const val REPEL_UNLOCK_SPECIES_COUNT = 50
 
 private fun CaughtPokemon.isRecent(referenceTimeMillis: Long): Boolean =
     caughtAt >= referenceTimeMillis - RECENT_CATCH_WINDOW_MILLIS

@@ -468,4 +468,34 @@ class SpawnDistributionTest {
         assertEquals(75f, probs[Pokemon.SQUIRTLE] ?: 0f, 0.01f) // 3.0/4.0 * 100
         assertEquals(25f, probs[Pokemon.PIDGEY] ?: 0f, 0.01f) // 1.0/4.0 * 100
     }
+
+    @Test
+    fun `exclusive pools leave everything else out while active`() {
+        val context = TestContext()
+        val noStarter = { context.night.not() }
+
+        val rules = PokemonSpawnDsl(context).pools {
+            pool("common", 100.percent) {
+                Pokemon.PIDGEY at 1.0f
+            }
+            special(Pokemon.BULBASAUR) {
+                exclusive()
+                activate(99.percent) given (noStarter)
+            }
+            pool("pseudo") {
+                exclusive()
+                activate(1.percent) given (noStarter)
+                Pokemon.DRATINI at 1.0f
+            }
+        }
+
+        val engine = SpawnRulesEngine(rules)
+        val starterPhase = engine.getCurrentPoolProbabilities()
+        assertEquals(setOf("special:bulbasaur", "pseudo"), starterPhase.keys)
+        assertEquals(99f, starterPhase["special:bulbasaur"] ?: 0f, 0.01f)
+        assertEquals(1f, starterPhase["pseudo"] ?: 0f, 0.01f)
+
+        context.night = true
+        assertEquals(setOf("common"), engine.getCurrentPoolProbabilities().keys)
+    }
 }

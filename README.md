@@ -9,7 +9,7 @@
 >
 > **Make sure to configure Glyph Catch as your Always-on Glyph Toy.**
 >
-> Latest version: v3.0.0 | Professors, regions, eggs and legendary key items
+> Latest version: v3.1.0 | Professor calls, the Fisherman, a clerk and a Pokémon Breeder
 >
 > The app lets you know when a new version is out. For automatic updates, add this repository to [Obtainium](https://github.com/ImranR98/Obtainium).
 
@@ -21,7 +21,7 @@ Glyph Catch is a fan-made Pokémon catching game for the Nothing Phone 3 that re
 
 **Pokémon appear based on real-world conditions.** Weather conditions boost certain Pokémon types. Zubat and Hoothoot come out at night. Phone running low on battery? Voltorb and its evolution might show up. Castform changes with the weather and Deerling with the season. Keep an eye on the daily Trainer Tips and the Rumors page for hints! **All 649 Pokémon from Kanto to Unova are obtainable.**
 
-**Every region has its professor.** Professor Oak welcomes you to Kanto, and as your Pokédex grows, Professors Elm, Birch, Rowan and Juniper hand over their regional Pokédex to open Johto, Hoenn, Sinnoh and Unova. Call them on the Pokégear to hear how you're doing and the latest rumors.
+**Every region has its professor.** Professor Oak welcomes you to Kanto, and as your Pokédex grows, Professors Elm, Birch, Rowan and Juniper call you with their regional Pokédex to open Johto, Hoenn, Sinnoh and Unova. Call them back on the Pokégear to hear how you're doing and the latest rumors.
 
 **There's more to do than just catching.** Choose a Pokémon to level up, and it gains EXP while your phone is face-down. Pokémon evolve when they hit the right level, unless you give them an Everstone. You'll also find items, like evolution stones, Rare Candies for leveling, and three fishing rods to fish for aquatic species. Daily and weekly missions reward items and a temporary rarity boost.
 
@@ -31,7 +31,15 @@ When there are no Pokémon around to catch, the Glyph Toy displays a handy digit
 
 Glyph Catch was created by **[Equal Parts](https://github.com/equalparts/glyph-catch)**, including the original Kanto sprites hand-made for the Glyph Matrix. This fork continues the app with the original author's written permission and encouragement. Thank you, Equal Parts!
 
-Gen 2-5 sprites, item sprites, Pokémon data and official names in each language come from [PokeAPI](https://pokeapi.co/). Professor sprites come from [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/), and the Pokédex sprite from [Bulbagarden Archives](https://archives.bulbagarden.net/).
+Gen 2-5 sprites, item sprites, Pokémon data and official names in each language come from [PokeAPI](https://pokeapi.co/). Professor and character sprites come from [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/), and the Pokédex sprite from [Bulbagarden Archives](https://archives.bulbagarden.net/).
+
+## What's new in 3.1
+
+- The Fisherman gives you the fishing rods, a clerk the Repel, and a Pokémon Breeder explains how Eggs work and gives you your first one.
+- Professors call you: a red dot on the phone icon means one of them has something for you on the Pokégear.
+- New games almost always start with a starter Pokémon (with a small chance of a pseudo-legendary's first stage).
+- Double-tap a tab to go back to the top of that section.
+- Fixed: after an update, Pokémon could take a long time to appear.
 
 ## What's new in 3.0
 
@@ -40,10 +48,10 @@ Gen 2-5 sprites, item sprites, Pokémon data and official names in each language
 - Johto, Hoenn, Sinnoh and Unova open when their professor gives you the regional Pokédex, at 50, 120, 200 and 300 Pokémon.
 - The Pokégear: call the professors to hear how your regional Pokédex is going and a different rumor each time.
 - With all four regional Pokédexes, Professor Oak gives you the Town Map to choose which regions' Pokémon appear.
-- Existing saves receive everything they've already earned the first time they open the app.
+- When a professor has something for you, the phone on the Home screen shows a red dot: call them on the Pokégear to collect it. Existing saves can collect everything they've already earned.
 
 **Legendary Pokémon**
-- Many legendary Pokémon need their key item to appear, like the Eon Ticket for Latias and Latios or the Meteorite for Deoxys. Their professor gives it to you when you hear the rumor.
+- Many legendary Pokémon need their key item to appear, like the Eon Ticket for Latias and Latios or the Meteorite for Deoxys. Their professor calls you with it when you hear the rumor.
 - A released legendary Pokémon can appear again, one at a time, so you can hunt for its shiny.
 - Complete the national Pokédex to get the Shiny Charm: shinies are three times as common (it can be switched off in the Bag).
 

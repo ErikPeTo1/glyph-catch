@@ -22,7 +22,9 @@ data class SpawnPool(
     val modifiers: List<Modifier> = emptyList(),
     val baseModifier: ((Float) -> Float)? = null,
     val isSpecial: Boolean = false,
-    val isConditional: Boolean = false
+    val isConditional: Boolean = false,
+    /** While an exclusive pool is active, only exclusive pools can be picked. */
+    val isExclusive: Boolean = false
 ) {
     /**
      * Indicates whether this spawn pool should be considered.

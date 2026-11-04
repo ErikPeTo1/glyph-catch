@@ -119,7 +119,9 @@ private fun MissionCard(progress: MissionProgress, onClaim: () -> Unit) {
             )
             LinearProgressIndicator(
                 progress = { (progress.progress.toFloat() / mission.target).coerceIn(0f, 1f) },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                drawStopIndicator = { }
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,

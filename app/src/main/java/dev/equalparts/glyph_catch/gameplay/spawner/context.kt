@@ -149,6 +149,14 @@ data class GameplayContext(
         @Volatile
         var unlockedSinceLastTick: Boolean = false
 
+        /**
+         * `true` when the game should act as if the phone were locked: either it is, or the
+         * hidden "play while in use" setting is on.
+         */
+        var countsAsAway: Boolean = true
+
+        private val preferences = PreferencesManager(applicationContext)
+
         val minutesOffOutsideBedtime: Int
             get() = sleep.minutesOffOutsideBedtime
 
@@ -166,8 +174,9 @@ data class GameplayContext(
             val interactive = unlockedNow || unlockedSinceLastTick
             unlockedSinceLastTick = false
             isInteractive = interactive
+            countsAsAway = !interactive || preferences.playWhileInUse
 
-            if (interactive) {
+            if (!countsAsAway) {
                 minutesOff = 0
             } else {
                 minutesOff++

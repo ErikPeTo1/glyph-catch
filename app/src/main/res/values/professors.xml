@@ -49,6 +49,7 @@
     <!-- Pokégear -->
     <string name="pokegear_title">Pokégear</string>
     <string name="pokegear_call">Call</string>
+    <string name="pokegear_has_something">Has something for you!</string>
     <string name="call_hello">Hello? Oh, it\'s you! %1$s here.</string>
     <string name="call_progress">You\'ve registered %1$d of the %2$d Pokémon from %3$s.</string>
     <string name="call_eval_low">There\'s still a lot to discover. Keep that phone face-down!</string>
@@ -59,6 +60,32 @@
     <string name="call_no_rumor">I haven\'t heard any rumors yet. Grow your Pokédex and I\'m sure something will come up.</string>
     <string name="call_bye">Talk to you later!</string>
     <string name="rumors_region_locked">You need the %1$s Pokédex to hear about this one.</string>
+
+    <!-- Fisherman, clerk and breeder -->
+    <string name="npc_fisherman">Fisherman</string>
+    <string name="npc_clerk_m">Clerk</string>
+    <string name="npc_clerk_f">Clerk</string>
+    <string name="npc_breeder_m">Pokémon Breeder</string>
+    <string name="npc_breeder_f">Pokémon Breeder</string>
+    <string name="npc_fisher_old_1">Hey there! You\'ve caught quite a few Pokémon. Do you like fishing too?</string>
+    <string name="npc_fisher_old_2">Take this Old Rod. Use it from your Bag and water Pokémon will bite for a while.</string>
+    <string name="npc_fisher_good">You again! You\'re turning into a real angler. This Good Rod hooks better Pokémon.</string>
+    <string name="npc_fisher_super">A hundred catches already? Here, my most prized possession: the Super Rod!</string>
+    <string name="npc_fisher_bye">Only one rod can be used at a time, so pick the one for the Pokémon you\'re after. Good luck!</string>
+    <string name="npc_clerk_1">Welcome! %1$d kinds of Pokémon registered… You must be tired of meeting the same ones again and again.</string>
+    <string name="npc_clerk_2">Here, try this Repel, on the house. While it\'s on, Pokémon you already have will stay away.</string>
+    <string name="npc_clerk_3">You can switch it on and off from your Bag. Come back anytime!</string>
+    <string name="npc_breeder_1">Oh, you have the Johto Pokédex! Then you\'ll want to meet baby Pokémon, like Pichu or Togepi. They only hatch from Eggs.</string>
+    <string name="npc_breeder_2">Whenever you catch a Pokémon, you might find an Egg. You can carry up to three.</string>
+    <string name="npc_breeder_3">Eggs hatch while your phone stays locked: some take 2 hours, others 5 or 10. You can check on them on the Home screen.</string>
+    <string name="npc_breeder_4">When one hatches, the baby appears on your Glyph Matrix. Catch it with a long press! Hatched Pokémon are more likely to be shiny, too.</string>
+    <string name="npc_breeder_5">Here, take this Egg to get started. Look after it!</string>
+    <string name="npc_egg_received">You received an Egg!</string>
+
+    <!-- Hidden setting -->
+    <string name="hidden_settings_unlocked">You found a secret setting!</string>
+    <string name="hidden_play_in_use_title">Catch while using the phone</string>
+    <string name="hidden_play_in_use_subtitle">Pokémon, Eggs and training keep going when you unlock your phone, just like when it\'s locked.</string>
 
     <!-- Key items -->
     <string name="inventory_key_item">Key item</string>

@@ -88,6 +88,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
     private var localClockJob: Job? = null
     private var aodActive = false
+    private var lastTickMinute = -1L
 
     private val animationWakeLockMutex = Any()
     private var animationWakeLock: PowerManager.WakeLock? = null
@@ -200,8 +201,10 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     override fun onAodTick() {
         if (!aodActive) {
             aodActive = true
-            localClockJob?.cancel()
-            localClockJob = null
+            if (!preferencesManager.playWhileInUse) {
+                localClockJob?.cancel()
+                localClockJob = null
+            }
         }
         tick()
     }
@@ -212,7 +215,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     private fun startLocalClock() {
         localClockJob?.cancel()
         localClockJob = coroutineScope?.launch(Dispatchers.Main) {
-            while (!aodActive) {
+            while (!aodActive || preferencesManager.playWhileInUse) {
                 val calendar = Calendar.getInstance()
                 val secondsUntilNextMinute = 60 - calendar.get(Calendar.SECOND)
                 val millisUntilNextMinute = secondsUntilNextMinute * 1000L - calendar.get(Calendar.MILLISECOND)
@@ -227,14 +230,20 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Updates the game / display state. Might spawn a new Pokémon.
      */
     private fun tick() {
+        // The AOD tick and the local clock can both fire in the same minute
+        val minute = System.currentTimeMillis() / 60_000L
+        if (minute == lastTickMinute) return
+        lastTickMinute = minute
+
         gameplayContext.phone.refresh()
         gameplayContext.trainer.refresh()
+        // Stats only count real time without unlocking, even with "play while in use" on
         if (!gameplayContext.phone.isInteractive) {
             preferencesManager.dailyStats.add(Stat.MINUTES)
-            coroutineScope?.launch { advanceEggs() }
         }
-
-        if (gameplayContext.phone.isInteractive) {
+        if (gameplayContext.phone.countsAsAway) {
+            coroutineScope?.launch { advanceEggs() }
+        } else {
             spawnHistory.resetAfterScreenOn()
         }
 
@@ -258,10 +267,11 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         val now = System.currentTimeMillis()
         val spawnContext = SpawnContext(
             hasQueuedSpawns = spawnQueue.isNotEmpty(),
-            phoneIsInteractive = gameplayContext.phone.isInteractive,
+            phoneIsInteractive = !gameplayContext.phone.countsAsAway,
             phoneMinutesOff = gameplayContext.phone.minutesOff,
             trainerPokedexCount = gameplayContext.trainer.pokedexCount,
-            isBedtime = gameplayContext.sleep.isBedtime
+            isBedtime = gameplayContext.sleep.isBedtime,
+            fastSpawns = preferencesManager.playWhileInUse
         )
 
         if (!spawnContext.phoneIsInteractive) {

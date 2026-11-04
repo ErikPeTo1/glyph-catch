@@ -1,6 +1,7 @@
 package dev.equalparts.glyph_catch.screens.professor
 
 import android.content.Context
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +36,7 @@ import dev.equalparts.glyph_catch.ItemGlyphCircle
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.LegendaryItems
+import dev.equalparts.glyph_catch.data.NpcEvent
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.Professor
 import dev.equalparts.glyph_catch.data.ProfessorEvent
@@ -47,7 +49,7 @@ import kotlinx.coroutines.delay
 /**
  * One box of text. Pages with a [gift] show the item the professor hands over.
  */
-data class DialoguePage(val text: String, val gift: Item? = null)
+data class DialoguePage(val text: String, val gift: Item? = null, val egg: Boolean = false)
 
 /**
  * A professor talking, in the style of the main games: tap to show the whole line, tap again
@@ -56,6 +58,15 @@ data class DialoguePage(val text: String, val gift: Item? = null)
 @Composable
 fun ProfessorDialog(
     professor: Professor,
+    pages: List<DialoguePage>,
+    onFinish: () -> Unit,
+    onDismiss: (() -> Unit)? = null
+) = CharacterDialog(professor.sprite, stringResource(professor.nameRes), pages, onFinish, onDismiss)
+
+@Composable
+fun CharacterDialog(
+    @DrawableRes sprite: Int,
+    name: String,
     pages: List<DialoguePage>,
     onFinish: () -> Unit,
     onDismiss: (() -> Unit)? = null
@@ -98,11 +109,12 @@ fun ProfessorDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Spacer(modifier = Modifier.weight(1f))
-                ProfessorSprite(professor, modifier = Modifier.size(240.dp))
+                CharacterSprite(sprite, name, modifier = Modifier.size(240.dp))
                 page.gift?.let { GiftBadge(it) }
+                if (page.egg) EggBadge()
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = stringResource(professor.nameRes),
+                    text = name,
                     fontFamily = ndotFontFamily,
                     color = Color.White,
                     style = MaterialTheme.typography.titleMedium,
@@ -146,7 +158,54 @@ private fun GiftBadge(item: Item) {
     }
 }
 
+@Composable
+private fun EggBadge() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(text = "🥚", style = MaterialTheme.typography.displayMedium)
+        Text(
+            text = stringResource(R.string.npc_egg_received),
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+}
+
 private const val TYPE_DELAY_MILLIS = 18L
+
+/**
+ * What the Fisherman, the clerk and the breeder say.
+ */
+object NpcScripts {
+    fun event(context: Context, event: NpcEvent, pokedexCount: Int): List<DialoguePage> = when (event) {
+        is NpcEvent.Rod -> when (event.rod) {
+            Item.OLD_ROD -> listOf(
+                DialoguePage(context.getString(R.string.npc_fisher_old_1)),
+                DialoguePage(context.getString(R.string.npc_fisher_old_2), gift = Item.OLD_ROD),
+                DialoguePage(context.getString(R.string.npc_fisher_bye))
+            )
+            Item.GOOD_ROD -> listOf(
+                DialoguePage(context.getString(R.string.npc_fisher_good), gift = Item.GOOD_ROD),
+                DialoguePage(context.getString(R.string.npc_fisher_bye))
+            )
+            else -> listOf(
+                DialoguePage(context.getString(R.string.npc_fisher_super), gift = Item.SUPER_ROD),
+                DialoguePage(context.getString(R.string.npc_fisher_bye))
+            )
+        }
+        NpcEvent.Repel -> listOf(
+            DialoguePage(context.getString(R.string.npc_clerk_1, pokedexCount)),
+            DialoguePage(context.getString(R.string.npc_clerk_2), gift = Item.REPEL),
+            DialoguePage(context.getString(R.string.npc_clerk_3))
+        )
+        NpcEvent.Breeder -> listOf(
+            DialoguePage(context.getString(R.string.npc_breeder_1)),
+            DialoguePage(context.getString(R.string.npc_breeder_2)),
+            DialoguePage(context.getString(R.string.npc_breeder_3)),
+            DialoguePage(context.getString(R.string.npc_breeder_4)),
+            DialoguePage(context.getString(R.string.npc_breeder_5), egg = true)
+        )
+    }
+}
 
 /**
  * What each professor says.
