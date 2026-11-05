@@ -360,7 +360,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         preferencesManager.dailyStats.add(Stat.EVOLUTIONS)
         preferencesManager.enqueueEvolutionNotification(
             previousSpeciesId = species.id,
-            newSpeciesId = target.id
+            newSpeciesId = target.id,
+            shiny = pokemon.isShiny
         )
     }
 

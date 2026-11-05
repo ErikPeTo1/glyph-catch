@@ -47,3 +47,7 @@ actualizar.ps1
 
 # Personal sprite viewer for the Glyph Matrix (development tool)
 viewer/
+
+# Notes for local coding tools
+CLAUDE.md
+AGENTS.md

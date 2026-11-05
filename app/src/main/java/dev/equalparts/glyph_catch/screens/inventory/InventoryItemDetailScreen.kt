@@ -39,8 +39,10 @@ import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.displayName
 import dev.equalparts.glyph_catch.data.nameRes
+import dev.equalparts.glyph_catch.util.CandyEvolution
 import dev.equalparts.glyph_catch.util.ItemUsageError
 import dev.equalparts.glyph_catch.util.ItemUsageResult
+import dev.equalparts.glyph_catch.util.candyEvolution
 import dev.equalparts.glyph_catch.util.maxRareCandies
 import dev.equalparts.glyph_catch.util.tradeTargets
 import dev.equalparts.glyph_catch.util.useItemOnPokemon
@@ -244,6 +246,9 @@ fun InventoryItemDetailScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                    if (item == Item.RARE_CANDY) {
+                        CandyEvolutionText(candyEvolution(selectedPokemon, candyAmount))
+                    }
                     if (choices.size > 1) {
                         Text(stringResource(R.string.evolution_choose_prompt))
                         Row(horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)) {
@@ -304,4 +309,34 @@ private fun RepeatingButton(label: String, enabled: Boolean, onStep: () -> Unit)
     ) {
         Text(label)
     }
+}
+
+/**
+ * Tells, before using the candies, whether the Pokémon will evolve and into what.
+ */
+@Composable
+private fun CandyEvolutionText(evolution: CandyEvolution) {
+    val names = { list: List<dev.equalparts.glyph_catch.data.PokemonSpecies> ->
+        list.joinToString(" → ") { it.displayName }
+    }
+    val text = when (evolution) {
+        CandyEvolution.None -> stringResource(R.string.rare_candy_no_evolution)
+        CandyEvolution.Blocked -> stringResource(R.string.rare_candy_everstone)
+        CandyEvolution.Choice -> stringResource(R.string.rare_candy_choice)
+        is CandyEvolution.Evolves -> stringResource(R.string.rare_candy_will_evolve, names(evolution.path))
+        is CandyEvolution.Random -> stringResource(
+            R.string.rare_candy_will_evolve_random,
+            (evolution.path.map { it.displayName } + evolution.options.joinToString(" / ") { it.displayName })
+                .joinToString(" → ")
+        )
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        color = if (evolution is CandyEvolution.Evolves || evolution is CandyEvolution.Random) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    )
 }

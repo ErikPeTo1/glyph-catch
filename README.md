@@ -9,7 +9,7 @@
 >
 > **Make sure to configure Glyph Catch as your Always-on Glyph Toy.**
 >
-> Latest version: v3.1.0 | Professor calls, the Fisherman, a clerk and a Pokémon Breeder
+> Latest version: v3.2.0 · [What's new](CHANGELOG.md)
 >
 > The app lets you know when a new version is out. For automatic updates, add this repository to [Obtainium](https://github.com/ImranR98/Obtainium).
 
@@ -17,86 +17,28 @@
 
 Glyph Catch is a fan-made Pokémon catching game for the Nothing Phone 3 that rewards you for reducing screen time! Leave your phone down a while, and Pokémon appear on your Glyph Matrix. The longer your phone stays locked, the higher your chance of rare encounters. Press the touch button to catch the Pokémon and build your Pokédex!
 
-![Screenshots: Home screen, Pokédex screen, Pokémon (caught) screen, Bag screen](/visual.png)
+![Screenshots: Home, a call with Professor Oak, Pokédex, Pokémon grid and Bag](/visual.png)
 
-**Pokémon appear based on real-world conditions.** Weather conditions boost certain Pokémon types. Zubat and Hoothoot come out at night. Phone running low on battery? Voltorb and its evolution might show up. Castform changes with the weather and Deerling with the season. Keep an eye on the daily Trainer Tips and the Rumors page for hints! **All 649 Pokémon from Kanto to Unova are obtainable.**
+## Features
 
-**Every region has its professor.** Professor Oak welcomes you to Kanto, and as your Pokédex grows, Professors Elm, Birch, Rowan and Juniper call you with their regional Pokédex to open Johto, Hoenn, Sinnoh and Unova. Call them back on the Pokégear to hear how you're doing and the latest rumors.
-
-**There's more to do than just catching.** Choose a Pokémon to level up, and it gains EXP while your phone is face-down. Pokémon evolve when they hit the right level, unless you give them an Everstone. You'll also find items, like evolution stones, Rare Candies for leveling, and three fishing rods to fish for aquatic species. Daily and weekly missions reward items and a temporary rarity boost.
+- **649 Pokémon, from Kanto to Unova.** They appear based on real-world conditions: weather boosts certain types, Zubat and Hoothoot come out at night, Castform changes with the weather and Deerling with the season.
+- **A professor for every region.** Professor Oak welcomes you to Kanto. As your Pokédex grows, Professors Elm, Birch, Rowan and Juniper open Johto, Hoenn, Sinnoh and Unova. Call them on the Pokégear for your progress and the latest rumors.
+- **Legendary Pokémon with their key items,** like the Eon Ticket or the Meteorite, each with its own conditions to appear.
+- **Training and evolution.** Your training partner gains EXP while your phone is face-down. Evolution stones, Rare Candies, the Linking Cord and an Everstone toggle.
+- **Eggs.** Baby Pokémon only hatch from Eggs, while your phone stays locked.
+- **Shinies.** 1 in 512 wild Pokémon, more during holidays, and the Shiny Charm for completing the Pokédex.
+- **Fishing rods, missions and statistics,** with daily and weekly rewards.
+- **Color or Glyph Matrix style** in the app, your choice.
+- **Six languages:** English, Spanish, German, French, Italian and Portuguese.
 
 When there are no Pokémon around to catch, the Glyph Toy displays a handy digital clock instead.
 
-## Credits
+<details>
+<summary>Screenshots in the black-and-white Glyph Matrix style</summary>
 
-Glyph Catch was created by **[Equal Parts](https://github.com/equalparts/glyph-catch)**, including the original Kanto sprites hand-made for the Glyph Matrix. This fork continues the app with the original author's written permission and encouragement. Thank you, Equal Parts!
+![The same screens in the black-and-white Glyph Matrix style](/visual-bw.png)
 
-Gen 2-5 sprites, item sprites, Pokémon data and official names in each language come from [PokeAPI](https://pokeapi.co/). Professor and character sprites come from [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/), and the Pokédex sprite from [Bulbagarden Archives](https://archives.bulbagarden.net/).
-
-## What's new in 3.1
-
-- The Fisherman gives you the fishing rods, a clerk the Repel, and a Pokémon Breeder explains how Eggs work and gives you your first one.
-- Professors call you: a red dot on the phone icon means one of them has something for you on the Pokégear.
-- New games almost always start with a starter Pokémon (with a small chance of a pseudo-legendary's first stage).
-- Double-tap a tab to go back to the top of that section.
-- Fixed: after an update, Pokémon could take a long time to appear.
-
-## What's new in 3.0
-
-**Professors and regions**
-- Professor Oak welcomes you and gives you the Kanto Pokédex. New players start with Pokémon from Kanto only.
-- Johto, Hoenn, Sinnoh and Unova open when their professor gives you the regional Pokédex, at 50, 120, 200 and 300 Pokémon.
-- The Pokégear: call the professors to hear how your regional Pokédex is going and a different rumor each time.
-- With all four regional Pokédexes, Professor Oak gives you the Town Map to choose which regions' Pokémon appear.
-- When a professor has something for you, the phone on the Home screen shows a red dot: call them on the Pokégear to collect it. Existing saves can collect everything they've already earned.
-
-**Legendary Pokémon**
-- Many legendary Pokémon need their key item to appear, like the Eon Ticket for Latias and Latios or the Meteorite for Deoxys. Their professor calls you with it when you hear the rumor.
-- A released legendary Pokémon can appear again, one at a time, so you can hunt for its shiny.
-- Complete the national Pokédex to get the Shiny Charm: shinies are three times as common (it can be switched off in the Bag).
-
-**Eggs**
-- Baby Pokémon only hatch from Eggs. You might find one when you catch a Pokémon, from the Johto Pokédex on.
-- Carry up to three. They hatch after 2, 5 or 10 hours with the phone locked, and are four times as likely to be shiny.
-
-**Items and sprites**
-- Use several Rare Candies at once (hold + or − to go faster). Your training partner is listed first when an item works on it.
-- When giving an evolution item, you can see whether you've already registered the evolution.
-- Gen 2-5 sprites retuned for the Glyph Matrix, whose brightness isn't linear.
-- On first launch, choose between color sprites and the black-and-white Glyph Matrix style.
-
-## What's new in 2.0
-
-**Content**
-- 649 Pokémon (Gens 1-5) with current types and evolutions, including baby Pokémon.
-- New evolution items: Shiny, Dusk, Dawn and Ice Stones. The Sun Stone can now be found too.
-- You choose what Tyrogue and Clamperl evolve into. Wurmple and Burmy decide for themselves, like in the main games.
-- Everstone toggle to stop a Pokémon from evolving when it levels up.
-- Alternate forms: Castform (weather), Deerling/Sawsbuck (season), all 28 Unown, Burmy/Wormadam cloaks and Shellos/Gastrodon seas.
-
-**Spawning**
-- The streak only resets when you unlock your phone, so checking the time on the lock screen is fine.
-- Faster spawns: one is guaranteed after 30 minutes without unlocking.
-- Up to nine Pokémon can wait on the Glyph Matrix, and the rarest one is shown first.
-- New Very Rare tier for pseudo-legendaries, starters from other regions and a few special Pokémon.
-- Three fishing rods (Old, Good and Super), each with its own Pokémon.
-- Every legendary and mythical Pokémon has its own conditions to appear. The Rumors page gives hints as your Pokédex grows.
-- New events: Valentine's Day, Pokémon Day, New Year and San Juan (Midsummer), plus extra Halloween and thunderstorm Pokémon.
-- Pokémon keep appearing quietly while you sleep, without animations.
-
-**Shinies**
-- 1 in 512 wild Pokémon is shiny. On the Glyph Matrix it shows as a negative image and flashes longer when it appears.
-- Odds are doubled during the Halloween and Christmas weeks, and quadrupled on special days.
-- Shiny colors in the app and a "Shinydex" in the Pokédex.
-
-**Quality of life**
-- Sort and mass-release Pokémon in the PC (favorites and your training partner are protected).
-- Sort your Bag, and browse the Pokédex by region.
-- Export and import your progress to a file.
-- Statistics: time without unlocking each day, with a 7-day chart.
-- Daily and weekly missions.
-- Optional color sprites in the app (the Glyph Matrix stays monochrome).
-- Available in English, Spanish, German, French, Italian and Portuguese.
+</details>
 
 ## Q&A
 
@@ -133,6 +75,25 @@ Note that Essential Notifications may disconnect the Glyph Toy and disrupt the t
 ### Can I keep my progress from the original Glyph Catch?
 
 Unfortunately not: this version is a separate app, so it installs alongside the original and starts a fresh save. From now on, you can back up your progress under Settings > Backup.
+
+## Building
+
+Requires JDK 21.
+
+```bash
+./gradlew :app:assembleDebug     # Build a debug APK
+./gradlew :app:installDebug      # Install on a connected phone
+./gradlew :app:testDebugUnitTest # Run unit tests
+./gradlew :app:ktlintCheck       # Check code style
+```
+
+Translations live in `tools/i18n` and are generated with `node tools/i18n/build.js`.
+
+## Credits
+
+Glyph Catch was created by **[Equal Parts](https://github.com/equalparts/glyph-catch)**, including the original Kanto sprites hand-made for the Glyph Matrix. This fork continues the app with the original author's written permission and encouragement. Thank you, Equal Parts!
+
+Gen 2-5 sprites, item sprites, Pokémon data and official names in each language come from [PokeAPI](https://pokeapi.co/). Professor and character sprites come from [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/), and the Pokédex sprite from [Bulbagarden Archives](https://archives.bulbagarden.net/).
 
 ## Privacy
 

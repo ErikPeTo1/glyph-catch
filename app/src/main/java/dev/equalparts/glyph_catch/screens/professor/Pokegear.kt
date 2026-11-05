@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -218,7 +217,7 @@ private fun ContactCard(professor: Professor, hasCall: Boolean, onCall: () -> Un
                     }
                 )
             }
-            BadgedBox(badge = { if (hasCall) Badge() }) {
+            BadgedBox(badge = { if (hasCall) CallBadge() }) {
                 Button(onClick = onCall) { Text(stringResource(R.string.pokegear_call)) }
             }
         }

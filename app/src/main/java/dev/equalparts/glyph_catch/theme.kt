@@ -31,6 +31,9 @@ val ndotFontFamily = FontFamily(
 val darkColorScheme = darkColorScheme(
     primary = CatchColors.Red,
     onPrimary = CatchColors.White,
+    // Warnings and destructive actions (like releasing) use the app's red, not Material's pink
+    error = CatchColors.Red,
+    onError = CatchColors.White,
     primaryContainer = CatchColors.MediumGray,
     onPrimaryContainer = CatchColors.White,
     background = CatchColors.Black,
@@ -46,6 +49,9 @@ val darkColorScheme = darkColorScheme(
 val lightColorScheme = lightColorScheme(
     primary = CatchColors.Red,
     onPrimary = CatchColors.White,
+    // Warnings and destructive actions (like releasing) use the app's red, not Material's pink
+    error = CatchColors.Red,
+    onError = CatchColors.White,
     primaryContainer = CatchColors.VeryLightGray,
     onPrimaryContainer = CatchColors.DarkText,
     background = CatchColors.OffWhite,

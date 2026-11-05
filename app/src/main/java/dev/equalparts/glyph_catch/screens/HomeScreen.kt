@@ -21,7 +21,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -46,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.equalparts.glyph_catch.AppBadge
@@ -71,6 +71,8 @@ import dev.equalparts.glyph_catch.gameplay.spawner.Weather
 import dev.equalparts.glyph_catch.gameplay.spawner.WeatherProvider
 import dev.equalparts.glyph_catch.ndotFontFamily
 import dev.equalparts.glyph_catch.screens.formatDuration
+import dev.equalparts.glyph_catch.screens.professor.CallBadge
+import dev.equalparts.glyph_catch.screens.professor.EggSprite
 import dev.equalparts.glyph_catch.screens.professor.ProfessorEventHost
 import dev.equalparts.glyph_catch.screens.professor.ownedItems
 import dev.equalparts.glyph_catch.screens.professor.rememberPendingCalls
@@ -260,7 +262,7 @@ private fun EggsCard(db: PokemonDatabase) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium)
                 ) {
-                    Text(text = "🥚", style = MaterialTheme.typography.titleMedium)
+                    EggSprite(modifier = Modifier.size(28.dp))
                     LinearProgressIndicator(
                         progress = { (egg.minutesProgress.toFloat() / egg.minutesNeeded).coerceIn(0f, 1f) },
                         modifier = Modifier.weight(1f),
@@ -395,7 +397,7 @@ private fun Header(onSettingsClick: () -> Unit, onPokegearClick: (() -> Unit)?, 
             if (onPokegearClick != null) {
                 IconButton(onClick = onPokegearClick) {
                     // A dot when a professor has something for you
-                    BadgedBox(badge = { if (hasPendingCall) Badge() }) {
+                    BadgedBox(badge = { if (hasPendingCall) CallBadge() }) {
                         Icon(Icons.Default.Phone, contentDescription = stringResource(R.string.pokegear_title))
                     }
                 }
@@ -714,7 +716,8 @@ private fun EvolutionNotificationOverlay(notification: EvolutionNotification, on
                     PokemonSpriteCircle(
                         modifier = Modifier.size(AppSizes.homeTileHeight),
                         pokemonId = notification.newSpeciesId,
-                        pokemonName = newSpecies?.displayName ?: stringResource(R.string.common_unknown)
+                        pokemonName = newSpecies?.displayName ?: stringResource(R.string.common_unknown),
+                        shiny = notification.shiny
                     )
 
                     Text(

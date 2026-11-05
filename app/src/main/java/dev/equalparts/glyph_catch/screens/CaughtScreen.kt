@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,9 +15,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
@@ -31,20 +38,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.equalparts.glyph_catch.AppEmptyState
@@ -59,6 +71,8 @@ import dev.equalparts.glyph_catch.components.PokemonFilterState
 import dev.equalparts.glyph_catch.components.PokemonSort
 import dev.equalparts.glyph_catch.components.applyFilters
 import dev.equalparts.glyph_catch.data.CaughtPokemon
+import dev.equalparts.glyph_catch.data.InventoryItem
+import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
@@ -172,7 +186,12 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
         AlertDialog(
             onDismissRequest = { showReleaseConfirmation = false },
             title = { Text(pluralStringResource(R.plurals.caught_screen_release_title, count, count)) },
-            text = { Text(stringResource(R.string.caught_screen_release_message)) },
+            text = {
+                Text(
+                    stringResource(R.string.caught_screen_release_message) + "\n\n" +
+                        pluralStringResource(R.plurals.release_candy_note, count, count)
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -180,6 +199,15 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
                         scope.launch {
                             pokemonDao.deleteCaught(ids)
                             preferencesManager.releasedCount += ids.size
+                            // A Rare Candy for each released Pokémon
+                            val inventoryDao = db.inventoryDao()
+                            if (inventoryDao.getItem(Item.RARE_CANDY.ordinal) == null) {
+                                inventoryDao.insertItem(
+                                    InventoryItem(itemId = Item.RARE_CANDY.ordinal, quantity = ids.size)
+                                )
+                            } else {
+                                inventoryDao.addItems(Item.RARE_CANDY.ordinal, ids.size)
+                            }
                         }
                         selectedIds = emptySet()
                         showReleaseConfirmation = false
@@ -230,8 +258,6 @@ private fun CaughtScreenContent(state: CaughtUiState, actions: CaughtActions) {
             onSortChange = actions.onSortChange,
             onToggleShiny = actions.onToggleShiny
         )
-
-        Spacer(modifier = Modifier.height(AppSizes.spacingLarge))
 
         CaughtResults(state = state, actions = actions)
     }
@@ -286,22 +312,132 @@ private fun CaughtResults(state: CaughtUiState, actions: CaughtActions) {
             }
         )
     } else {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(AppSizes.spacingLarge)
-        ) {
-            items(
-                items = state.caughtPokemon,
-                key = { it.id }
-            ) { pokemon ->
-                CaughtPokemonCard(
-                    pokemon = pokemon,
-                    isSelecting = state.isSelecting,
-                    isSelected = pokemon.id in state.selectedIds,
-                    onToggleFavorite = actions.onToggleFavorite,
-                    onClick = if (state.isSelecting) actions.onToggleSelection else actions.onPokemonClick,
-                    onLongClick = actions.onToggleSelection
-                )
+        val context = LocalContext.current
+        val preferences = remember { PreferencesManager(context) }
+        var gridView by remember { mutableStateOf(preferences.caughtGridView) }
+        // The first visible Pokémon, shared by both layouts so switching keeps your place
+        var anchor by rememberSaveable { mutableIntStateOf(0) }
+
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = {
+                gridView = !gridView
+                preferences.caughtGridView = gridView
+            }) {
+                if (gridView) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.List,
+                        contentDescription = stringResource(R.string.caught_screen_list_view)
+                    )
+                } else {
+                    Icon(
+                        painterResource(R.drawable.icon_grid_dots),
+                        contentDescription = stringResource(R.string.caught_screen_grid_view)
+                    )
+                }
             }
+        }
+
+        val onClick = if (state.isSelecting) actions.onToggleSelection else actions.onPokemonClick
+        if (gridView) {
+            val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = anchor)
+            LaunchedEffect(gridState) { snapshotFlow { gridState.firstVisibleItemIndex }.collect { anchor = it } }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                state = gridState,
+                horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium),
+                verticalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium)
+            ) {
+                items(items = state.caughtPokemon, key = { it.id }) { pokemon ->
+                    CaughtPokemonGridCell(
+                        pokemon = pokemon,
+                        isSelecting = state.isSelecting,
+                        isSelected = pokemon.id in state.selectedIds,
+                        onClick = onClick,
+                        onLongClick = actions.onToggleSelection
+                    )
+                }
+            }
+        } else {
+            val listState = rememberLazyListState(initialFirstVisibleItemIndex = anchor)
+            LaunchedEffect(listState) { snapshotFlow { listState.firstVisibleItemIndex }.collect { anchor = it } }
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(AppSizes.spacingLarge)
+            ) {
+                items(
+                    items = state.caughtPokemon,
+                    key = { it.id }
+                ) { pokemon ->
+                    CaughtPokemonCard(
+                        pokemon = pokemon,
+                        isSelecting = state.isSelecting,
+                        isSelected = pokemon.id in state.selectedIds,
+                        onToggleFavorite = actions.onToggleFavorite,
+                        onClick = onClick,
+                        onLongClick = actions.onToggleSelection
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * A compact cell for the 3-column grid: sprite, name and level.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CaughtPokemonGridCell(
+    pokemon: CaughtPokemon,
+    isSelecting: Boolean,
+    isSelected: Boolean,
+    onClick: (CaughtPokemon) -> Unit,
+    onLongClick: (CaughtPokemon) -> Unit
+) {
+    val species = Pokemon[pokemon.speciesId] ?: return
+    val dimmed = isSelecting && pokemon.isProtected
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (dimmed) 0.4f else 1f),
+        shape = RoundedCornerShape(AppSizes.cardCornerRadius),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(onClick = { onClick(pokemon) }, onLongClick = { onLongClick(pokemon) })
+                .padding(AppSizes.spacingSmall),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(AppSizes.spacingTiny)
+        ) {
+            Box {
+                PokemonSpriteCircle(
+                    pokemonId = pokemon.speciesId,
+                    pokemonName = species.displayName,
+                    shiny = pokemon.isShiny,
+                    form = pokemon.form
+                )
+                if (pokemon.isFavorite) {
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(16.dp)
+                    )
+                }
+            }
+            Text(
+                text = pokemon.nickname ?: species.displayName,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            PokemonLevelChip(level = pokemon.level)
         }
     }
 }

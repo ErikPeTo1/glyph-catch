@@ -69,6 +69,17 @@
     <string name="npc_breeder_4">Quand l’un d’eux éclot, le bébé apparaît sur ta Glyph Matrix. Capture-le d’un appui long ! En plus, ils sont plus souvent chromatiques.</string>
     <string name="npc_breeder_5">Tiens, prends cet Œuf pour commencer. Prends-en soin !</string>
     <string name="npc_egg_received">Tu as reçu un Œuf !</string>
+    <string name="rare_candy_no_evolution">Il n’évoluera pas.</string>
+    <string name="rare_candy_everstone">Il n’évoluera pas : il porte une Pierre Stase.</string>
+    <string name="rare_candy_choice">Il sera prêt à évoluer : tu choisiras en quoi depuis sa fiche.</string>
+    <string name="rare_candy_will_evolve">Il évoluera : %1$s</string>
+    <string name="rare_candy_will_evolve_random">Il évoluera au hasard : %1$s</string>
+    <plurals name="release_candy_note">
+        <item quantity="one">Tu recevras un Super Bonbon pour lui.</item>
+        <item quantity="other">Tu recevras un Super Bonbon pour chacun (%1$d).</item>
+    </plurals>
+    <string name="caught_screen_grid_view">Vue en grille</string>
+    <string name="caught_screen_list_view">Vue en liste</string>
     <string name="hidden_settings_unlocked">Tu as trouvé un réglage secret !</string>
     <string name="hidden_play_in_use_title">Capturer en utilisant le téléphone</string>
     <string name="hidden_play_in_use_subtitle">Les Pokémon, les Œufs et l’entraînement continuent quand tu déverrouilles ton téléphone, comme s’il était verrouillé.</string>

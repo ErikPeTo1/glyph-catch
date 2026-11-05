@@ -23,4 +23,15 @@ class RareCandyTest {
     fun `no candies means none can be used`() {
         assertEquals(0, maxRareCandies(pokemon(level = 10), owned = 0))
     }
+
+    @Test
+    fun `the candy preview follows the whole evolution line`() {
+        assertEquals(CandyEvolution.None, candyEvolution(pokemon(level = 10), 2))
+        val evolves = candyEvolution(pokemon(level = 15), 25) as CandyEvolution.Evolves
+        assertEquals(listOf(5, 6), evolves.path.map { it.id })
+        assertEquals(CandyEvolution.Blocked, candyEvolution(pokemon(level = 15).copy(evolutionLocked = true), 1))
+        assertEquals(CandyEvolution.Choice, candyEvolution(pokemon(level = 19).copy(speciesId = 236), 1))
+        val wurmple = candyEvolution(pokemon(level = 6).copy(speciesId = 265), 1) as CandyEvolution.Random
+        assertEquals(setOf(266, 268), wurmple.options.map { it.id }.toSet())
+    }
 }

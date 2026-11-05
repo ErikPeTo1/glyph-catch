@@ -161,7 +161,7 @@ private fun GiftBadge(item: Item) {
 @Composable
 private fun EggBadge() {
     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(text = "🥚", style = MaterialTheme.typography.displayMedium)
+        EggSprite(modifier = Modifier.size(72.dp))
         Text(
             text = stringResource(R.string.npc_egg_received),
             color = MaterialTheme.colorScheme.primary,

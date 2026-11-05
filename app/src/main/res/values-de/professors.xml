@@ -69,6 +69,17 @@
     <string name="npc_breeder_4">Wenn eins schlüpft, erscheint das Baby auf deiner Glyph Matrix. Fang es mit langem Drücken! Geschlüpfte Pokémon sind außerdem öfter schillernd.</string>
     <string name="npc_breeder_5">Hier, nimm dieses Ei für den Anfang. Pass gut darauf auf!</string>
     <string name="npc_egg_received">Du hast ein Ei erhalten!</string>
+    <string name="rare_candy_no_evolution">Es wird sich nicht entwickeln.</string>
+    <string name="rare_candy_everstone">Es wird sich nicht entwickeln: Es trägt einen Ewigstein.</string>
+    <string name="rare_candy_choice">Es wird bereit sein, sich zu entwickeln: In den Details wählst du, wozu.</string>
+    <string name="rare_candy_will_evolve">Es wird sich entwickeln: %1$s</string>
+    <string name="rare_candy_will_evolve_random">Es entwickelt sich zufällig: %1$s</string>
+    <plurals name="release_candy_note">
+        <item quantity="one">Du erhältst dafür ein Sonderbonbon.</item>
+        <item quantity="other">Du erhältst für jedes ein Sonderbonbon (%1$d).</item>
+    </plurals>
+    <string name="caught_screen_grid_view">Rasteransicht</string>
+    <string name="caught_screen_list_view">Listenansicht</string>
     <string name="hidden_settings_unlocked">Du hast eine geheime Einstellung gefunden!</string>
     <string name="hidden_play_in_use_title">Fangen, während du das Handy benutzt</string>
     <string name="hidden_play_in_use_subtitle">Pokémon, Eier und Training laufen weiter, wenn du dein Handy entsperrst, genau wie im gesperrten Zustand.</string>

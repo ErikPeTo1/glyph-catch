@@ -140,7 +140,7 @@ private fun CaughtPokemonDetailContent(
                     scope.launch {
                         pokemonDao.evolveCaught(pokemon, target.id, pokemon.level, pokemon.exp)
                         preferencesManager.dailyStats.add(Stat.EVOLUTIONS)
-                        preferencesManager.enqueueEvolutionNotification(pokemon.speciesId, target.id)
+                        preferencesManager.enqueueEvolutionNotification(pokemon.speciesId, target.id, pokemon.isShiny)
                     }
                 }
             }

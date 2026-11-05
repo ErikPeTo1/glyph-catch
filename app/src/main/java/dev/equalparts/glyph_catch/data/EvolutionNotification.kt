@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class EvolutionNotification(
     val previousSpeciesId: Int,
     val newSpeciesId: Int,
+    val shiny: Boolean = false,
     val timestamp: Long = System.currentTimeMillis()
 )

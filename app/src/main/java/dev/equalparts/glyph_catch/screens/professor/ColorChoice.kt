@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -108,4 +109,20 @@ private fun RowScope.ColorOption(color: Boolean, label: String, onClick: () -> U
             )
         }
     }
+}
+
+/**
+ * The Egg sprite from Black and White, in black and white too when color sprites are off.
+ */
+@Composable
+fun EggSprite(modifier: Modifier = Modifier) {
+    CharacterSprite(R.drawable.egg, stringResource(R.string.pool_egg), modifier)
+}
+
+/**
+ * The red dot for waiting calls, in the app's red.
+ */
+@Composable
+fun CallBadge() {
+    Badge(containerColor = MaterialTheme.colorScheme.primary)
 }

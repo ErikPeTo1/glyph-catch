@@ -1,6 +1,14 @@
 // Professors, Pokégear and key items (res/values/professors.xml), merged into each language by build.js
 module.exports = {
   es: {
+    caught_screen_grid_view: "Vista en cuadrícula",
+    caught_screen_list_view: "Vista en lista",
+    rare_candy_no_evolution: "No evolucionará.",
+    rare_candy_everstone: "No evolucionará: lleva la Piedra Eterna.",
+    rare_candy_choice: "Estará listo para evolucionar: eliges en qué desde su ficha.",
+    rare_candy_will_evolve: "Evolucionará: %1$s",
+    rare_candy_will_evolve_random: "Evolucionará al azar: %1$s",
+    release_candy_note: {"one":"Recibirás un Caramelo Raro por él.","other":"Recibirás un Caramelo Raro por cada uno (%1$d)."},
     npc_fisherman: "Pescador",
     npc_clerk_m: "Dependiente",
     npc_clerk_f: "Dependienta",
@@ -111,6 +119,14 @@ module.exports = {
     item_reveal_glass_name: 'Espejo Veraz'
   },
   de: {
+    caught_screen_grid_view: "Rasteransicht",
+    caught_screen_list_view: "Listenansicht",
+    rare_candy_no_evolution: "Es wird sich nicht entwickeln.",
+    rare_candy_everstone: "Es wird sich nicht entwickeln: Es trägt einen Ewigstein.",
+    rare_candy_choice: "Es wird bereit sein, sich zu entwickeln: In den Details wählst du, wozu.",
+    rare_candy_will_evolve: "Es wird sich entwickeln: %1$s",
+    rare_candy_will_evolve_random: "Es entwickelt sich zufällig: %1$s",
+    release_candy_note: {"one":"Du erhältst dafür ein Sonderbonbon.","other":"Du erhältst für jedes ein Sonderbonbon (%1$d)."},
     npc_fisherman: "Angler",
     npc_clerk_m: "Verkäufer",
     npc_clerk_f: "Verkäuferin",
@@ -221,6 +237,14 @@ module.exports = {
     item_reveal_glass_name: 'Wahrspiegel'
   },
   fr: {
+    caught_screen_grid_view: "Vue en grille",
+    caught_screen_list_view: "Vue en liste",
+    rare_candy_no_evolution: "Il n’évoluera pas.",
+    rare_candy_everstone: "Il n’évoluera pas : il porte une Pierre Stase.",
+    rare_candy_choice: "Il sera prêt à évoluer : tu choisiras en quoi depuis sa fiche.",
+    rare_candy_will_evolve: "Il évoluera : %1$s",
+    rare_candy_will_evolve_random: "Il évoluera au hasard : %1$s",
+    release_candy_note: {"one":"Tu recevras un Super Bonbon pour lui.","other":"Tu recevras un Super Bonbon pour chacun (%1$d)."},
     npc_fisherman: "Pêcheur",
     npc_clerk_m: "Vendeur",
     npc_clerk_f: "Vendeuse",
@@ -331,6 +355,14 @@ module.exports = {
     item_reveal_glass_name: 'Miroir Sacré'
   },
   it: {
+    caught_screen_grid_view: "Vista a griglia",
+    caught_screen_list_view: "Vista a elenco",
+    rare_candy_no_evolution: "Non si evolverà.",
+    rare_candy_everstone: "Non si evolverà: tiene una Pietrastante.",
+    rare_candy_choice: "Sarà pronto a evolversi: scegli in cosa dalla sua scheda.",
+    rare_candy_will_evolve: "Si evolverà: %1$s",
+    rare_candy_will_evolve_random: "Si evolverà a caso: %1$s",
+    release_candy_note: {"one":"Riceverai una Caramella Rara per lui.","other":"Riceverai una Caramella Rara per ognuno (%1$d)."},
     npc_fisherman: "Pescatore",
     npc_clerk_m: "Commesso",
     npc_clerk_f: "Commessa",
@@ -441,6 +473,14 @@ module.exports = {
     item_reveal_glass_name: 'Verispecchio'
   },
   pt: {
+    caught_screen_grid_view: "Visualização em grade",
+    caught_screen_list_view: "Visualização em lista",
+    rare_candy_no_evolution: "Não vai evoluir.",
+    rare_candy_everstone: "Não vai evoluir: está segurando uma Pedra Eterna.",
+    rare_candy_choice: "Vai estar pronto para evoluir: você escolhe em quê na ficha dele.",
+    rare_candy_will_evolve: "Vai evoluir: %1$s",
+    rare_candy_will_evolve_random: "Vai evoluir ao acaso: %1$s",
+    release_candy_note: {"one":"Você vai receber um Doce Raro por ele.","other":"Você vai receber um Doce Raro por cada um (%1$d)."},
     npc_fisherman: "Pescador",
     npc_clerk_m: "Vendedor",
     npc_clerk_f: "Vendedora",

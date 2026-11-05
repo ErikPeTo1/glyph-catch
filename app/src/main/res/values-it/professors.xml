@@ -69,6 +69,17 @@
     <string name="npc_breeder_4">Quando uno si schiude, il baby appare sulla tua Glyph Matrix. Catturalo con una pressione prolungata! E poi sono più spesso cromatici.</string>
     <string name="npc_breeder_5">Tieni, quest’Uovo per cominciare. Abbine cura!</string>
     <string name="npc_egg_received">Hai ricevuto un Uovo!</string>
+    <string name="rare_candy_no_evolution">Non si evolverà.</string>
+    <string name="rare_candy_everstone">Non si evolverà: tiene una Pietrastante.</string>
+    <string name="rare_candy_choice">Sarà pronto a evolversi: scegli in cosa dalla sua scheda.</string>
+    <string name="rare_candy_will_evolve">Si evolverà: %1$s</string>
+    <string name="rare_candy_will_evolve_random">Si evolverà a caso: %1$s</string>
+    <plurals name="release_candy_note">
+        <item quantity="one">Riceverai una Caramella Rara per lui.</item>
+        <item quantity="other">Riceverai una Caramella Rara per ognuno (%1$d).</item>
+    </plurals>
+    <string name="caught_screen_grid_view">Vista a griglia</string>
+    <string name="caught_screen_list_view">Vista a elenco</string>
     <string name="hidden_settings_unlocked">Hai trovato un’impostazione segreta!</string>
     <string name="hidden_play_in_use_title">Cattura mentre usi il telefono</string>
     <string name="hidden_play_in_use_subtitle">Pokémon, Uova e allenamento continuano anche quando sblocchi il telefono, come se fosse bloccato.</string>

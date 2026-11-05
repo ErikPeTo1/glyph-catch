@@ -82,6 +82,21 @@
     <string name="npc_breeder_5">Here, take this Egg to get started. Look after it!</string>
     <string name="npc_egg_received">You received an Egg!</string>
 
+    <!-- Rare Candies -->
+    <string name="rare_candy_no_evolution">It won\'t evolve.</string>
+    <string name="rare_candy_everstone">It won\'t evolve: it\'s holding an Everstone.</string>
+    <string name="rare_candy_choice">It\'ll be ready to evolve: you choose into what from its details.</string>
+    <string name="rare_candy_will_evolve">It will evolve: %1$s</string>
+    <string name="rare_candy_will_evolve_random">It will evolve at random: %1$s</string>
+    <plurals name="release_candy_note">
+        <item quantity="one">You\'ll get a Rare Candy for it.</item>
+        <item quantity="other">You\'ll get a Rare Candy for each one (%1$d).</item>
+    </plurals>
+
+    <!-- PC layout -->
+    <string name="caught_screen_grid_view">Grid view</string>
+    <string name="caught_screen_list_view">List view</string>
+
     <!-- Hidden setting -->
     <string name="hidden_settings_unlocked">You found a secret setting!</string>
     <string name="hidden_play_in_use_title">Catch while using the phone</string>

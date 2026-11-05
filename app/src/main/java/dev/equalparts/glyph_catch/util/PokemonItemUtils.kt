@@ -103,3 +103,44 @@ fun canHoldEverstone(pokemon: CaughtPokemon): Boolean {
  */
 fun maxRareCandies(pokemon: CaughtPokemon, owned: Int): Int =
     minOf(owned, MAX_POKEMON_LEVEL - pokemon.level).coerceAtLeast(0)
+
+/**
+ * What happens to a Pokémon's evolution if it gets this many Rare Candies.
+ */
+sealed class CandyEvolution {
+    data object None : CandyEvolution()
+
+    /** It would evolve, but it's holding an Everstone. */
+    data object Blocked : CandyEvolution()
+
+    /** Tyrogue: the player picks the evolution in its details. */
+    data object Choice : CandyEvolution()
+
+    /** Evolves along this path, e.g. Charmeleon then Charizard. */
+    data class Evolves(val path: List<PokemonSpecies>) : CandyEvolution()
+
+    /** Evolves into one of these at random, like Wurmple. */
+    data class Random(val path: List<PokemonSpecies>, val options: List<PokemonSpecies>) : CandyEvolution()
+}
+
+fun candyEvolution(pokemon: CaughtPokemon, candies: Int): CandyEvolution {
+    var species = Pokemon[pokemon.speciesId] ?: return CandyEvolution.None
+    val path = mutableListOf<PokemonSpecies>()
+    for (level in pokemon.level + 1..minOf(pokemon.level + candies, MAX_POKEMON_LEVEL)) {
+        val targets = species.evolutionTargets().filter { candidate ->
+            val requirement = candidate.evolutionRequirement as? EvolutionRequirement.Level
+            requirement != null && level >= requirement.level
+        }
+        if (targets.isEmpty()) continue
+        if (pokemon.evolutionLocked) return CandyEvolution.Blocked
+        if (species.id in
+            CHOICE_EVOLUTIONS
+        ) {
+            return if (path.isEmpty()) CandyEvolution.Choice else CandyEvolution.Evolves(path)
+        }
+        if (targets.size > 1) return CandyEvolution.Random(path.toList(), targets)
+        species = targets.single()
+        path += species
+    }
+    return if (path.isEmpty()) CandyEvolution.None else CandyEvolution.Evolves(path)
+}

@@ -69,6 +69,17 @@
     <string name="npc_breeder_4">Cuando uno eclosiona, el bebé aparece en tu Glyph Matrix. ¡Captúralo con una pulsación larga! Además, es más fácil que salgan variocolor.</string>
     <string name="npc_breeder_5">Toma, este Huevo para empezar. ¡Cuídalo bien!</string>
     <string name="npc_egg_received">¡Has recibido un Huevo!</string>
+    <string name="rare_candy_no_evolution">No evolucionará.</string>
+    <string name="rare_candy_everstone">No evolucionará: lleva la Piedra Eterna.</string>
+    <string name="rare_candy_choice">Estará listo para evolucionar: eliges en qué desde su ficha.</string>
+    <string name="rare_candy_will_evolve">Evolucionará: %1$s</string>
+    <string name="rare_candy_will_evolve_random">Evolucionará al azar: %1$s</string>
+    <plurals name="release_candy_note">
+        <item quantity="one">Recibirás un Caramelo Raro por él.</item>
+        <item quantity="other">Recibirás un Caramelo Raro por cada uno (%1$d).</item>
+    </plurals>
+    <string name="caught_screen_grid_view">Vista en cuadrícula</string>
+    <string name="caught_screen_list_view">Vista en lista</string>
     <string name="hidden_settings_unlocked">¡Has encontrado un ajuste secreto!</string>
     <string name="hidden_play_in_use_title">Capturar usando el móvil</string>
     <string name="hidden_play_in_use_subtitle">Los Pokémon, los Huevos y el entrenamiento siguen aunque desbloquees el móvil, igual que con él bloqueado.</string>
