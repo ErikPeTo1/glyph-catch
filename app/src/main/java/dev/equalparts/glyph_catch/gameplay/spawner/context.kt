@@ -137,6 +137,9 @@ data class GameplayContext(
         var minutesOff: Int = 0
         var battery: Int = 100
 
+        /** `true` while the phone is plugged in and charging. */
+        var isCharging: Boolean = false
+
         /**
          * `true` while the phone is unlocked and in use. Turning on the screen without
          * unlocking (lock screen, notifications) does not count as using the phone.
@@ -168,6 +171,7 @@ data class GameplayContext(
             val powerManager = applicationContext.getSystemService(POWER_SERVICE) as PowerManager
 
             battery = batteryManager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: 100
+            isCharging = batteryManager?.isCharging ?: false
 
             val keyguardManager = applicationContext.getSystemService(KEYGUARD_SERVICE) as? KeyguardManager
             val unlockedNow = powerManager.isInteractive && keyguardManager?.isKeyguardLocked == false

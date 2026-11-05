@@ -399,6 +399,7 @@ module.exports = {
     "Algunos Pokémon legendarios no aparecen sin su objeto clave, como el Ticket Eón. Cuando oyes su rumor, su profesor te lo guarda en el Pokégear.",
     "Un Pokémon legendario que liberes puede volver a aparecer, de uno en uno. ¡Buena noticia para los cazadores de variocolor!",
     "Con las cuatro Pokédex regionales, el Profesor Oak te da el Mapa para elegir de qué regiones aparecen Pokémon.",
-    "Completa la Pokédex Nacional y el Profesor Oak te recompensará con el Amuleto Iris."
+    "Completa la Pokédex Nacional y el Profesor Oak te recompensará con el Amuleto Iris.",
+    "¿Dejas el móvil cargando? Los Pokémon de tipo Eléctrico, como Pikachu, Magnemite o Shinx, se acercan a curiosear."
   ]
 };

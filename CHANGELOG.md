@@ -2,6 +2,11 @@
 
 All notable changes to Glyph Catch since it was continued from [Equal Parts' original](https://github.com/equalparts/glyph-catch).
 
+## 3.3.0
+
+- Electric-type Pokémon gather around your phone while it's charging, like Pikachu, Magnemite or Shinx. Joltik, which feeds on the tiniest static charge, gets a chance of its own.
+- Spacing fix in the Pokégear.
+
 ## 3.2.0
 
 - When using Rare Candies, you can see whether the Pokémon will evolve and into what (including whole evolution lines, random evolutions and the Everstone).

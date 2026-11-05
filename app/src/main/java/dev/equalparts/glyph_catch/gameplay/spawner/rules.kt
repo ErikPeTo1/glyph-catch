@@ -608,6 +608,37 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.MAGNETON at 1.0f
         }
 
+        // Charging event
+        // ==============
+        //
+        // Electric-type Pokémon gather around a phone that's charging. They
+        // don't take over: they get a share of the spawns, like other events.
+
+        pool("Charging") {
+            activate(15.percent) given { phone.isCharging }
+            Pokemon.PIKACHU at 2.0f
+            Pokemon.MAGNEMITE at 2.0f
+            Pokemon.MAREEP at 2.0f
+            Pokemon.CHINCHOU at 1.0f
+            Pokemon.ELECTRIKE at 2.0f
+            Pokemon.PLUSLE at 1.0f
+            Pokemon.MINUN at 1.0f
+            Pokemon.SHINX at 2.0f
+            Pokemon.PACHIRISU at 1.0f
+            Pokemon.BLITZLE at 2.0f
+            Pokemon.EMOLGA at 1.0f
+            Pokemon.TYNAMO at 1.0f
+            Pokemon.ROTOM at 0.3f
+        }
+
+        // Joltik can't make electricity of its own and feeds on the tiniest static
+        // charge, so it comes to a charging phone on its own (from the Unova Pokédex on).
+
+        pool("Charging Joltik") {
+            activate(5.percent) given { phone.isCharging }
+            Pokemon.JOLTIK at 1.0f
+        }
+
         // Low battery event
         // =================
         //

@@ -397,6 +397,7 @@ module.exports = {
     "Manche legendären Pokémon erscheinen nicht ohne ihr Basis-Item, wie das Äon-Ticket. Wenn du ihr Gerücht hörst, hält ihr Professor es im PokéCom für dich bereit.",
     "Ein freigelassenes legendäres Pokémon kann wieder erscheinen, eins nach dem anderen. Gute Nachricht für Shiny-Jäger!",
     "Mit allen vier regionalen Pokédex gibt dir Professor Eich die Karte, mit der du wählst, aus welchen Regionen Pokémon erscheinen.",
-    "Vervollständige den Nationaldex, und Professor Eich belohnt dich mit dem Schillerpin."
+    "Vervollständige den Nationaldex, und Professor Eich belohnt dich mit dem Schillerpin.",
+    "Lädst du dein Handy? Elektro-Pokémon wie Pikachu, Magnetilo oder Sheinux versammeln sich darum."
   ]
 };

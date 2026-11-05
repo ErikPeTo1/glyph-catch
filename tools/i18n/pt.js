@@ -403,6 +403,7 @@ module.exports = {
     "Alguns Pokémon lendários não aparecem sem o item-chave deles, como o Eon Ticket. Quando você ouve o rumor, o professor deles guarda o item para você no Pokégear.",
     "Um Pokémon lendário que você soltar pode aparecer de novo, um de cada vez. Boa notícia para os caçadores de brilhantes!",
     "Com as quatro Pokédex regionais, o Professor Carvalho te dá o Mapa para escolher de quais regiões aparecem Pokémon.",
-    "Complete a Pokédex Nacional e o Professor Carvalho vai te recompensar com o Shiny Charm."
+    "Complete a Pokédex Nacional e o Professor Carvalho vai te recompensar com o Shiny Charm.",
+    "Deixou o celular carregando? Pokémon do tipo Elétrico, como Pikachu, Magnemite ou Shinx, se juntam por perto."
   ]
 };

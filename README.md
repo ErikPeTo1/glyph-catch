@@ -9,7 +9,7 @@
 >
 > **Make sure to configure Glyph Catch as your Always-on Glyph Toy.**
 >
-> Latest version: v3.2.0 · [What's new](CHANGELOG.md)
+> Latest version: v3.3.0 · [What's new](CHANGELOG.md)
 >
 > The app lets you know when a new version is out. For automatic updates, add this repository to [Obtainium](https://github.com/ImranR98/Obtainium).
 
