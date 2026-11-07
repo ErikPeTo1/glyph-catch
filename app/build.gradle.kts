@@ -27,8 +27,8 @@ android {
         applicationId = "dev.erikpeto.glyphcatch"
         minSdk = 35
         targetSdk = 36
-        versionCode = 36000
-        versionName = "3.6.0"
+        versionCode = 36100
+        versionName = "3.6.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

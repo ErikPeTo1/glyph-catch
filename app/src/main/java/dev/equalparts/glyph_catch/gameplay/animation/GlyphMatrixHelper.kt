@@ -13,6 +13,18 @@ import com.nothing.ketchum.GlyphMatrixUtils
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.util.PokemonSpriteUtils
 
+/** Brightest value of a Glyph Matrix LED: frames hold one brightness per LED, not a color. */
+internal const val MAX_LED_BRIGHTNESS = 2047
+
+/**
+ * Dims every LED of a frame by [factor]. Each value is scaled as a whole; treating it as a color
+ * mixed up its bits and turned highlights into shadows.
+ */
+internal fun dimFrame(frame: IntArray, factor: Float): IntArray {
+    if (factor >= 0.999f) return frame
+    return IntArray(frame.size) { (frame[it] * factor).toInt().coerceIn(0, MAX_LED_BRIGHTNESS) }
+}
+
 /**
  * Provides various utility methods for drawing frames for the Glyph Matrix.
  */
@@ -111,21 +123,7 @@ internal class GlyphMatrixHelper(private val context: Context, val matrixSize: I
         return SpriteFrames(primaryFrame = primary, flashFrame = flash)
     }
 
-    fun adjustBrightness(frame: IntArray, factor: Float): IntArray {
-        if (factor >= 0.999f) {
-            return frame
-        }
-        val result = IntArray(frame.size)
-        for (index in frame.indices) {
-            val color = frame[index]
-            val alpha = Color.alpha(color)
-            val red = (Color.red(color) * factor).toInt().coerceIn(0, 255)
-            val green = (Color.green(color) * factor).toInt().coerceIn(0, 255)
-            val blue = (Color.blue(color) * factor).toInt().coerceIn(0, 255)
-            result[index] = Color.argb(alpha, red, green, blue)
-        }
-        return result
-    }
+    fun adjustBrightness(frame: IntArray, factor: Float): IntArray = dimFrame(frame, factor)
 
     /**
      * Loads a [Bitmap] from a resource ID using the Glyph Matrix SDK.

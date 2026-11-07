@@ -2,6 +2,10 @@
 
 All notable changes to Glyph Catch since it was continued from [Equal Parts' original](https://github.com/equalparts/glyph-catch).
 
+## 3.6.1
+
+- Fixed Pokémon looking like a negative on the Glyph Matrix when dimmed (the companion and the "Lower brightness" setting): highlights and shadows are back where they belong.
+
 ## 3.6.0
 
 - Achievements: 15 extra PC Box wallpapers from Pokémon Emerald, each one unlocked by an achievement, like catching a Pikachu, hatching 10 Eggs or your first shiny. Locked ones show what it takes and how far you are.
