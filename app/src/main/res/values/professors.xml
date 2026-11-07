@@ -100,22 +100,44 @@
     </plurals>
 
     <!-- Shiny odds for species caught many times -->
-    <string name="research_times_caught">Times caught</string>
-    <string name="research_shiny_bonus">%1$d · shiny odds ×%2$d</string>
-    <string name="research_next_step">%1$d · %2$d more for better shiny odds</string>
+
+    <!-- Shiny chain card -->
+    <string name="shiny_chain_title">Shiny chain</string>
+    <plurals name="shiny_chain_catches">
+        <item quantity="one">Caught %1$d time, released ones included</item>
+        <item quantity="other">Caught %1$d times, released ones included</item>
+    </plurals>
+    <plurals name="shiny_chain_next">
+        <item quantity="one">%1$d more catch for shiny odds ×%2$d</item>
+        <item quantity="other">%1$d more catches for shiny odds ×%2$d</item>
+    </plurals>
+    <string name="shiny_chain_max">Top shiny odds for this species: ×%1$d</string>
 
     <!-- PC layout -->
+    <string name="pokemon_sort_duplicates">Most repeated</string>
+    <string name="caught_screen_filter_duplicates">Repeated</string>
+    <string name="caught_screen_select_all_but_one">All but one</string>
     <string name="caught_screen_grid_view">Grid view</string>
     <string name="caught_screen_list_view">List view</string>
 
     <!-- Settings -->
     <string name="settings_appearance_title">Appearance</string>
     <string name="settings_section_appearance_description">Color sprites and widget backgrounds</string>
-    <string name="settings_section_toy_description">Clock and brightness on the Glyph Matrix</string>
+    <string name="settings_section_toy_description">Clock, companion and brightness on the Glyph Matrix</string>
     <string name="settings_section_report_description">Logs to report a problem</string>
     <string name="settings_summary_weather_live">Live weather · %1$s</string>
     <string name="settings_summary_sleep">Bedtime: %1$s</string>
     <string name="widget_howto">To add a widget, long-press your home screen, tap Widgets and look for Glyph Catch. Pick your team from each Pokémon\'s details in the PC.</string>
+
+    <!-- Companion on the Glyph Matrix -->
+    <string name="glyph_idle_title">With no Pokémon waiting</string>
+    <string name="glyph_idle_subtitle">What the Glyph Matrix shows meanwhile</string>
+    <string name="glyph_idle_clock">Clock</string>
+    <string name="glyph_idle_companion">Companion</string>
+    <string name="glyph_idle_none">Nothing</string>
+    <string name="glyph_idle_companion_hint">Pick it from a Pokémon\'s details in the PC; otherwise it\'s the one you\'re training. It looks dimmer than wild Pokémon.</string>
+    <string name="companion_show">Show on the Glyph Matrix</string>
+    <string name="companion_hide">Stop showing on the Glyph Matrix</string>
 
     <!-- Widgets -->
     <string name="widget_team_name">Team</string>
@@ -154,8 +176,47 @@
     <string name="box_wallpaper_machine">Machine</string>
     <string name="box_wallpaper_plain">Plain</string>
 
+    <!-- Achievements: each one unlocks an extra PC Box wallpaper -->
+    <string name="box_wallpaper_pikachu">Pikachu</string>
+    <string name="box_wallpaper_zigzag">Zigzag</string>
+    <string name="box_wallpaper_pokeballs">Poké Balls</string>
+    <string name="box_wallpaper_circles">Circles</string>
+    <string name="box_wallpaper_azumarill">Azumarill</string>
+    <string name="box_wallpaper_whiscash">Whiscash</string>
+    <string name="box_wallpaper_ludicolo">Ludicolo</string>
+    <string name="box_wallpaper_pokecenter2">Pokémon Center II</string>
+    <string name="box_wallpaper_stars">Stars</string>
+    <string name="box_wallpaper_hearts">Hearts</string>
+    <string name="box_wallpaper_dusclops">Dusclops</string>
+    <string name="box_wallpaper_meander">Meander</string>
+    <string name="box_wallpaper_stripes">Stripes</string>
+    <string name="box_wallpaper_bricks">Bricks</string>
+    <string name="box_wallpaper_legendary">Legendary</string>
+    <string name="achievement_pikachu">Catch a Pikachu</string>
+    <string name="achievement_catches">Catch %1$d Pokémon</string>
+    <string name="achievement_species">Register %1$d species</string>
+    <string name="achievement_rod">Catch %1$d Pokémon with a rod</string>
+    <string name="achievement_super_rod">Catch a Pokémon with the Super Rod</string>
+    <string name="achievement_evolutions">Evolve %1$d Pokémon</string>
+    <string name="achievement_eggs">Hatch %1$d Eggs</string>
+    <string name="achievement_shiny">Catch your first shiny</string>
+    <string name="achievement_level">Raise a Pokémon to level %1$d</string>
+    <string name="achievement_ghosts">Catch %1$d Ghost-type Pokémon</string>
+    <string name="achievement_missions">Complete %1$d missions</string>
+    <string name="achievement_days">Play on %1$d different days</string>
+    <string name="achievement_minutes">Spend %1$d minutes face-down</string>
+    <string name="achievement_legendaries">Catch %1$d legendary Pokémon</string>
+    <string name="achievements_count">Achievements %1$d/%2$d</string>
+    <string name="achievement_new">New! %1$s</string>
+    <string name="settings_summary_new_wallpaper">New wallpaper for your widgets!</string>
+    <string name="achievement_progress" translatable="false">%1$d/%2$d</string>
+
     <!-- Hidden setting -->
     <string name="hidden_settings_unlocked">You found a secret setting!</string>
+    <string name="hidden_settings_title">Hidden settings</string>
+    <string name="hidden_settings_description">For those who know where to tap</string>
+    <string name="hidden_catch_all_title">Catch all button</string>
+    <string name="hidden_catch_all_subtitle">On the waiting Pokémon widget, while catching with the phone is on</string>
     <string name="hidden_play_in_use_title">Catch while using the phone</string>
     <string name="hidden_play_in_use_subtitle">Pokémon, Eggs and training keep going when you unlock your phone, just like when it\'s locked.</string>
 

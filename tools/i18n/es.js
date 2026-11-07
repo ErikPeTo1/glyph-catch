@@ -58,11 +58,6 @@ module.exports = {
     settings_weather_title: 'Tiempo',
     settings_sleep_title: 'Sueño y hábitos',
     settings_weather_provider_random: 'Tiempo aleatorio cada día',
-    settings_section_graphics_description: 'Opciones de visualización',
-    settings_section_weather_description: 'Sincronizar el tiempo real',
-    settings_section_sleep_description: 'Configurar tu hora de dormir',
-    settings_graphics_clock_title: 'Reloj digital',
-    settings_graphics_clock_subtitle: 'Muestra la hora cuando no hay Pokémon',
     settings_graphics_brightness_title: 'Menos brillo',
     settings_graphics_brightness_subtitle: 'Atenúa los sprites del Glyph Toy',
     settings_graphics_note_cycle: 'Cambia de Glyph Toy y vuelve para aplicar los cambios.',
@@ -87,7 +82,6 @@ module.exports = {
     settings_weather_status_save_changes: 'Guarda los cambios para sincronizar',
     settings_weather_status_add_api_key: 'Añade tu clave de API para sincronizar',
     settings_weather_status_select_location: 'Elige una ubicación para sincronizar',
-    settings_section_debug_description: 'Opciones para resolver problemas',
     settings_debug_title: 'Depuración',
     settings_debug_toggle_label: 'Guardar registros',
     settings_debug_toggle_subtitle: 'Solo para resolver problemas',
@@ -400,6 +394,12 @@ module.exports = {
     "Un Pokémon legendario que liberes puede volver a aparecer, de uno en uno. ¡Buena noticia para los cazadores de variocolor!",
     "Con las cuatro Pokédex regionales, el Profesor Oak te da el Mapa para elegir de qué regiones aparecen Pokémon.",
     "Completa la Pokédex Nacional y el Profesor Oak te recompensará con el Amuleto Iris.",
-    "¿Dejas el móvil cargando? Los Pokémon de tipo Eléctrico, como Pikachu, Magnemite o Shinx, se acercan a curiosear."
+    "¿Dejas el móvil cargando? Los Pokémon de tipo Eléctrico, como Pikachu, Magnemite o Shinx, se acercan a curiosear.",
+    "Mantén pulsada la pantalla de inicio para añadir los widgets de Glyph Catch: tu equipo o los Pokémon que esperan en tu Glyph Matrix. Sus fondos se eligen en Ajustes → Apariencia.",
+    "Añade hasta seis favoritos a tu equipo desde la ficha de cada Pokémon. Con el Repartir Experiencia, el regalo del Profesor Oak al llegar a Teselia, todo el equipo gana experiencia.",
+    "Algunos fondos de las cajas del PC están bloqueados: cada uno es un logro, como atrapar un Pikachu o eclosionar 10 Huevos. Los tienes en Ajustes → Apariencia.",
+    "Sin Pokémon salvajes cerca, tu Glyph Matrix puede mostrar un compañero en lugar del reloj. Elígelo con «Mostrar en el Glyph» en su ficha.",
+    "Cada captura de una especie suma a su cadena variocolor: a las 10, 25 y 50 capturas su variocolor es más probable. La ficha de cada Pokémon te dice cuánto te falta.",
+    "¿Demasiados Pidgey? En el PC, el filtro Repetidos muestra solo las especies que tienes más de una vez, y «Todos menos uno» las selecciona para liberarlas dejando una de cada."
   ]
 };

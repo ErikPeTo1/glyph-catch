@@ -83,6 +83,7 @@ import dev.equalparts.glyph_catch.util.TrainerTipsProvider
 import dev.equalparts.glyph_catch.util.UpdateChecker
 import dev.equalparts.glyph_catch.util.rememberActiveItemStatus
 import dev.equalparts.glyph_catch.util.rememberSleepBonusStatus
+import dev.equalparts.glyph_catch.widget.Achievements
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -163,7 +164,8 @@ fun HomeScreen(
             Header(
                 onSettingsClick = onSettingsClick,
                 onPokegearClick = onPokegearClick.takeIf { preferencesManager.professorIntroSeen },
-                hasPendingCall = rememberPendingCalls(db, preferencesManager).isNotEmpty()
+                hasPendingCall = rememberPendingCalls(db, preferencesManager).isNotEmpty(),
+                hasNewWallpaper = rememberNewWallpapers()
             )
             Spacer(modifier = Modifier.height(AppSizes.spacingXLarge))
             UpdateBanner()
@@ -377,7 +379,12 @@ private fun HomeShortcuts(
 }
 
 @Composable
-private fun Header(onSettingsClick: () -> Unit, onPokegearClick: (() -> Unit)?, hasPendingCall: Boolean) {
+private fun Header(
+    onSettingsClick: () -> Unit,
+    onPokegearClick: (() -> Unit)?,
+    hasPendingCall: Boolean,
+    hasNewWallpaper: Boolean
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -403,10 +410,13 @@ private fun Header(onSettingsClick: () -> Unit, onPokegearClick: (() -> Unit)?, 
                 }
             }
             IconButton(onClick = onSettingsClick) {
-                Icon(
-                    Icons.Default.Settings,
-                    contentDescription = stringResource(R.string.nav_settings)
-                )
+                // A dot when an achievement has unlocked a new wallpaper
+                BadgedBox(badge = { if (hasNewWallpaper) CallBadge() }) {
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.nav_settings)
+                    )
+                }
             }
         }
     }
@@ -989,3 +999,11 @@ private const val RECENT_CATCH_WINDOW_MILLIS = 24 * 60 * 60 * 1000L
 
 private fun CaughtPokemon.isRecent(referenceTimeMillis: Long): Boolean =
     caughtAt >= referenceTimeMillis - RECENT_CATCH_WINDOW_MILLIS
+
+/** Whether an achievement unlocked a wallpaper the player hasn't seen yet. */
+@Composable
+private fun rememberNewWallpapers(): Boolean {
+    val context = LocalContext.current
+    val hasNew by produceState(false) { value = Achievements.refresh(context).unseen.isNotEmpty() }
+    return hasNew
+}

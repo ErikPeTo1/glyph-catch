@@ -12,6 +12,7 @@ import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphMatrixObject
 import dev.equalparts.glyph_catch.data.CaughtPokemon
+import dev.equalparts.glyph_catch.data.DailyStats
 import dev.equalparts.glyph_catch.data.Eggs
 import dev.equalparts.glyph_catch.data.EvolutionRequirement
 import dev.equalparts.glyph_catch.data.Forms
@@ -21,6 +22,7 @@ import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.Stat
+import dev.equalparts.glyph_catch.data.legendaryLevels
 import dev.equalparts.glyph_catch.debug.DebugCaptureManager
 import dev.equalparts.glyph_catch.debug.DebugExceptionTracker
 import dev.equalparts.glyph_catch.debug.DebugSnapshot
@@ -546,10 +548,18 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             }
         } else {
             displayedSpawn = null
-            if (preferencesManager.glyphToyClockEnabled) {
-                showDigitalWatch()
-            } else {
-                clearGlyphMatrix()
+            val companion = gameplayContext.trainer.companion
+            val idle = preferencesManager.glyphIdleDisplay
+            when {
+                idle == PreferencesManager.IDLE_CLOCK -> showDigitalWatch()
+                // Dimmer than wild Pokémon, so it's never mistaken for one
+                idle == PreferencesManager.IDLE_COMPANION && companion != null -> animationCoordinator.showPokemon(
+                    pokemonId = companion.speciesId,
+                    brightnessFactor = COMPANION_BRIGHTNESS * (brightnessFactor ?: 1f),
+                    isShiny = companion.isShiny,
+                    form = companion.form
+                )
+                else -> clearGlyphMatrix()
             }
         }
     }
@@ -676,6 +686,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
                 add(Stat.CATCHES)
                 if (!alreadyDiscovered) add(Stat.NEW_SPECIES)
                 if (spawn.pool.name in ROD_POOLS) add(Stat.ROD_CATCHES)
+                if (spawn.pool.name == "Super Rod") bump(DailyStats.SUPER_ROD_CATCHES)
+                if (spawn.pool.name == Eggs.POOL_NAME) bump(DailyStats.EGGS_HATCHED)
             }
 
             val queueSnapshot = synchronized(spawnQueue) {
@@ -898,6 +910,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Called when a Pokémon is caught to assign a random level, accounting for evolution thresholds.
      */
     private fun randomLevelForSpecies(speciesId: Int): Int {
+        legendaryLevels(speciesId)?.let { return it.random() }
         val species = Pokemon[speciesId] ?: return Random.nextInt(18, 41)
         val nextLevelRequirement = species.evolvesTo
             .mapNotNull { Pokemon[it] }
@@ -972,6 +985,18 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         suspend fun catchAllFromWidget() {
             instance?.catchAll()
         }
+
+        /**
+         * Redraws the Glyph Matrix after the companion or what to show without Pokémon changes,
+         * instead of waiting for the next minute.
+         */
+        fun refreshIdleDisplay() {
+            val service = instance ?: return
+            service.coroutineScope?.launch {
+                service.gameplayContext.trainer.refresh()
+                withContext(Dispatchers.Main) { service.updateGlyphMatrix() }
+            }
+        }
         private const val SLEEP_BONUS_DURATION_MILLIS = 24L * 60 * 60 * 1000
         private const val EVOLUTION_STONE_DROP_CHANCE = 0.10
         private const val LINKING_CORD_DROP_CHANCE = 0.02
@@ -980,6 +1005,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         private const val GLYPH_MATRIX_SIZE = 25 // 25x25 circular display
         private const val GLYPH_MATRIX_CENTER = GLYPH_MATRIX_SIZE / 2 // Center index (12, which is the 13th pixel)
         private const val LOWER_BRIGHTNESS_FACTOR = 0.6f
+        private const val COMPANION_BRIGHTNESS = 0.45f
         private const val WAKE_LOCK_TIMEOUT_MS = 6000L
         private const val WAKE_LOCK_TAG = "GlyphCatch:Animation"
 

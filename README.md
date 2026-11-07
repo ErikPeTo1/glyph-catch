@@ -16,6 +16,7 @@ Set Glyph Catch as your **Always-on Glyph Toy**. The app tells you when there's 
 - Shinies, eggs and legendary Pokémon with their own items
 - Charge your phone and Electric types show up
 - Home-screen widgets with your team, framed in the PC Box wallpapers
+- Achievements that unlock more wallpapers, and a companion on your Glyph Matrix
 
 ![Home, Professor Oak and Pokédex](screenshots-1.png)
 ![Pokémon, Bag and the black-and-white style](screenshots-2.png)

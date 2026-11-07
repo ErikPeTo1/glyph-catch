@@ -18,12 +18,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +37,7 @@ import dev.equalparts.glyph_catch.AppCard
 import dev.equalparts.glyph_catch.AppSizes
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.widget.Achievements
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -46,6 +47,7 @@ fun SettingsSectionList(modifier: Modifier, onSectionSelected: (SettingsDestinat
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val preferences = remember { PreferencesManager(context) }
+    val hasNewWallpaper by produceState(false) { value = Achievements.refresh(context).unseen.isNotEmpty() }
 
     Column(
         modifier = modifier.verticalScroll(scrollState),
@@ -54,7 +56,11 @@ fun SettingsSectionList(modifier: Modifier, onSectionSelected: (SettingsDestinat
         SettingsSectionCard(
             icon = R.drawable.ic_settings_palette,
             title = stringResource(R.string.settings_appearance_title),
-            description = stringResource(R.string.settings_section_appearance_description),
+            description = if (hasNewWallpaper) {
+                stringResource(R.string.settings_summary_new_wallpaper)
+            } else {
+                stringResource(R.string.settings_section_appearance_description)
+            },
             onClick = { onSectionSelected(SettingsDestination.Appearance) }
         )
 
@@ -93,15 +99,15 @@ fun SettingsSectionList(modifier: Modifier, onSectionSelected: (SettingsDestinat
             onClick = { onSectionSelected(SettingsDestination.Debug) }
         )
 
-        VersionAndHiddenSettings()
+        VersionAndHiddenSettings(onOpen = { onSectionSelected(SettingsDestination.Hidden) })
     }
 }
 
 /**
- * The version number. Tapping it seven times reveals a hidden setting.
+ * The version number. Tapping it seven times reveals the hidden settings.
  */
 @Composable
-private fun VersionAndHiddenSettings() {
+private fun VersionAndHiddenSettings(onOpen: () -> Unit) {
     val context = LocalContext.current
     val preferences = remember { PreferencesManager(context) }
     var unlocked by remember { mutableStateOf(preferences.hiddenSettingsUnlocked) }
@@ -111,36 +117,12 @@ private fun VersionAndHiddenSettings() {
     }
 
     if (unlocked) {
-        var playWhileInUse by remember { mutableStateOf(preferences.playWhileInUse) }
-        AppCard(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppSizes.spacingLarge),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.hidden_play_in_use_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    Spacer(modifier = Modifier.height(AppSizes.spacingTiny))
-                    Text(
-                        text = stringResource(R.string.hidden_play_in_use_subtitle),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Switch(
-                    checked = playWhileInUse,
-                    onCheckedChange = {
-                        playWhileInUse = it
-                        preferences.playWhileInUse = it
-                    }
-                )
-            }
-        }
+        SettingsSectionCard(
+            icon = R.drawable.ic_lock,
+            title = stringResource(R.string.hidden_settings_title),
+            description = stringResource(R.string.hidden_settings_description),
+            onClick = onOpen
+        )
     }
 
     Text(

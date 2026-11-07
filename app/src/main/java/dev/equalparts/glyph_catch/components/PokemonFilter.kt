@@ -44,7 +44,8 @@ enum class PokemonSort(@StringRes val labelRes: Int) {
     LEVEL_LOW(R.string.pokemon_sort_level_low),
     NAME(R.string.pokemon_sort_name),
     TYPE(R.string.pokemon_sort_type),
-    FAVORITES(R.string.pokemon_sort_favorites)
+    FAVORITES(R.string.pokemon_sort_favorites),
+    DUPLICATES(R.string.pokemon_sort_duplicates)
 }
 
 data class PokemonFilterState(
@@ -52,15 +53,20 @@ data class PokemonFilterState(
     val showFavoritesOnly: Boolean = false,
     val showEventOnly: Boolean = false,
     val showShinyOnly: Boolean = false,
+    val showDuplicatesOnly: Boolean = false,
     val sort: PokemonSort = PokemonSort.RECENT
 ) {
     val hasActiveFilters: Boolean
-        get() = searchQuery.isNotBlank() || showFavoritesOnly || showEventOnly || showShinyOnly
+        get() = searchQuery.isNotBlank() || showFavoritesOnly || showEventOnly || showShinyOnly || showDuplicatesOnly
 }
 
 private fun CaughtPokemon.sortName(): String = nickname ?: Pokemon[speciesId]?.displayName.orEmpty()
 
-private fun PokemonSort.comparator(): Comparator<CaughtPokemon> {
+/** The same species and form: West Sea and East Sea Shellos aren't duplicates of each other. */
+internal val CaughtPokemon.copyKey: Pair<Int, String?> get() = speciesId to form
+
+/** [copies] is how many of each species and form are in the PC, for sorting by duplicates. */
+private fun PokemonSort.comparator(copies: Map<Pair<Int, String?>, Int>): Comparator<CaughtPokemon> {
     val newestFirst = compareByDescending<CaughtPokemon> { it.caughtAt }
     val byPokedex = compareBy<CaughtPokemon> { it.speciesId }
     return when (this) {
@@ -74,23 +80,32 @@ private fun PokemonSort.comparator(): Comparator<CaughtPokemon> {
         PokemonSort.TYPE -> compareBy<CaughtPokemon> { Pokemon[it.speciesId]?.type1?.ordinal ?: Int.MAX_VALUE }
             .then(byPokedex)
         PokemonSort.FAVORITES -> compareByDescending<CaughtPokemon> { it.isFavorite }.then(newestFirst)
+        PokemonSort.DUPLICATES -> compareByDescending<CaughtPokemon> { copies[it.copyKey] ?: 0 }
+            .then(byPokedex)
+            .thenBy { it.form.orEmpty() }
+            .thenByDescending { it.level }
     }
 }
 
-fun List<CaughtPokemon>.applyFilters(state: PokemonFilterState): List<CaughtPokemon> = filter { pokemon ->
-    val species = Pokemon[pokemon.speciesId]
-    val matchesSearch = if (state.searchQuery.isBlank()) {
-        true
-    } else {
-        (pokemon.nickname?.contains(state.searchQuery, ignoreCase = true) == true) ||
-            (species?.name?.contains(state.searchQuery, ignoreCase = true) == true) ||
-            (species?.displayName?.contains(state.searchQuery, ignoreCase = true) == true)
-    }
-    val matchesFavorite = !state.showFavoritesOnly || pokemon.isFavorite
-    val matchesEvent = !state.showEventOnly || pokemon.isSpecialSpawn || pokemon.isConditionalSpawn
-    val matchesShiny = !state.showShinyOnly || pokemon.isShiny
-    matchesSearch && matchesFavorite && matchesEvent && matchesShiny
-}.sortedWith(state.sort.comparator())
+fun List<CaughtPokemon>.applyFilters(state: PokemonFilterState): List<CaughtPokemon> {
+    // Counted over the whole PC, so filters don't change what counts as a duplicate
+    val copies = groupingBy { it.copyKey }.eachCount()
+    return filter { pokemon ->
+        val species = Pokemon[pokemon.speciesId]
+        val matchesSearch = if (state.searchQuery.isBlank()) {
+            true
+        } else {
+            (pokemon.nickname?.contains(state.searchQuery, ignoreCase = true) == true) ||
+                (species?.name?.contains(state.searchQuery, ignoreCase = true) == true) ||
+                (species?.displayName?.contains(state.searchQuery, ignoreCase = true) == true)
+        }
+        val matchesFavorite = !state.showFavoritesOnly || pokemon.isFavorite
+        val matchesEvent = !state.showEventOnly || pokemon.isSpecialSpawn || pokemon.isConditionalSpawn
+        val matchesShiny = !state.showShinyOnly || pokemon.isShiny
+        val matchesDuplicates = !state.showDuplicatesOnly || (copies[pokemon.copyKey] ?: 0) > 1
+        matchesSearch && matchesFavorite && matchesEvent && matchesShiny && matchesDuplicates
+    }.sortedWith(state.sort.comparator(copies))
+}
 
 @Composable
 fun PokemonFilterControls(
@@ -101,7 +116,8 @@ fun PokemonFilterControls(
     onToggleEvent: () -> Unit,
     onSortChange: (PokemonSort) -> Unit,
     modifier: Modifier = Modifier,
-    onToggleShiny: () -> Unit = {}
+    onToggleShiny: () -> Unit = {},
+    onToggleDuplicates: (() -> Unit)? = null
 ) {
     Column(modifier = modifier) {
         PokemonFilterSearchField(
@@ -120,6 +136,8 @@ fun PokemonFilterControls(
             onToggleEvent = onToggleEvent,
             showShinyOnly = state.showShinyOnly,
             onToggleShiny = onToggleShiny,
+            showDuplicatesOnly = state.showDuplicatesOnly,
+            onToggleDuplicates = onToggleDuplicates,
             sort = state.sort,
             onSortChange = onSortChange
         )
@@ -164,6 +182,8 @@ private fun PokemonFilterChips(
     onToggleEvent: () -> Unit,
     showShinyOnly: Boolean,
     onToggleShiny: () -> Unit,
+    showDuplicatesOnly: Boolean,
+    onToggleDuplicates: (() -> Unit)?,
     sort: PokemonSort,
     onSortChange: (PokemonSort) -> Unit,
     modifier: Modifier = Modifier
@@ -208,6 +228,16 @@ private fun PokemonFilterChips(
             label = { Text(stringResource(R.string.caught_screen_filter_shiny)) },
             colors = chipColors
         )
+
+        // Only where it makes sense: the PC
+        if (onToggleDuplicates != null) {
+            FilterChip(
+                selected = showDuplicatesOnly,
+                onClick = onToggleDuplicates,
+                label = { Text(stringResource(R.string.caught_screen_filter_duplicates)) },
+                colors = chipColors
+            )
+        }
     }
 }
 

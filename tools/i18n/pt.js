@@ -64,11 +64,6 @@ module.exports = {
     settings_weather_title: 'Clima',
     settings_sleep_title: 'Sono e hábitos',
     settings_weather_provider_random: 'Clima aleatório todo dia',
-    settings_section_graphics_description: 'Opções de exibição',
-    settings_section_weather_description: 'Sincronizar o clima real',
-    settings_section_sleep_description: 'Definir a hora de dormir',
-    settings_graphics_clock_title: 'Relógio digital',
-    settings_graphics_clock_subtitle: 'Mostra a hora quando não há Pokémon',
     settings_graphics_brightness_title: 'Brilho reduzido',
     settings_graphics_brightness_subtitle: 'Escurece os sprites do Glyph Toy',
     settings_graphics_note_cycle: 'Troque de Glyph Toy e volte para aplicar as mudanças.',
@@ -93,7 +88,6 @@ module.exports = {
     settings_weather_status_save_changes: 'Salve as alterações para sincronizar',
     settings_weather_status_add_api_key: 'Adicione sua chave de API para sincronizar',
     settings_weather_status_select_location: 'Escolha uma localização para sincronizar',
-    settings_section_debug_description: 'Opções para resolver problemas',
     settings_debug_title: 'Depuração',
     settings_debug_toggle_label: 'Salvar registros',
     settings_debug_toggle_subtitle: 'Apenas para resolver problemas',
@@ -404,6 +398,12 @@ module.exports = {
     "Um Pokémon lendário que você soltar pode aparecer de novo, um de cada vez. Boa notícia para os caçadores de brilhantes!",
     "Com as quatro Pokédex regionais, o Professor Carvalho te dá o Mapa para escolher de quais regiões aparecem Pokémon.",
     "Complete a Pokédex Nacional e o Professor Carvalho vai te recompensar com o Shiny Charm.",
-    "Deixou o celular carregando? Pokémon do tipo Elétrico, como Pikachu, Magnemite ou Shinx, se juntam por perto."
+    "Deixou o celular carregando? Pokémon do tipo Elétrico, como Pikachu, Magnemite ou Shinx, se juntam por perto.",
+    "Toque e segure a tela inicial para adicionar os widgets do Glyph Catch: sua equipe ou os Pokémon esperando na sua Glyph Matrix. Escolha os fundos em Ajustes → Aparência.",
+    "Adicione até seis favoritos à sua equipe pela ficha de cada Pokémon. Com o Exp. Share, o presente do Professor Carvalho quando você chega a Unova, toda a equipe ganha experiência.",
+    "Alguns fundos das caixas do PC estão bloqueados: cada um é uma conquista, como capturar um Pikachu ou chocar 10 Ovos. Eles ficam em Ajustes → Aparência.",
+    "Sem Pokémon selvagens por perto, sua Glyph Matrix pode mostrar um companheiro no lugar do relógio. Escolha-o com \"Mostrar na Glyph Matrix\" na ficha dele.",
+    "Cada captura de uma espécie conta para a corrente brilhante dela: com 10, 25 e 50 capturas o brilhante fica mais provável. A ficha de cada Pokémon mostra quanto falta.",
+    "Pidgey demais? No PC, o filtro Repetidos mostra só as espécies que você tem mais de uma vez, e \"Todos menos um\" as seleciona para soltar deixando uma de cada."
   ]
 };

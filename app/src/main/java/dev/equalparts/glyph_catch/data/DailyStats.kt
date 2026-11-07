@@ -32,6 +32,10 @@ class DailyStats(private val prefs: SharedPreferences) {
         if (amount <= 0) return
         synchronized(lock) {
             val all = load().toMutableMap()
+            val totals = lifetime(all)
+            totals[stat.key] = (totals[stat.key] ?: 0) + amount
+            if (date.toString() !in all) totals[DAYS_PLAYED] = (totals[DAYS_PLAYED] ?: 0) + 1
+            saveLifetime(totals)
             val day = all[date.toString()].orEmpty().toMutableMap()
             day[stat.key] = (day[stat.key] ?: 0) + amount
             all[date.toString()] = day
@@ -56,6 +60,42 @@ class DailyStats(private val prefs: SharedPreferences) {
             .sumOf { all[it.toString()]?.get(stat.key) ?: 0 }
     }
 
+    /** All-time total of a stat, for achievements. */
+    fun total(stat: Stat): Int = lifetime(load())[stat.key] ?: 0
+
+    /** Days with anything counted. */
+    val daysPlayed: Int get() = lifetime(load())[DAYS_PLAYED] ?: 0
+
+    /** All-time counters that aren't daily stats, like hatched Eggs. */
+    fun counter(key: String): Int = lifetime(load())[key] ?: 0
+
+    fun bump(key: String, amount: Int = 1) {
+        synchronized(lock) {
+            val totals = lifetime(load())
+            totals[key] = (totals[key] ?: 0) + amount
+            saveLifetime(totals)
+        }
+    }
+
+    /**
+     * The all-time totals. The first time, they start from the days still kept, so older saves
+     * don't start from zero.
+     */
+    private fun lifetime(days: Map<String, Map<String, Int>>): MutableMap<String, Int> {
+        val raw = prefs.getString(LIFETIME_KEY, null)
+        val saved = raw?.let {
+            runCatching { Json.parseToJsonElement(it).jsonObject.mapValues { (_, v) -> v.jsonPrimitive.int } }
+                .getOrNull()
+        }
+        if (saved != null) return saved.toMutableMap()
+        val seeded = Stat.entries.associate { stat -> stat.key to days.values.sumOf { it[stat.key] ?: 0 } }
+        return (seeded + (DAYS_PLAYED to days.size)).toMutableMap()
+    }
+
+    private fun saveLifetime(totals: Map<String, Int>) {
+        prefs.edit { putString(LIFETIME_KEY, JsonObject(totals.mapValues { JsonPrimitive(it.value) }).toString()) }
+    }
+
     private fun load(): Map<String, Map<String, Int>> {
         val raw = prefs.getString(KEY, null) ?: return emptyMap()
         return runCatching {
@@ -73,6 +113,11 @@ class DailyStats(private val prefs: SharedPreferences) {
     companion object {
         const val KEY = "daily_stats"
         private const val KEEP_DAYS = 40L
+        private const val LIFETIME_KEY = "lifetime_stats"
+        private const val DAYS_PLAYED = "days"
+        const val EGGS_HATCHED = "eggsHatched"
+        const val SUPER_ROD_CATCHES = "superRodCatches"
+        const val MISSIONS_COMPLETED = "missionsCompleted"
         private val lock = Any()
     }
 }

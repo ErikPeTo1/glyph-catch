@@ -103,6 +103,22 @@ object LegendaryItems {
 /** Legendary and mythical Pokémon: after release they can be met again, one at a time. */
 val LEGENDARY_SPECIES: Set<Int> = Rumors.all.map { it.speciesId }.toSet()
 
+/** Mythical Pokémon met at gentle levels in the games: Mew, Celebi, Jirachi, Phione, Manaphy, Shaymin, Victini, Meloetta. */
+private val GENTLE_MYTHICALS = setOf(151, 251, 385, 489, 490, 492, 494, 648)
+
+private const val ARCEUS = 493
+
+/**
+ * The level a legendary is caught at: strong enough to match what it takes to find them (Mewtwo
+ * wants six Pokémon at level 60). `null` for everything else.
+ */
+fun legendaryLevels(speciesId: Int): IntRange? = when (speciesId) {
+    ARCEUS -> 80..90
+    in GENTLE_MYTHICALS -> 30..45
+    in LEGENDARY_SPECIES -> 70..80
+    else -> null
+}
+
 val REGION_POKEDEXES = listOf(Item.POKEDEX_JOHTO, Item.POKEDEX_HOENN, Item.POKEDEX_SINNOH, Item.POKEDEX_UNOVA)
 
 val Item.isKeyItem: Boolean get() = this == Item.POKEDEX_KANTO ||

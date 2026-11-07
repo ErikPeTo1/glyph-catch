@@ -70,6 +70,7 @@ import dev.equalparts.glyph_catch.components.PokemonFilterControls
 import dev.equalparts.glyph_catch.components.PokemonFilterState
 import dev.equalparts.glyph_catch.components.PokemonSort
 import dev.equalparts.glyph_catch.components.applyFilters
+import dev.equalparts.glyph_catch.components.copyKey
 import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.InventoryItem
 import dev.equalparts.glyph_catch.data.Item
@@ -97,6 +98,7 @@ private data class CaughtActions(
     val onToggleFavorites: () -> Unit,
     val onToggleEvent: () -> Unit,
     val onToggleShiny: () -> Unit,
+    val onToggleDuplicates: () -> Unit,
     val onSortChange: (PokemonSort) -> Unit,
     val onToggleFavorite: (CaughtPokemon) -> Unit,
     val onPokemonClick: (CaughtPokemon) -> Unit,
@@ -111,6 +113,23 @@ private data class CaughtActions(
  */
 private val CaughtPokemon.isProtected: Boolean get() = isFavorite || isTraining
 
+/**
+ * Selects every copy but one of each species (and form) in [shown], so clearing out duplicates never
+ * loses one. If a copy is protected or in [keep] (team, companion), that one stays; otherwise the
+ * shiny, then the highest level, then the first caught.
+ */
+internal fun allButOneOfEach(shown: List<CaughtPokemon>, pc: List<CaughtPokemon>, keep: Set<String>): Set<String> {
+    val copies = pc.groupBy { it.copyKey }
+    val keepers = shown.map { it.copyKey }.distinct().mapNotNull { key ->
+        val all = copies[key].orEmpty()
+        all.firstOrNull { it.isFavorite || it.isTraining || it.id in keep }
+            ?: all.maxWithOrNull(
+                compareBy<CaughtPokemon> { it.isShiny }.thenBy { it.level }.thenByDescending { it.caughtAt }
+            )
+    }.map { it.id }.toSet()
+    return shown.filter { !it.isFavorite && !it.isTraining && it.id !in keepers }.map { it.id }.toSet()
+}
+
 @Composable
 fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemonClick: (CaughtPokemon) -> Unit = {}) {
     val context = LocalContext.current
@@ -124,6 +143,7 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
     var showFavoritesOnly by remember { mutableStateOf(false) }
     var showEventOnly by remember { mutableStateOf(false) }
     var showShinyOnly by remember { mutableStateOf(false) }
+    var showDuplicatesOnly by remember { mutableStateOf(false) }
     var sort by rememberSaveable { mutableStateOf(PokemonSort.RECENT) }
     var selectedIds by remember { mutableStateOf(emptySet<String>()) }
     var showReleaseConfirmation by remember { mutableStateOf(false) }
@@ -137,6 +157,7 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
         showFavoritesOnly = showFavoritesOnly,
         showEventOnly = showEventOnly,
         showShinyOnly = showShinyOnly,
+        showDuplicatesOnly = showDuplicatesOnly,
         sort = sort
     )
 
@@ -165,6 +186,7 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
         onToggleFavorites = { showFavoritesOnly = !showFavoritesOnly },
         onToggleEvent = { showEventOnly = !showEventOnly },
         onToggleShiny = { showShinyOnly = !showShinyOnly },
+        onToggleDuplicates = { showDuplicatesOnly = !showDuplicatesOnly },
         onSortChange = { sort = it },
         onToggleFavorite = toggleFavorite,
         onPokemonClick = onPokemonClick,
@@ -174,7 +196,14 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
                     if (pokemon.id in validSelection) validSelection - pokemon.id else validSelection + pokemon.id
             }
         },
-        onSelectAll = { selectedIds = filteredPokemon.filterNot { it.isProtected }.map { it.id }.toSet() },
+        onSelectAll = {
+            selectedIds = if (showDuplicatesOnly) {
+                val keep = preferencesManager.team.toSet() + listOfNotNull(preferencesManager.companionId)
+                allButOneOfEach(filteredPokemon, caughtPokemon, keep)
+            } else {
+                filteredPokemon.filterNot { it.isProtected }.map { it.id }.toSet()
+            }
+        },
         onClearSelection = { selectedIds = emptySet() },
         onReleaseClick = { showReleaseConfirmation = true }
     )
@@ -238,6 +267,7 @@ private fun CaughtScreenContent(state: CaughtUiState, actions: CaughtActions) {
         if (state.isSelecting) {
             SelectionHeader(
                 selectedCount = state.selectedIds.size,
+                keepOne = state.filterState.showDuplicatesOnly,
                 onSelectAll = actions.onSelectAll,
                 onRelease = actions.onReleaseClick,
                 onClose = actions.onClearSelection
@@ -256,15 +286,23 @@ private fun CaughtScreenContent(state: CaughtUiState, actions: CaughtActions) {
             onToggleFavorites = actions.onToggleFavorites,
             onToggleEvent = actions.onToggleEvent,
             onSortChange = actions.onSortChange,
-            onToggleShiny = actions.onToggleShiny
+            onToggleShiny = actions.onToggleShiny,
+            onToggleDuplicates = actions.onToggleDuplicates
         )
 
         CaughtResults(state = state, actions = actions)
     }
 }
 
+/** With the Repeated filter on, "select all" keeps one of each species. */
 @Composable
-private fun SelectionHeader(selectedCount: Int, onSelectAll: () -> Unit, onRelease: () -> Unit, onClose: () -> Unit) {
+private fun SelectionHeader(
+    selectedCount: Int,
+    keepOne: Boolean,
+    onSelectAll: () -> Unit,
+    onRelease: () -> Unit,
+    onClose: () -> Unit
+) {
     Column {
         AppScreenHeader(
             title = pluralStringResource(R.plurals.caught_screen_selected_count, selectedCount, selectedCount),
@@ -281,7 +319,11 @@ private fun SelectionHeader(selectedCount: Int, onSelectAll: () -> Unit, onRelea
                 )
             }
             TextButton(onClick = onSelectAll) {
-                Text(stringResource(R.string.caught_screen_select_all))
+                Text(
+                    stringResource(
+                        if (keepOne) R.string.caught_screen_select_all_but_one else R.string.caught_screen_select_all
+                    )
+                )
             }
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = onRelease) {

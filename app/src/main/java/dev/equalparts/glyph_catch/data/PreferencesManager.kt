@@ -3,6 +3,7 @@ package dev.equalparts.glyph_catch.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import dev.equalparts.glyph_catch.gameplay.PokemonGlyphToyService
 import dev.equalparts.glyph_catch.widget.WidgetBackground
 import dev.equalparts.glyph_catch.widget.WidgetUpdater
 import kotlinx.coroutines.channels.awaitClose
@@ -100,6 +101,25 @@ class PreferencesManager(context: Context) {
     var glyphToyClockEnabled: Boolean
         get() = prefs.getBoolean(KEY_GLYPH_TOY_CLOCK_ENABLED, true)
         set(value) = prefs.edit { putBoolean(KEY_GLYPH_TOY_CLOCK_ENABLED, value) }
+
+    /**
+     * What the Glyph Matrix shows while no wild Pokémon is waiting: [IDLE_CLOCK], [IDLE_COMPANION]
+     * or [IDLE_NONE]. Saves from before follow the old clock switch.
+     */
+    var glyphIdleDisplay: String
+        get() = prefs.getString(KEY_GLYPH_IDLE_DISPLAY, null) ?: if (glyphToyClockEnabled) IDLE_CLOCK else IDLE_NONE
+        set(value) {
+            prefs.edit { putString(KEY_GLYPH_IDLE_DISPLAY, value) }
+            PokemonGlyphToyService.refreshIdleDisplay()
+        }
+
+    /** The Pokémon (caught id) shown as companion; without one, the training partner. */
+    var companionId: String?
+        get() = prefs.getString(KEY_COMPANION_ID, null)
+        set(value) {
+            prefs.edit { putString(KEY_COMPANION_ID, value) }
+            PokemonGlyphToyService.refreshIdleDisplay()
+        }
 
     var glyphToyLowerBrightness: Boolean
         get() = prefs.getBoolean(KEY_GLYPH_TOY_LOWER_BRIGHTNESS, false)
@@ -199,6 +219,14 @@ class PreferencesManager(context: Context) {
             WidgetUpdater.refresh(appContext)
         }
 
+    /** The waiting Pokémon widget shows its catch-all button (with [playWhileInUse] on). */
+    var catchAllButton: Boolean
+        get() = prefs.getBoolean(KEY_CATCH_ALL_BUTTON, true)
+        set(value) {
+            prefs.edit { putBoolean(KEY_CATCH_ALL_BUTTON, value) }
+            WidgetUpdater.refresh(appContext)
+        }
+
     /** Up to six favorite Pokémon (caught ids), shown on the team widget. */
     var team: List<String>
         get() = prefs.getString(KEY_TEAM, null)
@@ -208,6 +236,15 @@ class PreferencesManager(context: Context) {
             prefs.edit { putString(KEY_TEAM, json.encodeToString(value.distinct().take(TEAM_SIZE))) }
             WidgetUpdater.refresh(appContext)
         }
+
+    /** Extra PC Box wallpapers earned with achievements, and those already shown as new. */
+    var unlockedWallpapers: Set<String>
+        get() = prefs.getStringSet(KEY_UNLOCKED_WALLPAPERS, emptySet()).orEmpty()
+        set(value) = prefs.edit { putStringSet(KEY_UNLOCKED_WALLPAPERS, value) }
+
+    var seenWallpapers: Set<String>
+        get() = prefs.getStringSet(KEY_SEEN_WALLPAPERS, emptySet()).orEmpty()
+        set(value) = prefs.edit { putStringSet(KEY_SEEN_WALLPAPERS, value) }
 
     /** Background of the waiting Pokémon widget; by default it follows the Pokémon. */
     var queueWidgetBackground: String
@@ -501,10 +538,18 @@ class PreferencesManager(context: Context) {
 
     companion object {
         const val TEAM_SIZE = 6
+        const val IDLE_CLOCK = "clock"
+        const val IDLE_COMPANION = "companion"
+        const val IDLE_NONE = "none"
+        private const val KEY_GLYPH_IDLE_DISPLAY = "glyph_idle_display"
+        private const val KEY_COMPANION_ID = "companion_id"
         private const val PREFS_NAME = "glyph_catch_prefs"
         private const val KEY_TEAM = "team"
+        private const val KEY_CATCH_ALL_BUTTON = "catch_all_button"
         private const val KEY_WIDGET_BACKGROUND = "widget_background"
         private const val KEY_QUEUE_WIDGET_BACKGROUND = "queue_widget_background"
+        private const val KEY_UNLOCKED_WALLPAPERS = "unlocked_wallpapers"
+        private const val KEY_SEEN_WALLPAPERS = "seen_wallpapers"
         private const val KEY_RELEASED_COUNT = "released_count"
         private const val KEY_COLOR_SPRITES = "color_sprites"
         private const val KEY_RARITY_BOOST_UNTIL = "rarity_boost_until"

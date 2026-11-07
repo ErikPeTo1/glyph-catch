@@ -58,11 +58,6 @@ module.exports = {
     settings_weather_title: 'Meteo',
     settings_sleep_title: 'Sonno e abitudini',
     settings_weather_provider_random: 'Meteo casuale ogni giorno',
-    settings_section_graphics_description: 'Opzioni di visualizzazione',
-    settings_section_weather_description: 'Sincronizza il meteo reale',
-    settings_section_sleep_description: 'Imposta l\'ora di andare a dormire',
-    settings_graphics_clock_title: 'Orologio digitale',
-    settings_graphics_clock_subtitle: 'Mostra l\'ora quando non ci sono Pokémon',
     settings_graphics_brightness_title: 'Luminosità ridotta',
     settings_graphics_brightness_subtitle: 'Attenua gli sprite del Glyph Toy',
     settings_graphics_note_cycle: 'Cambia Glyph Toy e torna indietro per applicare le modifiche.',
@@ -87,7 +82,6 @@ module.exports = {
     settings_weather_status_save_changes: 'Salva le modifiche per sincronizzare',
     settings_weather_status_add_api_key: 'Aggiungi la tua chiave API per sincronizzare',
     settings_weather_status_select_location: 'Scegli una posizione per sincronizzare',
-    settings_section_debug_description: 'Opzioni per risolvere problemi',
     settings_debug_title: 'Debug',
     settings_debug_toggle_label: 'Salva i log',
     settings_debug_toggle_subtitle: 'Solo per risolvere problemi',
@@ -398,6 +392,12 @@ module.exports = {
     "Un Pokémon leggendario liberato può apparire di nuovo, uno alla volta. Bella notizia per i cacciatori di cromatici!",
     "Con tutti e quattro i Pokédex regionali, il Professor Oak ti dà la Mappa per scegliere da quali regioni appaiono i Pokémon.",
     "Completa il Pokédex Nazionale e il Professor Oak ti ricompenserà con il Cromamuleto.",
-    "Lasci il telefono in carica? I Pokémon di tipo Elettro come Pikachu, Magnemite o Shinx gli si radunano intorno."
+    "Lasci il telefono in carica? I Pokémon di tipo Elettro come Pikachu, Magnemite o Shinx gli si radunano intorno.",
+    "Tieni premuta la schermata Home per aggiungere i widget di Glyph Catch: la tua squadra o i Pokémon in attesa sulla tua Glyph Matrix. Scegli i loro sfondi in Impostazioni → Aspetto.",
+    "Aggiungi fino a sei preferiti alla squadra dalla scheda di ogni Pokémon. Con il Condividi Esp., il regalo del Professor Oak quando arrivi a Unima, tutta la squadra riceve esperienza.",
+    "Alcuni sfondi dei box del PC sono bloccati: ognuno è un obiettivo, come catturare un Pikachu o far schiudere 10 Uova. Li trovi in Impostazioni → Aspetto.",
+    "Senza Pokémon selvatici in giro, la tua Glyph Matrix può mostrare un compagno al posto dell’orologio. Sceglilo con «Mostra sulla Glyph Matrix» nella sua scheda.",
+    "Ogni cattura di una specie conta per la sua catena cromatica: a 10, 25 e 50 catture il suo cromatico diventa più probabile. La scheda di ogni Pokémon mostra a che punto sei.",
+    "Troppi Pidgey? Nel PC, il filtro Doppioni mostra solo le specie che hai più di una volta, e «Tutti tranne uno» le seleziona da liberare tenendone uno per specie."
   ]
 };

@@ -58,11 +58,6 @@ module.exports = {
     settings_weather_title: 'Wetter',
     settings_sleep_title: 'Schlaf & Gewohnheiten',
     settings_weather_provider_random: 'Zufälliges Wetter jeden Tag',
-    settings_section_graphics_description: 'Anzeigeoptionen ändern',
-    settings_section_weather_description: 'Echtes Wetter synchronisieren',
-    settings_section_sleep_description: 'Schlafenszeit festlegen',
-    settings_graphics_clock_title: 'Digitaluhr',
-    settings_graphics_clock_subtitle: 'Zeigt die Uhrzeit, wenn kein Pokémon da ist',
     settings_graphics_brightness_title: 'Geringere Helligkeit',
     settings_graphics_brightness_subtitle: 'Dimmt die Sprites des Glyph Toys',
     settings_graphics_note_cycle: 'Wechsle das Glyph Toy und zurück, um die Änderungen zu übernehmen.',
@@ -87,7 +82,6 @@ module.exports = {
     settings_weather_status_save_changes: 'Speichere die Änderungen zum Synchronisieren',
     settings_weather_status_add_api_key: 'Füge deinen API-Schlüssel hinzu, um zu synchronisieren',
     settings_weather_status_select_location: 'Wähle einen Standort, um zu synchronisieren',
-    settings_section_debug_description: 'Optionen zur Fehlerbehebung',
     settings_debug_title: 'Fehlersuche',
     settings_debug_toggle_label: 'Protokolle speichern',
     settings_debug_toggle_subtitle: 'Nur zur Fehlerbehebung',
@@ -398,6 +392,12 @@ module.exports = {
     "Ein freigelassenes legendäres Pokémon kann wieder erscheinen, eins nach dem anderen. Gute Nachricht für Shiny-Jäger!",
     "Mit allen vier regionalen Pokédex gibt dir Professor Eich die Karte, mit der du wählst, aus welchen Regionen Pokémon erscheinen.",
     "Vervollständige den Nationaldex, und Professor Eich belohnt dich mit dem Schillerpin.",
-    "Lädst du dein Handy? Elektro-Pokémon wie Pikachu, Magnetilo oder Sheinux versammeln sich darum."
+    "Lädst du dein Handy? Elektro-Pokémon wie Pikachu, Magnetilo oder Sheinux versammeln sich darum.",
+    "Halte den Startbildschirm gedrückt, um die Glyph-Catch-Widgets hinzuzufügen: dein Team oder die Pokémon, die auf deiner Glyph Matrix warten. Ihre Hintergründe wählst du unter Einstellungen → Darstellung.",
+    "Füge in den Details jedes Pokémon bis zu sechs Lieblinge zu deinem Team hinzu. Mit dem EP-Teiler, Professor Eichs Geschenk, wenn du Einall erreichst, erhält das ganze Team Erfahrung.",
+    "Manche PC-Box-Hintergründe sind gesperrt: Jeder ist ein Erfolg, etwa ein Pikachu fangen oder 10 Eier ausbrüten. Du findest sie unter Einstellungen → Darstellung.",
+    "Wenn keine wilden Pokémon da sind, kann deine Glyph Matrix statt der Uhr einen Begleiter zeigen. Wähle ihn mit „Auf der Glyph Matrix zeigen“ in seinen Details.",
+    "Jeder Fang einer Art zählt zu ihrer Schillernd-Kette: Ab 10, 25 und 50 Fängen wird ihr Schillernd wahrscheinlicher. Die Details jedes Pokémon zeigen, wie weit du bist.",
+    "Zu viele Taubsi? Im PC zeigt der Filter Doppelte nur Arten, die du mehrfach hast, und „Alle außer einem“ wählt sie zum Freilassen aus, wobei je eines bleibt."
   ]
 };

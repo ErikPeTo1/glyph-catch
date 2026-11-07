@@ -784,6 +784,9 @@ object Pokemon {
         evolve(ELECTABUZZ, ELEKID at 30)
         evolve(MAGMAR, MAGBY at 30)
         evolve(SNORLAX, MUNCHLAX at 25)
+        // Hitmontop is linked where Tyrogue is defined; the other two came first
+        evolve(HITMONLEE, TYROGUE at 20)
+        evolve(HITMONCHAN, TYROGUE at 20)
     }
 
     const val POKEDEX_SIZE = 649

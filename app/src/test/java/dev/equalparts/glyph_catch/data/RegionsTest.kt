@@ -82,4 +82,18 @@ class RegionsTest {
             ProfessorEvent.ExpShare !in ProfessorEvents.pending(true, 300, before + Item.POKEDEX_UNOVA + Item.EXP_SHARE)
         )
     }
+
+    @Test
+    fun `legendaries are caught at high levels, gentle mythicals lower`() {
+        assertEquals(70..80, legendaryLevels(150))
+        assertEquals(80..90, legendaryLevels(493))
+        assertEquals(30..45, legendaryLevels(151))
+        assertEquals(null, legendaryLevels(25))
+    }
+
+    @Test
+    fun `Tyrogue can become any of the three Hitmon`() {
+        assertEquals(setOf(106, 107, 237), Pokemon[236]!!.evolvesTo.toSet())
+        assertEquals(EvolutionRequirement.Level(20), Pokemon[106]!!.evolutionRequirement)
+    }
 }

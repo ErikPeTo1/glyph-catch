@@ -261,7 +261,7 @@ class QueueWidget : GlanceAppWidget() {
             val background = WidgetBackground.from(preferences.queueWidgetBackground)
             return QueueState(
                 background = (background as? WidgetBackground.Auto)?.resolve(queue.firstOrNull()) ?: background,
-                canCatch = preferences.playWhileInUse,
+                canCatch = preferences.playWhileInUse && preferences.catchAllButton,
                 sprites = queue.map { loadSprite(context, it.pokemonId, it.isShiny, it.form, color) }
             )
         }
@@ -317,7 +317,8 @@ class QueueWidgetReceiver : GlanceAppWidgetReceiver() {
 
 class CatchAllAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        if (PreferencesManager(context).playWhileInUse) {
+        val preferences = PreferencesManager(context)
+        if (preferences.playWhileInUse && preferences.catchAllButton) {
             PokemonGlyphToyService.catchAllFromWidget()
         }
     }

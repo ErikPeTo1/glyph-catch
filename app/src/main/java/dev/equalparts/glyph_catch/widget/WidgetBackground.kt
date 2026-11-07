@@ -20,7 +20,7 @@ import kotlin.math.roundToInt
  * The PC box wallpapers from Pokémon Emerald. The inside of some of them is a pattern that
  * repeats every [periodX] / [periodY] pixels; the rest are scenes (0), which are cropped to fit:
  * around the middle sideways, and keeping the bottom (shores, clouds, the Poké Ball) up and down,
- * unless the scene is [centered].
+ * unless the scene is [centered]. The ones with an [achievement] stay locked until it's reached.
  */
 enum class BoxWallpaper(
     @param:DrawableRes val drawable: Int,
@@ -28,7 +28,8 @@ enum class BoxWallpaper(
     val periodX: Int,
     val periodY: Int,
     val dark: Boolean,
-    val centered: Boolean = false
+    val centered: Boolean = false,
+    val achievement: Achievement? = null
 ) {
     FOREST(R.drawable.box_wallpaper_forest, R.string.box_wallpaper_forest, 32, 16, false),
     CITY(R.drawable.box_wallpaper_city, R.string.box_wallpaper_city, 32, 16, false),
@@ -45,7 +46,88 @@ enum class BoxWallpaper(
     POLKADOT(R.drawable.box_wallpaper_polkadot, R.string.box_wallpaper_polkadot, 32, 64, false),
     POKECENTER(R.drawable.box_wallpaper_pokecenter, R.string.box_wallpaper_pokecenter, 0, 0, false),
     MACHINE(R.drawable.box_wallpaper_machine, R.string.box_wallpaper_machine, 0, 0, false),
-    PLAIN(R.drawable.box_wallpaper_plain, R.string.box_wallpaper_plain, 0, 0, false)
+    PLAIN(R.drawable.box_wallpaper_plain, R.string.box_wallpaper_plain, 0, 0, false),
+
+    // Earned with achievements
+    PIKACHU(R.drawable.box_wallpaper_pikachu, R.string.box_wallpaper_pikachu, 0, 0, false, false, Achievement.PIKACHU),
+    ZIGZAG(R.drawable.box_wallpaper_zigzag, R.string.box_wallpaper_zigzag, 48, 0, false, false, Achievement.CATCHES),
+    POKE_BALLS(
+        R.drawable.box_wallpaper_pokeballs,
+        R.string.box_wallpaper_pokeballs,
+        0,
+        0,
+        false,
+        true,
+        Achievement.MORE_CATCHES
+    ),
+    CIRCLES(
+        R.drawable.box_wallpaper_circles,
+        R.string.box_wallpaper_circles,
+        80,
+        32,
+        false,
+        false,
+        Achievement.SPECIES
+    ),
+    AZUMARILL(
+        R.drawable.box_wallpaper_azumarill,
+        R.string.box_wallpaper_azumarill,
+        32,
+        0,
+        false,
+        false,
+        Achievement.ROD_CATCHES
+    ),
+    WHISCASH(
+        R.drawable.box_wallpaper_whiscash,
+        R.string.box_wallpaper_whiscash,
+        0,
+        0,
+        false,
+        false,
+        Achievement.SUPER_ROD
+    ),
+    LUDICOLO(
+        R.drawable.box_wallpaper_ludicolo,
+        R.string.box_wallpaper_ludicolo,
+        0,
+        0,
+        false,
+        false,
+        Achievement.EVOLUTIONS
+    ),
+    POKECENTER_2(
+        R.drawable.box_wallpaper_pokecenter2,
+        R.string.box_wallpaper_pokecenter2,
+        0,
+        0,
+        false,
+        false,
+        Achievement.EGGS
+    ),
+    STARS(R.drawable.box_wallpaper_stars, R.string.box_wallpaper_stars, 0, 0, true, true, Achievement.SHINY),
+    HEARTS(R.drawable.box_wallpaper_hearts, R.string.box_wallpaper_hearts, 0, 0, true, true, Achievement.LEVEL_100),
+    DUSCLOPS(
+        R.drawable.box_wallpaper_dusclops,
+        R.string.box_wallpaper_dusclops,
+        96,
+        0,
+        false,
+        true,
+        Achievement.GHOSTS
+    ),
+    MEANDER(R.drawable.box_wallpaper_meander, R.string.box_wallpaper_meander, 96, 0, false, true, Achievement.MISSIONS),
+    STRIPES(R.drawable.box_wallpaper_stripes, R.string.box_wallpaper_stripes, 0, 0, false, true, Achievement.DAYS),
+    BRICKS(R.drawable.box_wallpaper_bricks, R.string.box_wallpaper_bricks, 16, 16, true, false, Achievement.MINUTES),
+    LEGENDARY(
+        R.drawable.box_wallpaper_legendary,
+        R.string.box_wallpaper_legendary,
+        0,
+        0,
+        false,
+        false,
+        Achievement.LEGENDARIES
+    )
 }
 
 /**

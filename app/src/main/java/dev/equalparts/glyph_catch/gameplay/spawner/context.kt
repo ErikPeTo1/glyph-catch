@@ -7,6 +7,7 @@ import android.content.Context.KEYGUARD_SERVICE
 import android.content.Context.POWER_SERVICE
 import android.os.BatteryManager
 import android.os.PowerManager
+import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.LEGENDARY_SPECIES
 import dev.equalparts.glyph_catch.data.PokemonDatabase
@@ -303,6 +304,9 @@ data class GameplayContext(
 
         var pokedexCount: Int = 0
         var currentPartnerDays: Int = 0
+
+        /** Shown on the Glyph Matrix while nobody is waiting, if the player wants. */
+        var companion: CaughtPokemon? = null
         var ownedItems: Set<Item> = emptySet()
         var activeRegions: Set<Region> = Region.entries.toSet()
         var catchCounts: Map<Int, Int> = emptyMap()
@@ -410,6 +414,7 @@ data class GameplayContext(
                 catchCounts = preferences.catchCounts
 
                 val activePartner = dao.getActiveTrainingPartner()
+                companion = preferences.companionId?.let { dao.getCaughtPokemon(it) } ?: activePartner
                 if (activePartner == null) {
                     currentPartnerDays = 0
                     preferences.clearTrainingPartner()

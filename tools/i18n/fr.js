@@ -58,11 +58,6 @@ module.exports = {
     settings_weather_title: 'Météo',
     settings_sleep_title: 'Sommeil et habitudes',
     settings_weather_provider_random: 'Météo aléatoire chaque jour',
-    settings_section_graphics_description: 'Options d\'affichage',
-    settings_section_weather_description: 'Synchroniser la météo réelle',
-    settings_section_sleep_description: 'Définir l\'heure du coucher',
-    settings_graphics_clock_title: 'Horloge numérique',
-    settings_graphics_clock_subtitle: 'Affiche l\'heure quand il n\'y a pas de Pokémon',
     settings_graphics_brightness_title: 'Luminosité réduite',
     settings_graphics_brightness_subtitle: 'Atténue les sprites du Glyph Toy',
     settings_graphics_note_cycle: 'Change de Glyph Toy puis reviens pour appliquer les changements.',
@@ -87,7 +82,6 @@ module.exports = {
     settings_weather_status_save_changes: 'Enregistre les modifications pour synchroniser',
     settings_weather_status_add_api_key: 'Ajoute ta clé d\'API pour synchroniser',
     settings_weather_status_select_location: 'Choisis une position pour synchroniser',
-    settings_section_debug_description: 'Options de dépannage',
     settings_debug_title: 'Débogage',
     settings_debug_toggle_label: 'Enregistrer les journaux',
     settings_debug_toggle_subtitle: 'Uniquement pour le dépannage',
@@ -398,6 +392,12 @@ module.exports = {
     "Un Pokémon légendaire relâché peut réapparaître, un à la fois. Bonne nouvelle pour les chasseurs de chromatiques !",
     "Avec les quatre Pokédex régionaux, le Professeur Chen te donne la Carte pour choisir de quelles régions viennent les Pokémon.",
     "Complète le Pokédex National et le Professeur Chen te récompensera avec le Charme Chroma.",
-    "Ton téléphone est en charge ? Les Pokémon de type Électrik, comme Pikachu, Magnéti ou Lixy, viennent rôder autour."
+    "Ton téléphone est en charge ? Les Pokémon de type Électrik, comme Pikachu, Magnéti ou Lixy, viennent rôder autour.",
+    "Appuie longuement sur l’écran d’accueil pour ajouter les widgets Glyph Catch : ton équipe ou les Pokémon qui attendent sur ta Glyph Matrix. Choisis leurs fonds dans Réglages → Apparence.",
+    "Ajoute jusqu’à six favoris à ton équipe depuis la fiche de chaque Pokémon. Avec le Multi Exp, le cadeau du Professeur Chen quand tu atteins Unys, toute l’équipe gagne de l’expérience.",
+    "Certains fonds des boîtes du PC sont verrouillés : chacun est un succès, comme attraper un Pikachu ou faire éclore 10 Œufs. Tu les trouves dans Réglages → Apparence.",
+    "Sans Pokémon sauvage autour, ta Glyph Matrix peut afficher un compagnon à la place de l’horloge. Choisis-le avec « Afficher sur la Glyph Matrix » dans sa fiche.",
+    "Chaque capture d’une espèce compte pour sa chaîne chromatique : à 10, 25 et 50 captures, son chromatique devient plus probable. La fiche de chaque Pokémon montre où tu en es.",
+    "Trop de Roucool ? Dans le PC, le filtre En double ne montre que les espèces que tu as plusieurs fois, et « Tous sauf un » les sélectionne pour les relâcher en gardant un de chaque."
   ]
 };

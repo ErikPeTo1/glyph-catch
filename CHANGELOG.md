@@ -2,6 +2,16 @@
 
 All notable changes to Glyph Catch since it was continued from [Equal Parts' original](https://github.com/equalparts/glyph-catch).
 
+## 3.6.0
+
+- Achievements: 15 extra PC Box wallpapers from Pokémon Emerald, each one unlocked by an achievement, like catching a Pikachu, hatching 10 Eggs or your first shiny. Locked ones show what it takes and how far you are.
+- Companion: with no wild Pokémon waiting, the Glyph Matrix can show a Pokémon of your choice instead of the clock, a bit dimmer so it's never mistaken for a wild one. Pick it from its details.
+- Each Pokémon's details show its shiny chain: the three steps, how far you are and, once you've caught one, its shiny.
+- In the PC: sort by "Most repeated", the "Repeated" filter (different forms count separately) and "All but one" to release duplicates while keeping one of each.
+- Legendary Pokémon are caught at level 70–80 (Arceus 80–90); gentle mythicals like Mew or Jirachi at 30–45.
+- Tyrogue can evolve into Hitmonlee and Hitmonchan too, not just Hitmontop.
+- 6 new tips.
+
 ## 3.5.0
 
 - Two home-screen widgets: your **team**, up to six favorites picked from each Pokémon's details, and the **Pokémon waiting** on your Glyph Matrix. They adapt to any size and update as you play.

@@ -27,6 +27,7 @@ import dev.equalparts.glyph_catch.screens.settings.AppearanceSettingsScreen
 import dev.equalparts.glyph_catch.screens.settings.BackupSettingsScreen
 import dev.equalparts.glyph_catch.screens.settings.DebugSettingsScreen
 import dev.equalparts.glyph_catch.screens.settings.GraphicsSettingsScreen
+import dev.equalparts.glyph_catch.screens.settings.HiddenSettingsScreen
 import dev.equalparts.glyph_catch.screens.settings.SettingsDestination
 import dev.equalparts.glyph_catch.screens.settings.SettingsSectionList
 import dev.equalparts.glyph_catch.screens.settings.SleepSettingsScreen
@@ -133,5 +134,6 @@ private fun SettingsContent(
         SettingsDestination.Graphics -> GraphicsSettingsScreen(modifier = modifier)
         SettingsDestination.Backup -> BackupSettingsScreen(modifier = modifier)
         SettingsDestination.Debug -> DebugSettingsScreen(modifier = modifier)
+        SettingsDestination.Hidden -> HiddenSettingsScreen(modifier = modifier)
     }
 }

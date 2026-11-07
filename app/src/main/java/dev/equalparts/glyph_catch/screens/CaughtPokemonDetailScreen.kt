@@ -1,6 +1,7 @@
 package dev.equalparts.glyph_catch.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -22,12 +24,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.equalparts.glyph_catch.AppBadge
 import dev.equalparts.glyph_catch.AppCard
 import dev.equalparts.glyph_catch.AppEmptyState
 import dev.equalparts.glyph_catch.AppScaffoldWithTopBar
@@ -54,6 +59,7 @@ import dev.equalparts.glyph_catch.util.levelChoiceTargets
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 private data class CaughtPokemonDetailInfo(
@@ -135,6 +141,7 @@ private fun CaughtPokemonDetailContent(
             )
         } else {
             CaughtPokemonSummaryCard(pokemon = pokemon, pokemonDao = pokemonDao)
+            ShinyChainCard(pokemon = pokemon, pokemonDao = pokemonDao)
 
             val choices = remember(pokemon) { levelChoiceTargets(pokemon) }
             if (choices.isNotEmpty()) {
@@ -188,6 +195,22 @@ private fun CaughtPokemonDetailContent(
                 ) {
                     Text(text = stringResource(R.string.caught_detail_stop_training))
                 }
+            }
+
+            var companionId by remember { mutableStateOf(preferencesManager.companionId) }
+            val isCompanion = companionId == pokemon.id
+            OutlinedButton(
+                onClick = {
+                    preferencesManager.companionId = if (isCompanion) null else pokemon.id
+                    // Choosing one means you want to see it
+                    if (!isCompanion) preferencesManager.glyphIdleDisplay = PreferencesManager.IDLE_COMPANION
+                    companionId = preferencesManager.companionId
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(if (isCompanion) R.string.companion_hide else R.string.companion_show)
+                )
             }
 
             var team by remember { mutableStateOf(preferencesManager.team) }
@@ -405,21 +428,6 @@ private fun CaughtPokemonInfoList(info: CaughtPokemonDetailInfo) {
                 )
             }
         }
-
-        info.speciesId?.let { speciesId ->
-            val context = LocalContext.current
-            val caught = remember(speciesId) { PreferencesManager(context).catchCounts[speciesId] ?: 0 }
-            val multiplier = EventHelpers.catchShinyMultiplier(caught)
-            val toNext = EventHelpers.catchesToNextStep(caught)
-            InfoRow(
-                label = stringResource(R.string.research_times_caught),
-                value = when {
-                    multiplier > 1 -> stringResource(R.string.research_shiny_bonus, caught, multiplier)
-                    toNext != null -> stringResource(R.string.research_next_step, caught, toNext)
-                    else -> caught.toString()
-                }
-            )
-        }
     }
 }
 
@@ -434,4 +442,96 @@ private fun poolLabel(pool: String): String = when (pool) {
     "Good Rod" -> stringResource(R.string.item_good_rod_name)
     "Super Rod" -> stringResource(R.string.item_super_rod_name)
     else -> stringResource(R.string.caught_detail_encounter_event)
+}
+
+/**
+ * The shiny chain: the more times a species is caught, the likelier its shiny. Shows the reward,
+ * the three steps and how far along the player is.
+ */
+@Composable
+private fun ShinyChainCard(pokemon: CaughtPokemon, pokemonDao: PokemonDao) {
+    val context = LocalContext.current
+    val shinyFound by remember(pokemon.speciesId) {
+        pokemonDao.watchShinySpeciesIds().map { pokemon.speciesId in it }
+    }.collectAsStateWithLifecycle(false)
+    val caught = remember(pokemon.speciesId) { PreferencesManager(context).catchCounts[pokemon.speciesId] ?: 0 }
+    val multiplier = EventHelpers.catchShinyMultiplier(caught)
+    val toNext = EventHelpers.catchesToNextStep(caught)
+    val steps = EventHelpers.CATCH_STREAK_STEPS
+
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(AppSizes.spacingLarge),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingLarge)
+        ) {
+            // The prize: this species' shiny, kept a mystery until you catch one
+            Box(contentAlignment = Alignment.Center) {
+                PokemonSpriteCircle(
+                    pokemonId = pokemon.speciesId,
+                    pokemonName = "",
+                    shiny = true,
+                    showSprite = shinyFound,
+                    form = pokemon.form,
+                    size = 64.dp
+                )
+                if (!shinyFound) {
+                    Text(text = "?", style = MaterialTheme.typography.titleLarge, color = Color.White)
+                }
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.shiny_chain_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (multiplier > 1) AppBadge(text = "×$multiplier")
+                }
+                Text(
+                    text = pluralStringResource(R.plurals.shiny_chain_catches, caught, caught),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                // One stretch per step: 0 → 10 → 25 → 50
+                Row(horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingTiny)) {
+                    steps.forEachIndexed { index, step ->
+                        val from = steps.getOrElse(index - 1) { 0 }
+                        val reached = caught >= step
+                        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                            LinearProgressIndicator(
+                                progress = { ((caught - from).toFloat() / (step - from)).coerceIn(0f, 1f) },
+                                modifier = Modifier.fillMaxWidth(),
+                                color = MaterialTheme.colorScheme.primary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                drawStopIndicator = { }
+                            )
+                            Text(
+                                text = "×${index + 2} · $step",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = if (reached) FontWeight.SemiBold else FontWeight.Normal,
+                                color = if (reached) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
+                            )
+                        }
+                    }
+                }
+                Text(
+                    text = if (toNext != null) {
+                        pluralStringResource(R.plurals.shiny_chain_next, toNext, toNext, multiplier + 1)
+                    } else {
+                        stringResource(R.string.shiny_chain_max, multiplier)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
 }

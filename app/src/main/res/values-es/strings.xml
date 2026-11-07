@@ -58,11 +58,6 @@
     <string name="settings_weather_title">Tiempo</string>
     <string name="settings_sleep_title">Sueño y hábitos</string>
     <string name="settings_weather_provider_random">Tiempo aleatorio cada día</string>
-    <string name="settings_section_graphics_description">Opciones de visualización</string>
-    <string name="settings_section_weather_description">Sincronizar el tiempo real</string>
-    <string name="settings_section_sleep_description">Configurar tu hora de dormir</string>
-    <string name="settings_graphics_clock_title">Reloj digital</string>
-    <string name="settings_graphics_clock_subtitle">Muestra la hora cuando no hay Pokémon</string>
     <string name="settings_graphics_brightness_title">Menos brillo</string>
     <string name="settings_graphics_brightness_subtitle">Atenúa los sprites del Glyph Toy</string>
     <string name="settings_graphics_note_cycle">Cambia de Glyph Toy y vuelve para aplicar los cambios.</string>
@@ -87,7 +82,6 @@
     <string name="settings_weather_status_save_changes">Guarda los cambios para sincronizar</string>
     <string name="settings_weather_status_add_api_key">Añade tu clave de API para sincronizar</string>
     <string name="settings_weather_status_select_location">Elige una ubicación para sincronizar</string>
-    <string name="settings_section_debug_description">Opciones para resolver problemas</string>
     <string name="settings_debug_title">Depuración</string>
     <string name="settings_debug_toggle_label">Guardar registros</string>
     <string name="settings_debug_toggle_subtitle">Solo para resolver problemas</string>

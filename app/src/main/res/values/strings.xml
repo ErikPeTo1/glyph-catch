@@ -61,11 +61,6 @@
     <string name="settings_weather_title">Weather</string>
     <string name="settings_sleep_title">Sleep &amp; habits</string>
     <string name="settings_weather_provider_random">Random daily weather</string>
-    <string name="settings_section_graphics_description">Change display options</string>
-    <string name="settings_section_weather_description">Enable live weather sync</string>
-    <string name="settings_section_sleep_description">Set bedtime schedule</string>
-    <string name="settings_graphics_clock_title">Digital clock</string>
-    <string name="settings_graphics_clock_subtitle">Display the time when idle</string>
     <string name="settings_graphics_brightness_title">Lower brightness</string>
     <string name="settings_graphics_brightness_subtitle">Dim Glyph Toy sprites</string>
     <string name="settings_graphics_note_cycle">Cycle the Glyph Toy to apply changes.</string>
@@ -91,7 +86,6 @@
     <string name="settings_weather_status_save_changes">Save changes to sync</string>
     <string name="settings_weather_status_add_api_key">Add your API key to enable sync</string>
     <string name="settings_weather_status_select_location">Select a location to enable sync</string>
-    <string name="settings_section_debug_description">Troubleshooting options</string>
     <string name="settings_debug_title">Debugging</string>
     <string name="settings_debug_toggle_label">Save logs</string>
     <string name="settings_debug_toggle_subtitle">For troubleshooting only</string>

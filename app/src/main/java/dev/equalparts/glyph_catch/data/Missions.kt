@@ -117,6 +117,7 @@ object Missions {
     suspend fun claim(db: PokemonDatabase, preferencesManager: PreferencesManager, progress: MissionProgress): Boolean {
         if (!progress.canClaim) return false
         val mission = progress.mission
+        preferencesManager.dailyStats.bump(DailyStats.MISSIONS_COMPLETED)
         preferencesManager.claimedMissions = (preferencesManager.claimedMissions + mission.id)
             .filter { it.startsWith("w:") || it.startsWith("d:${LocalDate.now()}") || isRecent(it) }
             .toSet()
