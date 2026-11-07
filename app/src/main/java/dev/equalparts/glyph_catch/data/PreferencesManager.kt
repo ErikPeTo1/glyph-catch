@@ -140,6 +140,29 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_COLOR_CHOICE_ASKED, false)
         set(value) = prefs.edit { putBoolean(KEY_COLOR_CHOICE_ASKED, value) }
 
+    /**
+     * How many times each species has been caught, released ones included (species id to
+     * count). Used for the shiny odds bonus.
+     */
+    val catchCounts: Map<Int, Int>
+        get() = prefs.getString(KEY_CATCH_COUNTS, null)
+            ?.let { runCatching { json.decodeFromString<Map<Int, Int>>(it) }.getOrNull() }
+            .orEmpty()
+
+    fun addCatch(speciesId: Int) {
+        val counts = catchCounts.toMutableMap()
+        counts[speciesId] = (counts[speciesId] ?: 0) + 1
+        prefs.edit { putString(KEY_CATCH_COUNTS, json.encodeToString(counts)) }
+    }
+
+    /** Saves made before catches were counted start from the Pokémon they still own. */
+    fun seedCatchCounts(counts: Map<Int, Int>) {
+        if (prefs.contains(KEY_CATCH_COUNTS)) return
+        prefs.edit { putString(KEY_CATCH_COUNTS, json.encodeToString(counts)) }
+    }
+
+    val hasCatchCounts: Boolean get() = prefs.contains(KEY_CATCH_COUNTS)
+
     /** The PC shows Pokémon in a 3-column grid instead of a list. */
     var caughtGridView: Boolean
         get() = prefs.getBoolean(KEY_CAUGHT_GRID_VIEW, false)
@@ -462,6 +485,7 @@ class PreferencesManager(context: Context) {
         private const val KEY_PROFESSOR_INTRO_SEEN = "professor_intro_seen"
         private const val KEY_BREEDER_MET = "breeder_met"
         private const val KEY_CAUGHT_GRID_VIEW = "caught_grid_view"
+        private const val KEY_CATCH_COUNTS = "catch_counts"
         private const val KEY_NPC_VARIANT_PREFIX = "npc_variant_female_"
         private const val KEY_HIDDEN_SETTINGS_UNLOCKED = "hidden_settings_unlocked"
         private const val KEY_PLAY_WHILE_IN_USE = "play_while_in_use"

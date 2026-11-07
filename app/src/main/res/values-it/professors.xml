@@ -78,6 +78,9 @@
         <item quantity="one">Riceverai una Caramella Rara per lui.</item>
         <item quantity="other">Riceverai una Caramella Rara per ognuno (%1$d).</item>
     </plurals>
+    <string name="research_times_caught">Volte catturato</string>
+    <string name="research_shiny_bonus">%1$d · cromatico ×%2$d</string>
+    <string name="research_next_step">%1$d · altri %2$d per più probabilità di cromatico</string>
     <string name="caught_screen_grid_view">Vista a griglia</string>
     <string name="caught_screen_list_view">Vista a elenco</string>
     <string name="hidden_settings_unlocked">Hai trovato un’impostazione segreta!</string>

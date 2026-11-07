@@ -78,6 +78,9 @@
         <item quantity="one">Tu recevras un Super Bonbon pour lui.</item>
         <item quantity="other">Tu recevras un Super Bonbon pour chacun (%1$d).</item>
     </plurals>
+    <string name="research_times_caught">Capturé</string>
+    <string name="research_shiny_bonus">%1$d · chromatique ×%2$d</string>
+    <string name="research_next_step">%1$d · encore %2$d pour de meilleures chances de chromatique</string>
     <string name="caught_screen_grid_view">Vue en grille</string>
     <string name="caught_screen_list_view">Vue en liste</string>
     <string name="hidden_settings_unlocked">Tu as trouvé un réglage secret !</string>

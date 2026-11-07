@@ -305,6 +305,7 @@ data class GameplayContext(
         var currentPartnerDays: Int = 0
         var ownedItems: Set<Item> = emptySet()
         var activeRegions: Set<Region> = Region.entries.toSet()
+        var catchCounts: Map<Int, Int> = emptyMap()
 
         /**
          * Yields `true` if the given Pokémon species is not in the current spawn queue
@@ -403,6 +404,10 @@ data class GameplayContext(
                     .toSet()
                 activeRegions = Region.active(ownedItems, preferences.disabledRegions)
                 EventHelpers.hasShinyCharm = Item.SHINY_CHARM in ownedItems && preferences.shinyCharmEnabled
+                if (!preferences.hasCatchCounts) {
+                    preferences.seedCatchCounts(dao.countOwnedBySpecies().associate { it.speciesId to it.count })
+                }
+                catchCounts = preferences.catchCounts
 
                 val activePartner = dao.getActiveTrainingPartner()
                 if (activePartner == null) {

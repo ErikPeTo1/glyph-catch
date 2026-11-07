@@ -78,6 +78,9 @@
         <item quantity="one">Recibirás un Caramelo Raro por él.</item>
         <item quantity="other">Recibirás un Caramelo Raro por cada uno (%1$d).</item>
     </plurals>
+    <string name="research_times_caught">Veces capturado</string>
+    <string name="research_shiny_bonus">%1$d · variocolor ×%2$d</string>
+    <string name="research_next_step">%1$d · %2$d más para mejorar la probabilidad de variocolor</string>
     <string name="caught_screen_grid_view">Vista en cuadrícula</string>
     <string name="caught_screen_list_view">Vista en lista</string>
     <string name="hidden_settings_unlocked">¡Has encontrado un ajuste secreto!</string>

@@ -48,6 +48,9 @@ data class CaughtPokemon(
     val form: String? = null
 )
 
+/** How many Pokémon of a species are in the PC. */
+data class SpeciesCount(val speciesId: Int, val count: Int)
+
 /**
  * Pokédex record. One per species ID.
  */
@@ -155,6 +158,9 @@ interface PokemonDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM caught_pokemon WHERE speciesId = :speciesId)")
     suspend fun isSpeciesOwned(speciesId: Int): Boolean
+
+    @Query("SELECT speciesId, COUNT(*) AS count FROM caught_pokemon GROUP BY speciesId")
+    suspend fun countOwnedBySpecies(): List<SpeciesCount>
 
     @Query("SELECT * FROM pokedex_records WHERE speciesId = :speciesId LIMIT 1")
     suspend fun getPokedexRecord(speciesId: Int): PokedexRecord?

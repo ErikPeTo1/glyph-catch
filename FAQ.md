@@ -38,7 +38,7 @@ Unfortunately not: this version is a separate app, so it installs alongside the 
 
 Glyph Catch does not collect any personal data.
 
-Once a day, the app checks this repository's GitHub Releases to tell you when a new version is available. Only the public release information is requested; nothing about you or your game is sent.
+When you open it, the app checks this repository's GitHub Releases to tell you when a new version is available. Only the public release information is requested; nothing about you or your game is sent.
 
 Live weather sync uses the popular OpenWeatherMap API with a geographical location that you configure, no live location. Refer to the [OpenWeatherMap privacy policy](https://openweather.co.uk/privacy-policy) for details.
 

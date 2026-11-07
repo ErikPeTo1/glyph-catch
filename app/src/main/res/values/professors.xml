@@ -93,6 +93,11 @@
         <item quantity="other">You\'ll get a Rare Candy for each one (%1$d).</item>
     </plurals>
 
+    <!-- Shiny odds for species caught many times -->
+    <string name="research_times_caught">Times caught</string>
+    <string name="research_shiny_bonus">%1$d · shiny odds ×%2$d</string>
+    <string name="research_next_step">%1$d · %2$d more for better shiny odds</string>
+
     <!-- PC layout -->
     <string name="caught_screen_grid_view">Grid view</string>
     <string name="caught_screen_list_view">List view</string>

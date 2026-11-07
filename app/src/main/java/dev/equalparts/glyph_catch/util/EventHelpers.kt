@@ -50,6 +50,19 @@ object EventHelpers {
 
     private const val SHINY_CHARM_FACTOR = 3
 
+    /** Catches of a species needed for each step of better shiny odds: ×2, ×3 and ×4. */
+    val CATCH_STREAK_STEPS = listOf(10, 25, 50)
+
+    /**
+     * Like the research levels in Legends: Arceus, the more you catch a species, the more
+     * likely its shiny becomes. Releasing doesn't undo catches.
+     */
+    fun catchShinyMultiplier(timesCaught: Int): Int = 1 + CATCH_STREAK_STEPS.count { timesCaught >= it }
+
+    /** Catches still needed for the next step, or `null` at the top. */
+    fun catchesToNextStep(timesCaught: Int): Int? =
+        CATCH_STREAK_STEPS.firstOrNull { timesCaught < it }?.minus(timesCaught)
+
     fun isHalloween(): Boolean {
         val cal = Calendar.getInstance()
         val month = cal.get(Calendar.MONTH)

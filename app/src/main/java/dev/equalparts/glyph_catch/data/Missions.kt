@@ -49,7 +49,7 @@ object Missions {
     )
 
     private val dailyRewards = listOf(
-        Item.RARE_CANDY to 2,
+        Item.RARE_CANDY to 30,
         Item.FIRE_STONE to 1,
         Item.WATER_STONE to 1,
         Item.THUNDER_STONE to 1,
@@ -64,7 +64,7 @@ object Missions {
         Item.DUSK_STONE to 1,
         Item.DAWN_STONE to 1,
         Item.ICE_STONE to 1,
-        Item.RARE_CANDY to 5
+        Item.RARE_CANDY to 100
     )
 
     fun weekStart(date: LocalDate): LocalDate = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))

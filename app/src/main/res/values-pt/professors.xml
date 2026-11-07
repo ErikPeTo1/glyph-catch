@@ -78,6 +78,9 @@
         <item quantity="one">Você vai receber um Doce Raro por ele.</item>
         <item quantity="other">Você vai receber um Doce Raro por cada um (%1$d).</item>
     </plurals>
+    <string name="research_times_caught">Vezes capturado</string>
+    <string name="research_shiny_bonus">%1$d · brilhante ×%2$d</string>
+    <string name="research_next_step">%1$d · mais %2$d para melhorar a chance de brilhante</string>
     <string name="caught_screen_grid_view">Visualização em grade</string>
     <string name="caught_screen_list_view">Visualização em lista</string>
     <string name="hidden_settings_unlocked">Você encontrou uma configuração secreta!</string>

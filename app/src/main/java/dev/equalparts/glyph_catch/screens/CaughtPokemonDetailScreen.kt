@@ -22,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +48,7 @@ import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.Stat
 import dev.equalparts.glyph_catch.data.displayName
 import dev.equalparts.glyph_catch.data.nameRes
+import dev.equalparts.glyph_catch.util.EventHelpers
 import dev.equalparts.glyph_catch.util.canHoldEverstone
 import dev.equalparts.glyph_catch.util.levelChoiceTargets
 import java.text.SimpleDateFormat
@@ -383,6 +385,21 @@ private fun CaughtPokemonInfoList(info: CaughtPokemonDetailInfo) {
                     value = poolLabel(pool)
                 )
             }
+        }
+
+        info.speciesId?.let { speciesId ->
+            val context = LocalContext.current
+            val caught = remember(speciesId) { PreferencesManager(context).catchCounts[speciesId] ?: 0 }
+            val multiplier = EventHelpers.catchShinyMultiplier(caught)
+            val toNext = EventHelpers.catchesToNextStep(caught)
+            InfoRow(
+                label = stringResource(R.string.research_times_caught),
+                value = when {
+                    multiplier > 1 -> stringResource(R.string.research_shiny_bonus, caught, multiplier)
+                    toNext != null -> stringResource(R.string.research_next_step, caught, toNext)
+                    else -> caught.toString()
+                }
+            )
         }
     }
 }

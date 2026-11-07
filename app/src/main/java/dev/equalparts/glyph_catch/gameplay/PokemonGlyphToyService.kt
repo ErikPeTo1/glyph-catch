@@ -33,6 +33,7 @@ import dev.equalparts.glyph_catch.gameplay.spawner.SpawnHistoryTracker
 import dev.equalparts.glyph_catch.gameplay.spawner.SpawnResult
 import dev.equalparts.glyph_catch.gameplay.spawner.SpawnRulesEngine
 import dev.equalparts.glyph_catch.gameplay.spawner.createSpawnRules
+import dev.equalparts.glyph_catch.util.EventHelpers
 import dev.equalparts.glyph_catch.util.GlyphMatrixService
 import dev.equalparts.glyph_catch.util.findLevelEvolutionTarget
 import java.util.Calendar
@@ -124,7 +125,11 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
         val weatherProvider = WeatherProviderFactory.create(applicationContext)
         gameplayContext = GameplayContext(applicationContext, weatherProvider, spawnQueue)
-        spawnEngine = SpawnRulesEngine(createSpawnRules(gameplayContext)) { gameplayContext.trainer.canSpawn(it.id) }
+        spawnEngine = SpawnRulesEngine(
+            rules = createSpawnRules(gameplayContext),
+            speciesFilter = { gameplayContext.trainer.canSpawn(it.id) },
+            shinyMultiplier = { EventHelpers.catchShinyMultiplier(gameplayContext.trainer.catchCounts[it.id] ?: 0) }
+        )
         spawnHistory = SpawnHistoryTracker(preferences = preferencesManager, pokemonDao = db.pokemonDao())
         cadenceController = SpawnCadenceController(spawnEngine = spawnEngine, history = spawnHistory)
 
@@ -630,6 +635,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             )
             db.pokemonDao().insert(caughtPokemon)
             db.pokemonDao().recordPokedexEntry(spawn.pokemon.id, spawn.isShiny, spawn.form)
+            preferencesManager.addCatch(spawn.pokemon.id)
             Log.d(TAG, "Successfully saved ${spawn.pokemon.name} to database")
 
             maybeAwardItems(spawn.pokemon.id, alreadyDiscovered)

@@ -2,6 +2,12 @@
 
 All notable changes to Glyph Catch since it was continued from [Equal Parts' original](https://github.com/equalparts/glyph-catch).
 
+## 3.4.0
+
+- The more times you catch a species, the more likely its shiny becomes: twice as likely after 10 catches, three times after 25 and four times after 50. Released Pokémon still count, and each Pokémon's details show how far you are.
+- Missions that reward Rare Candies now give 30 (daily) or 100 (weekly).
+- The app checks for updates every time you open it.
+
 ## 3.3.0
 
 - Electric-type Pokémon gather around your phone while it's charging, like Pikachu, Magnemite or Shinx. Joltik, which feeds on the tiniest static charge, gets a chance of its own.

@@ -19,7 +19,10 @@ data class AvailableUpdate(val version: String, val url: String)
  */
 object UpdateChecker {
     private const val REPOSITORY = "ErikPeTo1/glyph-catch"
-    private const val CHECK_INTERVAL_MILLIS = 24L * 60 * 60 * 1000
+
+    // Checked in the background every time the app opens; the short gap only avoids asking
+    // GitHub again when coming back to Home a moment later.
+    private const val CHECK_INTERVAL_MILLIS = 15L * 60 * 1000
     private const val PREFS_NAME = "glyph_catch_updates"
     private const val KEY_LAST_CHECK = "last_check"
     private const val KEY_LATEST_VERSION = "latest_version"

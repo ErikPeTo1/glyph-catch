@@ -14,7 +14,8 @@ import kotlin.random.Random
 class SpawnRulesEngine(
     val rules: SpawnRules,
     private val random: Random = Random.Default,
-    private val speciesFilter: (PokemonSpecies) -> Boolean = { true }
+    private val speciesFilter: (PokemonSpecies) -> Boolean = { true },
+    private val shinyMultiplier: (PokemonSpecies) -> Int = { 1 }
 ) {
     /**
      * Gets a map of pool names to effective percentages.
@@ -52,7 +53,7 @@ class SpawnRulesEngine(
             pool,
             screenOffDurationMinutes,
             System.currentTimeMillis(),
-            isShiny = random.nextInt(EventHelpers.shinyOdds()) == 0
+            isShiny = random.nextInt((EventHelpers.shinyOdds() / shinyMultiplier(pokemon)).coerceAtLeast(1)) == 0
         )
     }
 

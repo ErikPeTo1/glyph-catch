@@ -78,6 +78,9 @@
         <item quantity="one">Du erhältst dafür ein Sonderbonbon.</item>
         <item quantity="other">Du erhältst für jedes ein Sonderbonbon (%1$d).</item>
     </plurals>
+    <string name="research_times_caught">Gefangen</string>
+    <string name="research_shiny_bonus">%1$d · Schillernd ×%2$d</string>
+    <string name="research_next_step">%1$d · noch %2$d für bessere Schillernd-Chancen</string>
     <string name="caught_screen_grid_view">Rasteransicht</string>
     <string name="caught_screen_list_view">Listenansicht</string>
     <string name="hidden_settings_unlocked">Du hast eine geheime Einstellung gefunden!</string>

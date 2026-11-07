@@ -1,6 +1,9 @@
 // Professors, Pokégear and key items (res/values/professors.xml), merged into each language by build.js
 module.exports = {
   es: {
+    research_times_caught: "Veces capturado",
+    research_shiny_bonus: "%1$d · variocolor ×%2$d",
+    research_next_step: "%1$d · %2$d más para mejorar la probabilidad de variocolor",
     caught_screen_grid_view: "Vista en cuadrícula",
     caught_screen_list_view: "Vista en lista",
     rare_candy_no_evolution: "No evolucionará.",
@@ -119,6 +122,9 @@ module.exports = {
     item_reveal_glass_name: 'Espejo Veraz'
   },
   de: {
+    research_times_caught: "Gefangen",
+    research_shiny_bonus: "%1$d · Schillernd ×%2$d",
+    research_next_step: "%1$d · noch %2$d für bessere Schillernd-Chancen",
     caught_screen_grid_view: "Rasteransicht",
     caught_screen_list_view: "Listenansicht",
     rare_candy_no_evolution: "Es wird sich nicht entwickeln.",
@@ -237,6 +243,9 @@ module.exports = {
     item_reveal_glass_name: 'Wahrspiegel'
   },
   fr: {
+    research_times_caught: "Capturé",
+    research_shiny_bonus: "%1$d · chromatique ×%2$d",
+    research_next_step: "%1$d · encore %2$d pour de meilleures chances de chromatique",
     caught_screen_grid_view: "Vue en grille",
     caught_screen_list_view: "Vue en liste",
     rare_candy_no_evolution: "Il n’évoluera pas.",
@@ -355,6 +364,9 @@ module.exports = {
     item_reveal_glass_name: 'Miroir Sacré'
   },
   it: {
+    research_times_caught: "Volte catturato",
+    research_shiny_bonus: "%1$d · cromatico ×%2$d",
+    research_next_step: "%1$d · altri %2$d per più probabilità di cromatico",
     caught_screen_grid_view: "Vista a griglia",
     caught_screen_list_view: "Vista a elenco",
     rare_candy_no_evolution: "Non si evolverà.",
@@ -473,6 +485,9 @@ module.exports = {
     item_reveal_glass_name: 'Verispecchio'
   },
   pt: {
+    research_times_caught: "Vezes capturado",
+    research_shiny_bonus: "%1$d · brilhante ×%2$d",
+    research_next_step: "%1$d · mais %2$d para melhorar a chance de brilhante",
     caught_screen_grid_view: "Visualização em grade",
     caught_screen_list_view: "Visualização em lista",
     rare_candy_no_evolution: "Não vai evoluir.",
