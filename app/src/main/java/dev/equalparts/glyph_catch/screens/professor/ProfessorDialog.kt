@@ -47,9 +47,17 @@ import dev.equalparts.glyph_catch.ndotFontFamily
 import kotlinx.coroutines.delay
 
 /**
- * One box of text. Pages with a [gift] show the item the professor hands over.
+ * One box of text. Pages with a [gift] show the item the professor hands over; pages with
+ * [choices] wait for the player to pick one.
  */
-data class DialoguePage(val text: String, val gift: Item? = null, val egg: Boolean = false)
+data class DialoguePage(
+    val text: String,
+    val gift: Item? = null,
+    val egg: Boolean = false,
+    val choices: List<DialogueChoice> = emptyList()
+)
+
+class DialogueChoice(val label: String, val onPick: () -> Unit)
 
 /**
  * A professor talking, in the style of the main games: tap to show the whole line, tap again
@@ -96,6 +104,7 @@ fun CharacterDialog(
                 .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {
                     when {
                         shown < page.text.length -> shown = page.text.length
+                        page.choices.isNotEmpty() -> Unit
                         index < pages.lastIndex -> index++
                         else -> onFinish()
                     }
@@ -113,6 +122,12 @@ fun CharacterDialog(
                 page.gift?.let { GiftBadge(it) }
                 if (page.egg) EggBadge()
                 Spacer(modifier = Modifier.weight(1f))
+                if (page.choices.isNotEmpty() && shown >= page.text.length) {
+                    ChoiceBox(page.choices) { choice ->
+                        choice.onPick()
+                        if (index < pages.lastIndex) index++ else onFinish()
+                    }
+                }
                 Text(
                     text = name,
                     fontFamily = ndotFontFamily,
@@ -132,7 +147,7 @@ fun CharacterDialog(
                         color = Color.White,
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    if (shown >= page.text.length) {
+                    if (shown >= page.text.length && page.choices.isEmpty()) {
                         Text(
                             text = "▼",
                             color = Color.White,
@@ -140,6 +155,31 @@ fun CharacterDialog(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * The Yes/No box from the main games, on the right above the text.
+ */
+@Composable
+private fun ChoiceBox(choices: List<DialogueChoice>, onPick: (DialogueChoice) -> Unit) {
+    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+        Column(
+            modifier = Modifier
+                .border(2.dp, Color.White, RoundedCornerShape(12.dp))
+                .padding(vertical = 4.dp)
+        ) {
+            choices.forEach { choice ->
+                Text(
+                    text = "▶ " + choice.label,
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .clickable { onPick(choice) }
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                )
             }
         }
     }
@@ -257,6 +297,25 @@ object ProfessorScripts {
                 DialoguePage(context.getString(R.string.oak_charm_2), gift = Item.SHINY_CHARM),
                 DialoguePage(context.getString(R.string.oak_charm_3))
             )
+            ProfessorEvent.ExpShare -> {
+                val preferences = PreferencesManager(context)
+                listOf(
+                    DialoguePage(context.getString(R.string.oak_exp_share_1)),
+                    DialoguePage(context.getString(R.string.oak_exp_share_2), gift = Item.EXP_SHARE),
+                    DialoguePage(
+                        context.getString(R.string.oak_exp_share_ask),
+                        choices = listOf(
+                            DialogueChoice(context.getString(R.string.oak_exp_share_on)) {
+                                preferences.expShareEnabled = true
+                            },
+                            DialogueChoice(context.getString(R.string.oak_exp_share_off)) {
+                                preferences.expShareEnabled = false
+                            }
+                        )
+                    ),
+                    DialoguePage(context.getString(R.string.oak_exp_share_3))
+                )
+            }
             ProfessorEvent.TownMap -> listOf(
                 DialoguePage(context.getString(R.string.oak_map_1)),
                 DialoguePage(context.getString(R.string.oak_map_2), gift = Item.TOWN_MAP),

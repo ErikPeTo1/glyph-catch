@@ -72,7 +72,19 @@ fun InventoryItemContent(
         durationMinutes != null -> TimedItemActions(db, item, name, durationMinutes)
         item == Item.REPEL -> RepelToggleCard(preferencesManager)
         item == Item.TOWN_MAP -> RegionFilterCard(db, preferencesManager)
-        item == Item.SHINY_CHARM -> ShinyCharmToggleCard(preferencesManager)
+        item == Item.SHINY_CHARM -> KeyItemToggleCard(
+            label = stringResource(R.string.item_shiny_charm_toggle_label),
+            subtitle = stringResource(R.string.item_shiny_charm_toggle_subtitle),
+            initial = preferencesManager.shinyCharmEnabled
+        ) { on ->
+            preferencesManager.shinyCharmEnabled = on
+            EventHelpers.hasShinyCharm = on
+        }
+        item == Item.EXP_SHARE -> KeyItemToggleCard(
+            label = stringResource(R.string.item_exp_share_toggle_label),
+            subtitle = stringResource(R.string.item_exp_share_toggle_subtitle),
+            initial = preferencesManager.expShareEnabled
+        ) { on -> preferencesManager.expShareEnabled = on }
         item.isKeyItem -> Unit
         else -> UseOnPokemonButton(name, quantity) { onSelectPokemonClick(item) }
     }
@@ -303,8 +315,8 @@ private fun RegionFilterCard(db: PokemonDatabase, preferencesManager: Preference
  * The Shiny Charm can be switched off, for anyone who prefers the usual odds.
  */
 @Composable
-private fun ShinyCharmToggleCard(preferencesManager: PreferencesManager) {
-    var enabled by remember { mutableStateOf(preferencesManager.shinyCharmEnabled) }
+private fun KeyItemToggleCard(label: String, subtitle: String, initial: Boolean, onChange: (Boolean) -> Unit) {
+    var enabled by remember { mutableStateOf(initial) }
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -314,12 +326,12 @@ private fun ShinyCharmToggleCard(preferencesManager: PreferencesManager) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.item_shiny_charm_toggle_label),
+                    text = label,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = stringResource(R.string.item_shiny_charm_toggle_subtitle),
+                    text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -328,8 +340,7 @@ private fun ShinyCharmToggleCard(preferencesManager: PreferencesManager) {
                 checked = enabled,
                 onCheckedChange = { on ->
                     enabled = on
-                    preferencesManager.shinyCharmEnabled = on
-                    EventHelpers.hasShinyCharm = on
+                    onChange(on)
                 }
             )
         }

@@ -34,11 +34,12 @@ class RegionsTest {
     fun `an advanced save gets everything in order, ending with the legendary items`() {
         val events = ProfessorEvents.pending(false, 649, emptySet())
         assertEquals(ProfessorEvent.Intro, events.first())
-        assertEquals(ProfessorEvent.TownMap, events[5])
-        assertEquals(ProfessorEvent.ShinyCharm, events[6])
-        val gifts = events.drop(7).flatMap { it.gifts }
+        assertEquals(ProfessorEvent.ExpShare, events[5])
+        assertEquals(ProfessorEvent.TownMap, events[6])
+        assertEquals(ProfessorEvent.ShinyCharm, events[7])
+        val gifts = events.drop(8).flatMap { it.gifts }
         assertEquals(LegendaryItems.species.keys, gifts.toSet())
-        events.drop(7).forEach { event ->
+        events.drop(8).forEach { event ->
             event.gifts.forEach { assertEquals(event.professor, LegendaryItems.region(it).professor) }
         }
     }
@@ -70,5 +71,15 @@ class RegionsTest {
         assertEquals(Region.entries.toSet(), Region.active(owned, Region.entries.map { it.name }.toSet()))
         // Without the map, switches are ignored
         assertEquals(Region.entries.toSet(), Region.active(REGION_POKEDEXES.toSet(), setOf("KANTO")))
+    }
+
+    @Test
+    fun `Oak gives the Exp Share once Unova is unlocked`() {
+        val before = setOf(Item.POKEDEX_KANTO, Item.POKEDEX_JOHTO, Item.POKEDEX_HOENN, Item.POKEDEX_SINNOH)
+        assertTrue(ProfessorEvent.ExpShare !in ProfessorEvents.pending(true, 299, before))
+        assertTrue(ProfessorEvent.ExpShare in ProfessorEvents.pending(true, 300, before))
+        assertTrue(
+            ProfessorEvent.ExpShare !in ProfessorEvents.pending(true, 300, before + Item.POKEDEX_UNOVA + Item.EXP_SHARE)
+        )
     }
 }

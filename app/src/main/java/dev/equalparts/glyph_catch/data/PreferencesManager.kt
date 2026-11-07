@@ -3,6 +3,8 @@ package dev.equalparts.glyph_catch.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import dev.equalparts.glyph_catch.widget.WidgetBackground
+import dev.equalparts.glyph_catch.widget.WidgetUpdater
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +21,7 @@ import kotlinx.serialization.json.Json
  * Manages app preferences including weather provider settings.
  */
 class PreferencesManager(context: Context) {
+    private val appContext = context.applicationContext
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -120,7 +123,10 @@ class PreferencesManager(context: Context) {
 
     var colorSprites: Boolean
         get() = prefs.getBoolean(KEY_COLOR_SPRITES, false)
-        set(value) = prefs.edit { putBoolean(KEY_COLOR_SPRITES, value) }
+        set(value) {
+            prefs.edit { putBoolean(KEY_COLOR_SPRITES, value) }
+            WidgetUpdater.refresh(appContext)
+        }
 
     fun watchColorSprites(): Flow<Boolean> = preferenceFlow(
         shouldEmit = { key -> key == KEY_COLOR_SPRITES },
@@ -188,7 +194,41 @@ class PreferencesManager(context: Context) {
     /** Pokémon, Eggs and training keep going while the phone is in use, as if it were locked. */
     var playWhileInUse: Boolean
         get() = prefs.getBoolean(KEY_PLAY_WHILE_IN_USE, false)
-        set(value) = prefs.edit { putBoolean(KEY_PLAY_WHILE_IN_USE, value) }
+        set(value) {
+            prefs.edit { putBoolean(KEY_PLAY_WHILE_IN_USE, value) }
+            WidgetUpdater.refresh(appContext)
+        }
+
+    /** Up to six favorite Pokémon (caught ids), shown on the team widget. */
+    var team: List<String>
+        get() = prefs.getString(KEY_TEAM, null)
+            ?.let { runCatching { json.decodeFromString<List<String>>(it) }.getOrNull() }
+            .orEmpty()
+        set(value) {
+            prefs.edit { putString(KEY_TEAM, json.encodeToString(value.distinct().take(TEAM_SIZE))) }
+            WidgetUpdater.refresh(appContext)
+        }
+
+    /** Background of the waiting Pokémon widget; by default it follows the Pokémon. */
+    var queueWidgetBackground: String
+        get() = prefs.getString(KEY_QUEUE_WIDGET_BACKGROUND, null) ?: WidgetBackground.Auto.encode()
+        set(value) {
+            prefs.edit { putString(KEY_QUEUE_WIDGET_BACKGROUND, value) }
+            WidgetUpdater.refresh(appContext)
+        }
+
+    /** Background of the team widget, as saved by [WidgetBackground.encode]. */
+    var widgetBackground: String
+        get() = prefs.getString(KEY_WIDGET_BACKGROUND, null) ?: WidgetBackground.DEFAULT.encode()
+        set(value) {
+            prefs.edit { putString(KEY_WIDGET_BACKGROUND, value) }
+            WidgetUpdater.refresh(appContext)
+        }
+
+    /** The Exp. Share can be switched off from the Bag. */
+    var expShareEnabled: Boolean
+        get() = prefs.getBoolean(KEY_EXP_SHARE_ENABLED, true)
+        set(value) = prefs.edit { putBoolean(KEY_EXP_SHARE_ENABLED, value) }
 
     /** The Shiny Charm can be switched off from the Bag. */
     var shinyCharmEnabled: Boolean
@@ -460,7 +500,11 @@ class PreferencesManager(context: Context) {
     }
 
     companion object {
+        const val TEAM_SIZE = 6
         private const val PREFS_NAME = "glyph_catch_prefs"
+        private const val KEY_TEAM = "team"
+        private const val KEY_WIDGET_BACKGROUND = "widget_background"
+        private const val KEY_QUEUE_WIDGET_BACKGROUND = "queue_widget_background"
         private const val KEY_RELEASED_COUNT = "released_count"
         private const val KEY_COLOR_SPRITES = "color_sprites"
         private const val KEY_RARITY_BOOST_UNTIL = "rarity_boost_until"
@@ -490,6 +534,7 @@ class PreferencesManager(context: Context) {
         private const val KEY_HIDDEN_SETTINGS_UNLOCKED = "hidden_settings_unlocked"
         private const val KEY_PLAY_WHILE_IN_USE = "play_while_in_use"
         private const val KEY_SHINY_CHARM_ENABLED = "shiny_charm_enabled"
+        private const val KEY_EXP_SHARE_ENABLED = "exp_share_enabled"
         private const val KEY_COLOR_CHOICE_ASKED = "color_choice_asked"
         private const val KEY_DISABLED_REGIONS = "disabled_regions"
         private const val KEY_RUMOR_TURN_PREFIX = "rumor_turn_"

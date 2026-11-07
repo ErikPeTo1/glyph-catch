@@ -109,6 +109,7 @@ val Item.isKeyItem: Boolean get() = this == Item.POKEDEX_KANTO ||
     this in REGION_POKEDEXES ||
     this == Item.TOWN_MAP ||
     this == Item.SHINY_CHARM ||
+    this == Item.EXP_SHARE ||
     this in LegendaryItems.species
 
 /**

@@ -15,12 +15,14 @@ Set Glyph Catch as your **Always-on Glyph Toy**. The app tells you when there's 
 - Professors who unlock each region and call you with rumors
 - Shinies, eggs and legendary Pokémon with their own items
 - Charge your phone and Electric types show up
+- Home-screen widgets with your team, framed in the PC Box wallpapers
 
 ![Home, Professor Oak and Pokédex](screenshots-1.png)
 ![Pokémon, Bag and the black-and-white style](screenshots-2.png)
+<img src="widget-team.png" alt="Team widget" width="280">
 
 Free, no ads, no data collected.
 
 ## Credits
 
-Created by **[Equal Parts](https://github.com/equalparts/glyph-catch)**, including the hand-made Kanto sprites, and continued here with his permission. Sprites and data from [PokeAPI](https://pokeapi.co/), [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/) and [Bulbagarden Archives](https://archives.bulbagarden.net/).
+Created by **[Equal Parts](https://github.com/equalparts/glyph-catch)**, including the hand-made Kanto sprites, and continued here with his permission. Sprites and data from [PokeAPI](https://pokeapi.co/), [Pokémon Showdown](https://play.pokemonshowdown.com/sprites/trainers/), [Bulbagarden Archives](https://archives.bulbagarden.net/) and [pret/pokeemerald](https://github.com/pret/pokeemerald) (PC Box wallpapers). Settings icons from [Material Icons](https://github.com/google/material-design-icons) (Apache 2.0).

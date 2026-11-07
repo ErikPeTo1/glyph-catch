@@ -1,6 +1,7 @@
 package dev.equalparts.glyph_catch.screens.settings
 
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,42 +37,59 @@ import dev.equalparts.glyph_catch.AppCard
 import dev.equalparts.glyph_catch.AppSizes
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun SettingsSectionList(modifier: Modifier, onSectionSelected: (SettingsDestination) -> Unit) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val preferences = remember { PreferencesManager(context) }
 
     Column(
         modifier = modifier.verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(AppSizes.spacingLarge)
     ) {
         SettingsSectionCard(
-            title = stringResource(R.string.settings_weather_title),
-            description = stringResource(R.string.settings_section_weather_description),
-            onClick = { onSectionSelected(SettingsDestination.Weather) }
+            icon = R.drawable.ic_settings_palette,
+            title = stringResource(R.string.settings_appearance_title),
+            description = stringResource(R.string.settings_section_appearance_description),
+            onClick = { onSectionSelected(SettingsDestination.Appearance) }
         )
 
         SettingsSectionCard(
-            title = stringResource(R.string.settings_sleep_title),
-            description = stringResource(R.string.settings_section_sleep_description),
-            onClick = { onSectionSelected(SettingsDestination.Sleep) }
-        )
-
-        SettingsSectionCard(
+            icon = R.drawable.ic_settings_lightbulb,
             title = stringResource(R.string.settings_graphics_title),
-            description = stringResource(R.string.settings_section_graphics_description),
+            description = stringResource(R.string.settings_section_toy_description),
             onClick = { onSectionSelected(SettingsDestination.Graphics) }
         )
 
         SettingsSectionCard(
+            icon = R.drawable.ic_settings_wb_sunny,
+            title = stringResource(R.string.settings_weather_title),
+            description = weatherSummary(preferences),
+            onClick = { onSectionSelected(SettingsDestination.Weather) }
+        )
+
+        SettingsSectionCard(
+            icon = R.drawable.ic_settings_bedtime,
+            title = stringResource(R.string.settings_sleep_title),
+            description = stringResource(R.string.settings_summary_sleep, bedtimeText(preferences.bedtimeMinutes)),
+            onClick = { onSectionSelected(SettingsDestination.Sleep) }
+        )
+
+        SettingsSectionCard(
+            icon = R.drawable.ic_settings_backup,
             title = stringResource(R.string.settings_backup_title),
             description = stringResource(R.string.settings_section_backup_description),
             onClick = { onSectionSelected(SettingsDestination.Backup) }
         )
 
         SettingsSectionCard(
+            icon = R.drawable.ic_settings_bug_report,
             title = stringResource(R.string.settings_debug_title),
-            description = stringResource(R.string.settings_section_debug_description),
+            description = stringResource(R.string.settings_section_report_description),
             onClick = { onSectionSelected(SettingsDestination.Debug) }
         )
 
@@ -146,7 +166,20 @@ private fun VersionAndHiddenSettings() {
 private const val HIDDEN_SETTINGS_TAPS = 7
 
 @Composable
-private fun SettingsSectionCard(title: String, description: String, onClick: () -> Unit) {
+private fun weatherSummary(preferences: PreferencesManager): String {
+    val city = preferences.weatherLocationName
+    return if (preferences.useOpenWeatherMap && !city.isNullOrBlank()) {
+        stringResource(R.string.settings_summary_weather_live, city)
+    } else {
+        stringResource(R.string.settings_weather_provider_random)
+    }
+}
+
+private fun bedtimeText(minutes: Int): String =
+    LocalTime.of(minutes / 60, minutes % 60).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
+
+@Composable
+private fun SettingsSectionCard(@DrawableRes icon: Int, title: String, description: String, onClick: () -> Unit) {
     AppCard(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick
@@ -157,6 +190,12 @@ private fun SettingsSectionCard(title: String, description: String, onClick: () 
                 .padding(AppSizes.spacingLarge),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(AppSizes.spacingLarge))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,

@@ -2,6 +2,14 @@
 
 All notable changes to Glyph Catch since it was continued from [Equal Parts' original](https://github.com/equalparts/glyph-catch).
 
+## 3.5.0
+
+- Two home-screen widgets: your **team**, up to six favorites picked from each Pokémon's details, and the **Pokémon waiting** on your Glyph Matrix. They adapt to any size and update as you play.
+- Widget backgrounds: any color with RGB and opacity sliders, or one of the 16 PC Box wallpapers from Pokémon Emerald. The waiting Pokémon widget can also pick the box that fits whoever is at the front.
+- Exp. Share: Professor Oak gives it to you once you reach Unova and asks whether you want it on. With it on, your whole team earns experience while your phone is locked, a little less than the Pokémon you're training. Switch it from the Bag.
+- Settings are easier to find: a new Appearance section, icons, and summaries of your weather and bedtime.
+- The Glyph Matrix could stop updating for a while when the system stopped sending its minute ticks. Glyph Catch now keeps its own clock as a backup.
+
 ## 3.4.0
 
 - The more times you catch a species, the more likely its shiny becomes: twice as likely after 10 catches, three times after 25 and four times after 50. Released Pokémon still count, and each Pokémon's details show how far you are.

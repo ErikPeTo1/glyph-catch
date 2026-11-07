@@ -55,6 +55,7 @@ fun Item.nameRes(): Int = when (this) {
     Item.REVEAL_GLASS -> R.string.item_reveal_glass_name
     Item.POKEDEX_KANTO -> R.string.item_pokedex_kanto_name
     Item.SHINY_CHARM -> R.string.item_shiny_charm_name
+    Item.EXP_SHARE -> R.string.item_exp_share_name
 }
 
 @StringRes
@@ -79,6 +80,7 @@ fun Item.descriptionRes(): Int = when (this) {
     Item.POKEDEX_SINNOH, Item.POKEDEX_UNOVA -> R.string.item_pokedex_description
     Item.TOWN_MAP -> R.string.item_town_map_description
     Item.SHINY_CHARM -> R.string.item_shiny_charm_description
+    Item.EXP_SHARE -> R.string.item_exp_share_description
     Item.OLD_SEA_MAP,
     Item.TIDAL_BELL,
     Item.CLEAR_BELL,

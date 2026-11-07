@@ -36,8 +36,11 @@ import dev.equalparts.glyph_catch.gameplay.spawner.createSpawnRules
 import dev.equalparts.glyph_catch.util.EventHelpers
 import dev.equalparts.glyph_catch.util.GlyphMatrixService
 import dev.equalparts.glyph_catch.util.findLevelEvolutionTarget
+import dev.equalparts.glyph_catch.widget.WidgetUpdater
+import dev.equalparts.glyph_catch.widget.decodeQueue
 import java.util.Calendar
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.floor
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -76,6 +79,7 @@ data class PersistentSpawn(
 class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
     private var coroutineScope: CoroutineScope? = null
+    private val lifecycleLogScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private lateinit var db: PokemonDatabase
     private lateinit var preferencesManager: PreferencesManager
@@ -142,6 +146,21 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         debugCapture = DebugCaptureManager.shared(applicationContext)
 
         registerReceiver(unlockReceiver, IntentFilter(Intent.ACTION_USER_PRESENT), RECEIVER_NOT_EXPORTED)
+        instance = this
+        logLifecycle("toy_created")
+    }
+
+    /**
+     * Notes when the system starts, connects, disconnects or stops the toy. Runs on its own
+     * scope so it still gets written while the service is being destroyed.
+     */
+    private fun logLifecycle(event: String) {
+        if (!::gameplayContext.isInitialized) return
+        val snapshot = runCatching { currentDebugSnapshot() }.getOrElse { DebugSnapshot.EMPTY }
+        val aod = aodActive
+        lifecycleLogScope.launch {
+            debugCapture.log(event, snapshot) { buildJsonObject { put("aodActive", JsonPrimitive(aod)) } }
+        }
     }
 
     /**
@@ -159,7 +178,9 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Called by the system when the service is no longer used and is being removed.
      */
     override fun onDestroy() {
+        logLifecycle("toy_destroyed")
         super.onDestroy()
+        if (instance === this) instance = null
         runCatching { unregisterReceiver(unlockReceiver) }
         if (::animationCoordinator.isInitialized) {
             animationCoordinator.cancelActive()
@@ -184,6 +205,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Called by the system when the Glyph Toy is activated.
      */
     override fun performOnServiceConnected(context: Context, glyphMatrixManager: GlyphMatrixManager) {
+        logLifecycle("toy_connected")
         restoreSpawnQueue()
         aodActive = false
         tick()
@@ -194,6 +216,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Called by the system when the Glyph Toy is deactivated.
      */
     override fun performOnServiceDisconnected(context: Context) {
+        logLifecycle("toy_disconnected")
         super.performOnServiceDisconnected(context)
         localClockJob?.cancel()
         localClockJob = null
@@ -206,21 +229,19 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     override fun onAodTick() {
         if (!aodActive) {
             aodActive = true
-            if (!preferencesManager.playWhileInUse) {
-                localClockJob?.cancel()
-                localClockJob = null
-            }
+            logLifecycle("aod_started")
         }
         tick()
     }
 
     /**
-     * Starts a local clock that ticks every minute until AOD becomes active.
+     * Starts a local clock that ticks every minute. It stays on with AOD too, as a backup for the
+     * system's minute ticks.
      */
     private fun startLocalClock() {
         localClockJob?.cancel()
         localClockJob = coroutineScope?.launch(Dispatchers.Main) {
-            while (!aodActive || preferencesManager.playWhileInUse) {
+            while (true) {
                 val calendar = Calendar.getInstance()
                 val secondsUntilNextMinute = 60 - calendar.get(Calendar.SECOND)
                 val millisUntilNextMinute = secondsUntilNextMinute * 1000L - calendar.get(Calendar.MILLISECOND)
@@ -340,18 +361,30 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      */
     private suspend fun applyTrainingExp(minutesOff: Int, isBedtime: Boolean) {
         val dao = db.pokemonDao()
-        val active = dao.getActiveTrainingPartner() ?: return
+        val active = dao.getActiveTrainingPartner()
         val intervalBonus = if (!isBedtime && minutesOff > 0 && minutesOff % TRAINING_EXP_BONUS_INTERVAL_MINUTES == 0) {
             TRAINING_EXP_BONUS_AMOUNT
         } else {
             0
         }
         val gainedExp = TRAINING_EXP_PER_MINUTE + intervalBonus
-        val result = LevelCalculator.expResult(active.level, active.exp, gainedExp) ?: return
-        dao.updateTrainingProgress(active.id, result.exp, result.level)
+        active?.let { giveExp(it, gainedExp) }
+
+        // With the Exp. Share on, the rest of the team earns a bit less than the training partner
+        val expShare = Item.EXP_SHARE in gameplayContext.trainer.ownedItems && preferencesManager.expShareEnabled
+        if (!expShare) return
+        preferencesManager.team
+            .filter { it != active?.id }
+            .mapNotNull { dao.getCaughtPokemon(it) }
+            .forEach { giveExp(it, gainedExp * EXP_SHARE_PERCENT / 100) }
+    }
+
+    private suspend fun giveExp(pokemon: CaughtPokemon, amount: Int) {
+        val result = LevelCalculator.expResult(pokemon.level, pokemon.exp, amount) ?: return
+        db.pokemonDao().updateTrainingProgress(pokemon.id, result.exp, result.level)
         if (result.leveledUp) {
-            preferencesManager.dailyStats.add(Stat.LEVELS, result.level - active.level)
-            maybeTriggerEvolution(active.copy(level = result.level, exp = result.exp))
+            preferencesManager.dailyStats.add(Stat.LEVELS, result.level - pokemon.level)
+            maybeTriggerEvolution(pokemon.copy(level = result.level, exp = result.exp))
         }
     }
 
@@ -667,6 +700,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
             showCatchAnimation(faster = queueSnapshot.isNotEmpty())
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             Log.e(TAG, "Error saving caught Pokémon", e)
             DebugExceptionTracker.log(applicationContext, e, currentDebugSnapshot(), "catch_pokemon")
         }
@@ -803,6 +837,15 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
                 }
             Log.d(TAG, "Saved ${persistentSpawns.size} spawns to storage")
         }
+        WidgetUpdater.refresh(applicationContext)
+    }
+
+    /**
+     * Catches every waiting Pokémon at once, from the queue widget.
+     */
+    private suspend fun catchAll() {
+        val waiting = synchronized(spawnQueue) { spawnQueue.toList() }
+        waiting.forEach { catchPokemon(it) }
     }
 
     /**
@@ -917,6 +960,18 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         private val ROD_POOLS = setOf("Old Rod", "Good Rod", "Super Rod")
         private const val PREFS_NAME = "pokemon_glyph_toy_prefs"
         private const val PREFS_KEY_SPAWN_QUEUE = "spawn_queue"
+
+        @Volatile
+        private var instance: PokemonGlyphToyService? = null
+
+        /** The Pokémon waiting on the Glyph Matrix, as last saved. */
+        fun readSavedQueue(context: Context): List<PersistentSpawn> =
+            decodeQueue(context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).getString(PREFS_KEY_SPAWN_QUEUE, null))
+
+        /** Only works while the Glyph Toy is running, which is when Pokémon are waiting. */
+        suspend fun catchAllFromWidget() {
+            instance?.catchAll()
+        }
         private const val SLEEP_BONUS_DURATION_MILLIS = 24L * 60 * 60 * 1000
         private const val EVOLUTION_STONE_DROP_CHANCE = 0.10
         private const val LINKING_CORD_DROP_CHANCE = 0.02
@@ -931,6 +986,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         private const val TRAINING_EXP_PER_MINUTE = 3
         private const val TRAINING_EXP_BONUS_INTERVAL_MINUTES = 20
         private const val TRAINING_EXP_BONUS_AMOUNT = 90
+        private const val EXP_SHARE_PERCENT = 67
 
         private val EVOLUTION_STONES = listOf(
             Item.FIRE_STONE,

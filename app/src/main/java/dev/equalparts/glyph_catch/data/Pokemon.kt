@@ -79,7 +79,8 @@ enum class Item {
     DNA_SPLICERS,
     REVEAL_GLASS,
     POKEDEX_KANTO,
-    SHINY_CHARM
+    SHINY_CHARM,
+    EXP_SHARE
 }
 
 /**

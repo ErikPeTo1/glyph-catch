@@ -39,6 +39,12 @@
     <string name="oak_charm_1">Incredible! You\'ve registered all %1$d Pokémon. The national Pokédex is complete!</string>
     <string name="oak_charm_2">Take this Shiny Charm. They say it attracts shiny Pokémon.</string>
     <string name="oak_charm_3">From now on, shinies will be three times as common. Keep looking!</string>
+    <string name="oak_exp_share_1">So you\'ve made it to Unova! Your Pokémon must be working hard alongside you.</string>
+    <string name="oak_exp_share_2">Take this Exp. Share. While it\'s on, every Pokémon in your team earns experience, a little less than the one you\'re training.</string>
+    <string name="oak_exp_share_ask">Some trainers prefer to train just one Pokémon at a time. Do you want it switched on?</string>
+    <string name="oak_exp_share_on">Yes</string>
+    <string name="oak_exp_share_off">No</string>
+    <string name="oak_exp_share_3">You can switch it on and off from your Bag. Pick your team from each Pokémon\'s details in the PC.</string>
     <string name="oak_map_3">You\'ll find it in your Bag. Keep up the good work!</string>
 
     <!-- Key items for legendary Pokémon -->
@@ -102,6 +108,52 @@
     <string name="caught_screen_grid_view">Grid view</string>
     <string name="caught_screen_list_view">List view</string>
 
+    <!-- Settings -->
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_section_appearance_description">Color sprites and widget backgrounds</string>
+    <string name="settings_section_toy_description">Clock and brightness on the Glyph Matrix</string>
+    <string name="settings_section_report_description">Logs to report a problem</string>
+    <string name="settings_summary_weather_live">Live weather · %1$s</string>
+    <string name="settings_summary_sleep">Bedtime: %1$s</string>
+    <string name="widget_howto">To add a widget, long-press your home screen, tap Widgets and look for Glyph Catch. Pick your team from each Pokémon\'s details in the PC.</string>
+
+    <!-- Widgets -->
+    <string name="widget_team_name">Team</string>
+    <string name="widget_team_description">Up to six favorite Pokémon on your home screen</string>
+    <string name="widget_team_empty">Add Pokémon to your team from their details in the PC</string>
+    <string name="widget_queue_name">Waiting Pokémon</string>
+    <string name="widget_queue_description">The Pokémon waiting on your Glyph Matrix</string>
+    <string name="widget_queue_count">Waiting: %1$d</string>
+    <string name="widget_catch_all">Catch all</string>
+    <string name="team_add">Add to team</string>
+    <string name="team_remove">Remove from team</string>
+    <string name="team_full">Team full (6)</string>
+    <string name="widget_bg_title">Widget background</string>
+    <string name="widget_bg_subtitle">Each home-screen widget has its own</string>
+    <string name="widget_bg_auto">Automatic</string>
+    <string name="widget_bg_auto_hint">Automatic picks the box that fits the Pokémon waiting at the front: rods, Eggs, events and types each have theirs.</string>
+    <string name="widget_bg_red">Red</string>
+    <string name="widget_bg_green">Green</string>
+    <string name="widget_bg_blue">Blue</string>
+    <string name="widget_bg_opacity">Opacity</string>
+    <string name="widget_bg_boxes">PC Boxes</string>
+    <string name="box_wallpaper_forest">Forest</string>
+    <string name="box_wallpaper_city">City</string>
+    <string name="box_wallpaper_desert">Desert</string>
+    <string name="box_wallpaper_savanna">Savanna</string>
+    <string name="box_wallpaper_crag">Crag</string>
+    <string name="box_wallpaper_volcano">Volcano</string>
+    <string name="box_wallpaper_snow">Snow</string>
+    <string name="box_wallpaper_cave">Cave</string>
+    <string name="box_wallpaper_beach">Beach</string>
+    <string name="box_wallpaper_seafloor">Seafloor</string>
+    <string name="box_wallpaper_river">River</string>
+    <string name="box_wallpaper_sky">Sky</string>
+    <string name="box_wallpaper_polkadot">Polka-dot</string>
+    <string name="box_wallpaper_pokecenter">Pokémon Center</string>
+    <string name="box_wallpaper_machine">Machine</string>
+    <string name="box_wallpaper_plain">Plain</string>
+
     <!-- Hidden setting -->
     <string name="hidden_settings_unlocked">You found a secret setting!</string>
     <string name="hidden_play_in_use_title">Catch while using the phone</string>
@@ -114,6 +166,10 @@
     <string name="item_pokedex_description">A gift from %1$s. Pokémon from %2$s can appear.</string>
     <string name="item_town_map_description">A gift from Professor Oak. Choose which regions\' Pokémon can appear.</string>
     <string name="item_legendary_description">A key item from %1$s. Without it, %2$s won\'t appear.</string>
+    <string name="item_exp_share_name">Exp. Share</string>
+    <string name="item_exp_share_description">A gift from Professor Oak. While your phone is locked, your whole team earns experience, a little less than the Pokémon you\'re training.</string>
+    <string name="item_exp_share_toggle_label">Use Exp. Share</string>
+    <string name="item_exp_share_toggle_subtitle">Your team earns experience too</string>
     <string name="item_shiny_charm_name">Shiny Charm</string>
     <string name="item_shiny_charm_description">The reward from Professor Oak for completing the Pokédex. Shiny Pokémon are three times as common.</string>
     <string name="item_shiny_charm_toggle_label">Use Shiny Charm</string>

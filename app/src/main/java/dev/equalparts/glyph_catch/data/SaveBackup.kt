@@ -3,6 +3,7 @@ package dev.equalparts.glyph_catch.data
 import android.content.Context
 import androidx.core.content.edit
 import androidx.room.withTransaction
+import dev.equalparts.glyph_catch.widget.WidgetUpdater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -112,6 +113,8 @@ object SaveBackup {
             db.activeItemDao().insertAll(save.activeItems.filter { it.itemId in validItems })
         }
         importPreferences(context, save.preferences)
+        // The widgets show the imported team and backgrounds right away
+        WidgetUpdater.refresh(context)
     }
 
     private fun exportPreferences(context: Context): Map<String, JsonElement> {

@@ -61,6 +61,28 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <receiver
+            android:name=".widget.TeamWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_team_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/team_widget_info" />
+        </receiver>
+        <receiver
+            android:name=".widget.QueueWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_queue_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/queue_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

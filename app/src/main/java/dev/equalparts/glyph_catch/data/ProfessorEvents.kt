@@ -14,6 +14,9 @@ sealed class ProfessorEvent(val professor: Professor, val gifts: List<Item>) {
 
     data object TownMap : ProfessorEvent(Professor.OAK, listOf(Item.TOWN_MAP))
 
+    /** Oak's present for reaching Unova: the whole team earns experience. */
+    data object ExpShare : ProfessorEvent(Professor.OAK, listOf(Item.EXP_SHARE))
+
     /** The reward for completing the national Pokédex. */
     data object ShinyCharm : ProfessorEvent(Professor.OAK, listOf(Item.SHINY_CHARM))
 
@@ -39,6 +42,9 @@ object ProfessorEvents {
                 events += ProfessorEvent.RegionPokedex(region)
                 willOwn += pokedex
             }
+        }
+        if (Item.EXP_SHARE !in willOwn && Item.POKEDEX_UNOVA in willOwn) {
+            events += ProfessorEvent.ExpShare
         }
         if (Item.TOWN_MAP !in willOwn && willOwn.containsAll(REGION_POKEDEXES)) {
             events += ProfessorEvent.TownMap

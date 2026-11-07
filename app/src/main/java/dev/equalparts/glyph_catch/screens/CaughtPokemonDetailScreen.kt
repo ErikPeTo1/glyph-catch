@@ -189,6 +189,25 @@ private fun CaughtPokemonDetailContent(
                     Text(text = stringResource(R.string.caught_detail_stop_training))
                 }
             }
+
+            var team by remember { mutableStateOf(preferencesManager.team) }
+            val inTeam = pokemon.id in team
+            OutlinedButton(
+                onClick = {
+                    preferencesManager.team = if (inTeam) team - pokemon.id else team + pokemon.id
+                    team = preferencesManager.team
+                },
+                enabled = inTeam || team.size < PreferencesManager.TEAM_SIZE,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = when {
+                        inTeam -> stringResource(R.string.team_remove)
+                        team.size < PreferencesManager.TEAM_SIZE -> stringResource(R.string.team_add)
+                        else -> stringResource(R.string.team_full)
+                    }
+                )
+            }
         }
     }
 }
