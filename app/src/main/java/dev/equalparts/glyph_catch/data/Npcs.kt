@@ -13,7 +13,8 @@ enum class Npc(@param:DrawableRes val sprite: Int, @param:StringRes val nameRes:
     CLERK_M(R.drawable.npc_vendor_m, R.string.npc_clerk_m),
     CLERK_F(R.drawable.npc_vendor_f, R.string.npc_clerk_f),
     BREEDER_M(R.drawable.npc_breeder_m, R.string.npc_breeder_m),
-    BREEDER_F(R.drawable.npc_breeder_f, R.string.npc_breeder_f)
+    BREEDER_F(R.drawable.npc_breeder_f, R.string.npc_breeder_f),
+    BUG_CATCHER(R.drawable.npc_bug_catcher, R.string.npc_bug_catcher)
 }
 
 sealed class NpcEvent(val gift: Item?) {
@@ -23,6 +24,12 @@ sealed class NpcEvent(val gift: Item?) {
     /** A clerk gives away the Repel once the Pokédex has 50 entries. */
     data object Repel : NpcEvent(Item.REPEL)
 
+    /** The same clerk comes back with the Super Repel at 150 entries. */
+    data object SuperRepel : NpcEvent(Item.SUPER_REPEL)
+
+    /** A Bug Catcher shares his Honey a few species after the Sinnoh Pokédex. */
+    data object Honey : NpcEvent(Item.HONEY)
+
     /** With the Johto Pokédex, a breeder explains how Eggs work and gives the first one. */
     data object Breeder : NpcEvent(null)
 }
@@ -30,6 +37,8 @@ sealed class NpcEvent(val gift: Item?) {
 object NpcEvents {
     val ROD_UNLOCK_COUNTS = listOf(Item.OLD_ROD to 15, Item.GOOD_ROD to 45, Item.SUPER_ROD to 100)
     const val REPEL_UNLOCK_SPECIES_COUNT = 50
+    const val SUPER_REPEL_UNLOCK_SPECIES_COUNT = 150
+    val HONEY_UNLOCK_SPECIES_COUNT = Region.SINNOH.unlockAt + 5
 
     /**
      * Encounters the player has earned, in order. [inBag] holds every item with a Bag entry,
@@ -40,13 +49,18 @@ object NpcEvents {
             if (rod !in inBag && caughtEver >= count) add(NpcEvent.Rod(rod))
         }
         if (Item.REPEL !in inBag && pokedexCount >= REPEL_UNLOCK_SPECIES_COUNT) add(NpcEvent.Repel)
+        if (Item.SUPER_REPEL !in inBag && pokedexCount >= SUPER_REPEL_UNLOCK_SPECIES_COUNT) add(NpcEvent.SuperRepel)
+        if (Item.HONEY !in inBag && Item.POKEDEX_SINNOH in inBag && pokedexCount >= HONEY_UNLOCK_SPECIES_COUNT) {
+            add(NpcEvent.Honey)
+        }
         if (!breederMet && Item.POKEDEX_JOHTO in inBag) add(NpcEvent.Breeder)
     }
 
     fun npcFor(event: NpcEvent, preferences: PreferencesManager): Npc = when (event) {
         is NpcEvent.Rod -> Npc.FISHERMAN
-        NpcEvent.Repel -> if (preferences.npcVariantFemale(CLERK)) Npc.CLERK_F else Npc.CLERK_M
+        NpcEvent.Repel, NpcEvent.SuperRepel -> if (preferences.npcVariantFemale(CLERK)) Npc.CLERK_F else Npc.CLERK_M
         NpcEvent.Breeder -> if (preferences.npcVariantFemale(BREEDER)) Npc.BREEDER_F else Npc.BREEDER_M
+        NpcEvent.Honey -> Npc.BUG_CATCHER
     }
 
     suspend fun complete(event: NpcEvent, db: PokemonDatabase, preferences: PreferencesManager) {
@@ -58,6 +72,7 @@ object NpcEvents {
         when (event) {
             is NpcEvent.Rod -> preferences.markSuperRodDiscovered()
             NpcEvent.Repel -> preferences.markRepelDiscovered()
+            NpcEvent.SuperRepel, NpcEvent.Honey -> Unit
             NpcEvent.Breeder -> {
                 preferences.breederMet = true
                 if (db.eggDao().countEggs() < Eggs.MAX_EGGS) {

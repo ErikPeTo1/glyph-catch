@@ -258,7 +258,7 @@
     <string name="item_linking_cord_name">Linking Cord</string>
     <string name="item_linking_cord_description">Evolves certain species of Pokémon.</string>
     <string name="item_repel_name">Repel</string>
-    <string name="item_repel_description">Keeps away wild Pokémon. Does not affect species you haven\'t obtained.</string>
+    <string name="item_repel_description">Keeps away wild Pokémon you have already registered, shinies included. Legendary Pokémon aren\'t scared off.</string>
     <string name="item_shiny_stone_name">Shiny Stone</string>
     <string name="item_shiny_stone_description">Sparkles with a dazzling light that triggers evolutions.</string>
     <string name="item_dusk_stone_name">Dusk Stone</string>

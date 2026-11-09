@@ -3,6 +3,7 @@ package dev.equalparts.glyph_catch.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import dev.equalparts.glyph_catch.gameplay.HiddenCatchUp
 import dev.equalparts.glyph_catch.gameplay.PokemonGlyphToyService
 import dev.equalparts.glyph_catch.widget.WidgetBackground
 import dev.equalparts.glyph_catch.widget.WidgetUpdater
@@ -216,10 +217,30 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_PLAY_WHILE_IN_USE, false)
         set(value) {
             prefs.edit { putBoolean(KEY_PLAY_WHILE_IN_USE, value) }
+            HiddenCatchUp.schedule(appContext, value)
             WidgetUpdater.refresh(appContext)
         }
 
+    /** Hidden setting: play like on a Phone (4a) Pro (Poké Ball on the matrix, catching from widgets). */
+    var simulatePhone4aPro: Boolean
+        get() = prefs.getBoolean(KEY_SIMULATE_4A_PRO, false)
+        set(value) {
+            prefs.edit { putBoolean(KEY_SIMULATE_4A_PRO, value) }
+            WidgetUpdater.refresh(appContext)
+            PokemonGlyphToyService.refreshIdleDisplay()
+        }
+
+    /** When the Glyph Toy last ticked, to make up for the time it was switched off. */
+    var lastToyTickAt: Long
+        get() = prefs.getLong(KEY_LAST_TOY_TICK_AT, 0L)
+        set(value) = prefs.edit { putLong(KEY_LAST_TOY_TICK_AT, value) }
+
     /** The waiting Pokémon widget shows its catch-all button (with [playWhileInUse] on). */
+    /** Shows the next Pokémon waiting on Home, as on the Phone (4a) Pro, to try it on another phone. */
+    var encounterCard: Boolean
+        get() = prefs.getBoolean(KEY_ENCOUNTER_CARD, false)
+        set(value) = prefs.edit { putBoolean(KEY_ENCOUNTER_CARD, value) }
+
     var catchAllButton: Boolean
         get() = prefs.getBoolean(KEY_CATCH_ALL_BUTTON, true)
         set(value) {
@@ -245,6 +266,17 @@ class PreferencesManager(context: Context) {
     var seenWallpapers: Set<String>
         get() = prefs.getStringSet(KEY_SEEN_WALLPAPERS, emptySet()).orEmpty()
         set(value) = prefs.edit { putStringSet(KEY_SEEN_WALLPAPERS, value) }
+
+    /**
+     * Forgets team members and the companion that are no longer in the PC, e.g. once released.
+     * Earlier versions didn't, which left a team looking full with a free slot.
+     */
+    suspend fun forgetMissingPokemon(db: PokemonDatabase) {
+        val dao = db.pokemonDao()
+        val kept = team.filter { dao.getCaughtPokemon(it) != null }
+        if (kept != team) team = kept
+        companionId?.let { if (dao.getCaughtPokemon(it) == null) companionId = null }
+    }
 
     /** Background of the waiting Pokémon widget; by default it follows the Pokémon. */
     var queueWidgetBackground: String
@@ -272,6 +304,11 @@ class PreferencesManager(context: Context) {
         get() = prefs.getBoolean(KEY_SHINY_CHARM_ENABLED, true)
         set(value) = prefs.edit { putBoolean(KEY_SHINY_CHARM_ENABLED, value) }
 
+    /** Professor Oak has explained how to play on the Phone (4a) Pro. */
+    var pokeBallTipSeen: Boolean
+        get() = prefs.getBoolean(KEY_POKE_BALL_TIP_SEEN, false)
+        set(value) = prefs.edit { putBoolean(KEY_POKE_BALL_TIP_SEEN, value) }
+
     /** Professor Oak has welcomed the player. */
     var professorIntroSeen: Boolean
         get() = prefs.getBoolean(KEY_PROFESSOR_INTRO_SEEN, false)
@@ -290,9 +327,20 @@ class PreferencesManager(context: Context) {
         return turn
     }
 
+    /** Only one repel works at a time: switching one on switches the other off. */
     var isRepelActive: Boolean
         get() = prefs.getBoolean(KEY_REPEL_ACTIVE, false)
-        set(value) = prefs.edit { putBoolean(KEY_REPEL_ACTIVE, value) }
+        set(value) = prefs.edit {
+            putBoolean(KEY_REPEL_ACTIVE, value)
+            if (value) putBoolean(KEY_SUPER_REPEL_ACTIVE, false)
+        }
+
+    var isSuperRepelActive: Boolean
+        get() = prefs.getBoolean(KEY_SUPER_REPEL_ACTIVE, false)
+        set(value) = prefs.edit {
+            putBoolean(KEY_SUPER_REPEL_ACTIVE, value)
+            if (value) putBoolean(KEY_REPEL_ACTIVE, false)
+        }
 
     var activeTrainingPartnerId: String?
         get() = prefs.getString(KEY_ACTIVE_TRAINING_PARTNER_ID, null)
@@ -545,7 +593,11 @@ class PreferencesManager(context: Context) {
         private const val KEY_COMPANION_ID = "companion_id"
         private const val PREFS_NAME = "glyph_catch_prefs"
         private const val KEY_TEAM = "team"
+        private const val KEY_LAST_TOY_TICK_AT = "last_toy_tick_at"
+        private const val KEY_SIMULATE_4A_PRO = "simulate_4a_pro"
         private const val KEY_CATCH_ALL_BUTTON = "catch_all_button"
+        private const val KEY_ENCOUNTER_CARD = "encounter_card"
+        private const val KEY_POKE_BALL_TIP_SEEN = "poke_ball_tip_seen"
         private const val KEY_WIDGET_BACKGROUND = "widget_background"
         private const val KEY_QUEUE_WIDGET_BACKGROUND = "queue_widget_background"
         private const val KEY_UNLOCKED_WALLPAPERS = "unlocked_wallpapers"
@@ -571,6 +623,7 @@ class PreferencesManager(context: Context) {
         private const val KEY_REPEL_DISCOVERED = "repel_discovered"
         private const val KEY_REPEL_INDICATOR_DISMISSED = "repel_indicator_dismissed"
         private const val KEY_REPEL_ACTIVE = "repel_active"
+        private const val KEY_SUPER_REPEL_ACTIVE = "super_repel_active"
         private const val KEY_PROFESSOR_INTRO_SEEN = "professor_intro_seen"
         private const val KEY_BREEDER_MET = "breeder_met"
         private const val KEY_CAUGHT_GRID_VIEW = "caught_grid_view"

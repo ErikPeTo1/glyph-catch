@@ -80,7 +80,10 @@ enum class Item {
     REVEAL_GLASS,
     POKEDEX_KANTO,
     SHINY_CHARM,
-    EXP_SHARE
+    EXP_SHARE,
+    SUPER_REPEL,
+    HONEY,
+    INCENSE
 }
 
 /**

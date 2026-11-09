@@ -25,6 +25,8 @@ fun HiddenSettingsScreen(modifier: Modifier) {
     val prefs = remember { PreferencesManager(context) }
     var playWhileInUse by remember { mutableStateOf(prefs.playWhileInUse) }
     var catchAllButton by remember { mutableStateOf(prefs.catchAllButton) }
+    var simulate4aPro by remember { mutableStateOf(prefs.simulatePhone4aPro) }
+    var encounterCard by remember { mutableStateOf(prefs.encounterCard) }
 
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
@@ -47,6 +49,26 @@ fun HiddenSettingsScreen(modifier: Modifier) {
             onCheckedChange = {
                 catchAllButton = it
                 prefs.catchAllButton = it
+            }
+        )
+
+        VisualToggleCard(
+            title = stringResource(R.string.hidden_simulate_4a_title),
+            subtitle = stringResource(R.string.hidden_simulate_4a_subtitle),
+            checked = simulate4aPro,
+            onCheckedChange = {
+                simulate4aPro = it
+                prefs.simulatePhone4aPro = it
+            }
+        )
+
+        VisualToggleCard(
+            title = stringResource(R.string.hidden_encounter_card_title),
+            subtitle = stringResource(R.string.hidden_encounter_card_subtitle),
+            checked = encounterCard,
+            onCheckedChange = {
+                encounterCard = it
+                prefs.encounterCard = it
             }
         )
     }

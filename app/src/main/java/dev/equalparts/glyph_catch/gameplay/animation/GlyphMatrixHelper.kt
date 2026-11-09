@@ -125,6 +125,12 @@ internal class GlyphMatrixHelper(private val context: Context, val matrixSize: I
 
     fun adjustBrightness(frame: IntArray, factor: Float): IntArray = dimFrame(frame, factor)
 
+    /** Equal Parts' Poké Ball from the catch animation, at its true size on the small matrix. */
+    fun renderPokeBallFrame(inverted: Boolean): IntArray {
+        val bitmap = loadBitmap(if (matrixSize <= 13) R.drawable.glyph_pokeball_13 else R.drawable.glyph_pokeball_25)
+        return renderBitmapFrame(if (inverted) inverted(bitmap) else bitmap)
+    }
+
     /**
      * Loads a [Bitmap] from a resource ID using the Glyph Matrix SDK.
      */

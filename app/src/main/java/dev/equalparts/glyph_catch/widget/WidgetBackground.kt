@@ -29,7 +29,8 @@ enum class BoxWallpaper(
     val periodY: Int,
     val dark: Boolean,
     val centered: Boolean = false,
-    val achievement: Achievement? = null
+    val achievement: Achievement? = null,
+    val stretched: Boolean = false
 ) {
     FOREST(R.drawable.box_wallpaper_forest, R.string.box_wallpaper_forest, 32, 16, false),
     CITY(R.drawable.box_wallpaper_city, R.string.box_wallpaper_city, 32, 16, false),
@@ -46,7 +47,9 @@ enum class BoxWallpaper(
     POLKADOT(R.drawable.box_wallpaper_polkadot, R.string.box_wallpaper_polkadot, 32, 64, false),
     POKECENTER(R.drawable.box_wallpaper_pokecenter, R.string.box_wallpaper_pokecenter, 0, 0, false),
     MACHINE(R.drawable.box_wallpaper_machine, R.string.box_wallpaper_machine, 0, 0, false),
-    PLAIN(R.drawable.box_wallpaper_plain, R.string.box_wallpaper_plain, 0, 0, false),
+
+    // Just a frame inside the frame: it stretches from the middle so its lines stay at the edges
+    PLAIN(R.drawable.box_wallpaper_plain, R.string.box_wallpaper_plain, 0, 0, false, stretched = true),
 
     // Earned with achievements
     PIKACHU(R.drawable.box_wallpaper_pikachu, R.string.box_wallpaper_pikachu, 0, 0, false, false, Achievement.PIKACHU),
@@ -178,6 +181,7 @@ sealed interface WidgetBackground {
             "Old Rod" to BoxWallpaper.RIVER,
             "Good Rod" to BoxWallpaper.BEACH,
             "Super Rod" to BoxWallpaper.SEAFLOOR,
+            "Honey" to BoxWallpaper.FOREST,
             Eggs.POOL_NAME to BoxWallpaper.POKECENTER,
             "Charging" to BoxWallpaper.MACHINE,
             "Halloween" to BoxWallpaper.CAVE,
@@ -271,11 +275,33 @@ object WallpaperRenderer {
         val sourcePixels = IntArray(WIDTH * HEIGHT)
         source.getPixels(sourcePixels, 0, WIDTH, 0, 0, WIDTH, HEIGHT)
 
-        val xs = IntArray(width) { mapAxis(it, width, WIDTH, wallpaper.periodX, keepEnd = false) }
-        val ys = IntArray(height) { mapAxis(it, height, HEIGHT, wallpaper.periodY, keepEnd = !wallpaper.centered) }
+        val xs = IntArray(width) {
+            if (wallpaper.stretched) {
+                stretchAxis(
+                    it,
+                    width,
+                    WIDTH
+                )
+            } else {
+                mapAxis(it, width, WIDTH, wallpaper.periodX, false)
+            }
+        }
+        val ys = IntArray(height) {
+            if (wallpaper.stretched) {
+                stretchAxis(it, height, HEIGHT)
+            } else {
+                mapAxis(it, height, HEIGHT, wallpaper.periodY, keepEnd = !wallpaper.centered)
+            }
+        }
         val pixels = IntArray(width * height) { sourcePixels[ys[it / width] * WIDTH + xs[it % width]] }
         val small = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
         return RenderedWallpaper(small.scale(width * pixel, height * pixel, false), FRAME * pixel / density)
+    }
+
+    /** Keeps both ends of the source and repeats its middle row or column in between. */
+    private fun stretchAxis(index: Int, size: Int, sourceSize: Int): Int {
+        val half = sourceSize / 2
+        return if (index < size / 2) min(index, half) else max(sourceSize - (size - index), half)
     }
 
     private fun mapAxis(index: Int, size: Int, sourceSize: Int, period: Int, keepEnd: Boolean): Int {

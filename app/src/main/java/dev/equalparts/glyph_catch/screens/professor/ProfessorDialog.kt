@@ -237,6 +237,16 @@ object NpcScripts {
             DialoguePage(context.getString(R.string.npc_clerk_2), gift = Item.REPEL),
             DialoguePage(context.getString(R.string.npc_clerk_3))
         )
+        NpcEvent.SuperRepel -> listOf(
+            DialoguePage(context.getString(R.string.npc_clerk_super_1, pokedexCount)),
+            DialoguePage(context.getString(R.string.npc_clerk_super_2), gift = Item.SUPER_REPEL),
+            DialoguePage(context.getString(R.string.npc_clerk_super_3))
+        )
+        NpcEvent.Honey -> listOf(
+            DialoguePage(context.getString(R.string.npc_bug_honey_1)),
+            DialoguePage(context.getString(R.string.npc_bug_honey_2), gift = Item.HONEY),
+            DialoguePage(context.getString(R.string.npc_bug_honey_3))
+        )
         NpcEvent.Breeder -> listOf(
             DialoguePage(context.getString(R.string.npc_breeder_1)),
             DialoguePage(context.getString(R.string.npc_breeder_2)),
@@ -269,6 +279,14 @@ object ProfessorScripts {
         Professor.ROWAN -> R.string.professor_rowan_hello
         Professor.JUNIPER -> R.string.professor_juniper_hello
     }
+
+    /** How to play on the Phone (4a) Pro, whose button can't catch. */
+    fun pokeBallTip(context: Context): List<DialoguePage> = listOf(
+        R.string.oak_poke_ball_1,
+        R.string.oak_poke_ball_2,
+        R.string.oak_poke_ball_3,
+        R.string.oak_poke_ball_4
+    ).map { DialoguePage(context.getString(it)) }
 
     fun event(context: Context, event: ProfessorEvent, pokedexCount: Int): List<DialoguePage> {
         val name = context.getString(event.professor.nameRes)

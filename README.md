@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > Unofficial fan project, not affiliated with Nintendo, The Pokémon Company or Game Freak. Pokémon © Nintendo/Creatures Inc./GAME FREAK inc.
 
-A Pokémon catching game for the Nothing Phone (3) Glyph Matrix. Leave your phone face-down and Pokémon appear on the Glyph Matrix. Long-press to catch them.
+A Pokémon catching game for the Nothing Phone (3) Glyph Matrix, and the Phone (4a) Pro in beta. Leave your phone face-down and Pokémon appear on the Glyph Matrix. Long-press to catch them.
 
 ### [⬇️ Download](https://github.com/ErikPeTo1/glyph-catch/releases/latest) · [What's new](CHANGELOG.md) · [FAQ](FAQ.md)
 
@@ -17,6 +17,7 @@ Set Glyph Catch as your **Always-on Glyph Toy**. The app tells you when there's 
 - Charge your phone and Electric types show up
 - Home-screen widgets with your team, framed in the PC Box wallpapers
 - Achievements that unlock more wallpapers, and a companion on your Glyph Matrix
+- Super Repel, Honey and Incense to choose who shows up, and how often
 
 ![Home, Professor Oak and Pokédex](screenshots-1.png)
 ![Pokémon, Bag and the black-and-white style](screenshots-2.png)

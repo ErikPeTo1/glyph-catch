@@ -237,7 +237,7 @@ module.exports = {
     item_linking_cord_name: 'Verbindungsschnur',
     item_linking_cord_description: 'Lässt bestimmte Pokémon-Arten sich entwickeln.',
     item_repel_name: 'Schutz',
-    item_repel_description: 'Hält wilde Pokémon fern. Wirkt nicht auf Arten, die du noch nicht hast.',
+    item_repel_description: "Hält wilde Pokémon fern, die du schon registriert hast, auch schillernde. Legendäre Pokémon lassen sich nicht verscheuchen.",
     item_shiny_stone_name: 'Leuchtstein',
     item_shiny_stone_description: 'Funkelt in einem blendenden Licht, das Entwicklungen auslöst.',
     item_dusk_stone_name: 'Finsterstein',
@@ -398,6 +398,9 @@ module.exports = {
     "Manche PC-Box-Hintergründe sind gesperrt: Jeder ist ein Erfolg, etwa ein Pikachu fangen oder 10 Eier ausbrüten. Du findest sie unter Einstellungen → Darstellung.",
     "Wenn keine wilden Pokémon da sind, kann deine Glyph Matrix statt der Uhr einen Begleiter zeigen. Wähle ihn mit „Auf der Glyph Matrix zeigen“ in seinen Details.",
     "Jeder Fang einer Art zählt zu ihrer Schillernd-Kette: Ab 10, 25 und 50 Fängen wird ihr Schillernd wahrscheinlicher. Die Details jedes Pokémon zeigen, wie weit du bist.",
-    "Zu viele Taubsi? Im PC zeigt der Filter Doppelte nur Arten, die du mehrfach hast, und „Alle außer einem“ wählt sie zum Freilassen aus, wobei je eines bleibt."
+    "Zu viele Taubsi? Im PC zeigt der Filter Doppelte nur Arten, die du mehrfach hast, und „Alle außer einem“ wählt sie zum Freilassen aus, wobei je eines bleibt.",
+    "Kurz nach dem Sinnoh-Pokédex schenkt dir ein Käfersammler Honig. Streiche ihn über den Beutel auf, und eine Stunde lang kommen naschhafte Pokémon wie Wadribie oder Skaraborn.",
+    "Zünde einen Rauch an, und eine Stunde lang erscheinen Pokémon doppelt so schnell. Du bekommst ihn bei Missionen oder ab und zu beim Fangen.",
+    "Bei 150 Arten bringt dir der Verkäufer den Superschutz: Nur Pokémon, die nicht in deinem PC sind, kommen näher. Legendäre lassen sich nie verscheuchen."
   ]
 };

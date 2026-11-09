@@ -92,11 +92,18 @@ class SpawnCadenceController(private val spawnEngine: SpawnRulesEngine, private 
         }
 
         if (context.fastSpawns) {
-            return if (minutesAccumulated >= FAST_SPAWN_MINUTES) 1.0 else 0.0
+            // With an Incense, every two and a half minutes on average: half the time at 2, always at 3
+            return when {
+                !context.incense -> if (minutesAccumulated >= FAST_SPAWN_MINUTES) 1.0 else 0.0
+                minutesAccumulated >= 3 -> 1.0
+                minutesAccumulated >= 2 -> 0.5
+                else -> 0.0
+            }
         }
 
+        val minutes = if (context.incense) minutesAccumulated * 2 else minutesAccumulated
         val baseChance = screenOffChanceRules
-            .lastOrNull { minutesAccumulated >= it.minMinutesAccumulated }
+            .lastOrNull { minutes >= it.minMinutesAccumulated }
             ?.baseChance
             ?: return 0.0
 
@@ -253,7 +260,9 @@ data class SpawnContext(
     val trainerPokedexCount: Int,
     val isBedtime: Boolean,
     /** One Pokémon every few minutes, for the hidden "play while in use" setting. */
-    val fastSpawns: Boolean = false
+    val fastSpawns: Boolean = false,
+    /** An Incense is burning: Pokémon come twice as fast. */
+    val incense: Boolean = false
 )
 
 data class SpawnDecision(val spawn: SpawnResult?, val debug: SpawnDecisionDebug)

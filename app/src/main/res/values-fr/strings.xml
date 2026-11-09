@@ -246,7 +246,7 @@
     <string name="item_linking_cord_name">Fil de Liaison</string>
     <string name="item_linking_cord_description">Fait évoluer certaines espèces de Pokémon.</string>
     <string name="item_repel_name">Repousse</string>
-    <string name="item_repel_description">Éloigne les Pokémon sauvages. N\'affecte pas les espèces que tu n\'as pas encore.</string>
+    <string name="item_repel_description">Éloigne les Pokémon sauvages déjà enregistrés, chromatiques compris. Les Pokémon légendaires ne fuient pas.</string>
     <string name="item_shiny_stone_name">Pierre Éclat</string>
     <string name="item_shiny_stone_description">Brille d\'une lumière éblouissante qui déclenche des évolutions.</string>
     <string name="item_dusk_stone_name">Pierre Nuit</string>

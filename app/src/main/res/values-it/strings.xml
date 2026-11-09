@@ -246,7 +246,7 @@
     <string name="item_linking_cord_name">Filo dell\'unione</string>
     <string name="item_linking_cord_description">Fa evolvere alcune specie di Pokémon.</string>
     <string name="item_repel_name">Repellente</string>
-    <string name="item_repel_description">Tiene lontani i Pokémon selvatici. Non influisce sulle specie che non hai ancora.</string>
+    <string name="item_repel_description">Tiene lontani i Pokémon selvatici che hai già registrato, anche i cromatici. I leggendari non si spaventano.</string>
     <string name="item_shiny_stone_name">Pietrabrillo</string>
     <string name="item_shiny_stone_description">Brilla di una luce abbagliante che provoca evoluzioni.</string>
     <string name="item_dusk_stone_name">Neropietra</string>

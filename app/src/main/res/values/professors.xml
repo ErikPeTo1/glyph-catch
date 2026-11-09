@@ -80,7 +80,14 @@
     <string name="npc_fisher_bye">Only one rod can be used at a time, so pick the one for the Pokémon you\'re after. Good luck!</string>
     <string name="npc_clerk_1">Welcome! %1$d kinds of Pokémon registered… You must be tired of meeting the same ones again and again.</string>
     <string name="npc_clerk_2">Here, try this Repel, on the house. While it\'s on, Pokémon you already have will stay away.</string>
+    <string name="npc_clerk_super_1">You again! %1$d kinds of Pokémon already… Now you must be looking for the ones you let go.</string>
+    <string name="npc_clerk_super_2">Take this Super Repel. While it\'s on, only Pokémon you don\'t have in your PC come close, even ones you\'ve registered before.</string>
+    <string name="npc_clerk_super_3">Only one repel works at a time. Legendary Pokémon aren\'t scared off by either, but shinies are, so keep that in mind!</string>
     <string name="npc_clerk_3">You can switch it on and off from your Bag. Come back anytime!</string>
+    <string name="npc_bug_catcher">Bug Catcher</string>
+    <string name="npc_bug_honey_1">Hey, you! Did you know bug Pokémon go crazy for Honey? I spread it on trees to find them.</string>
+    <string name="npc_bug_honey_2">Here, have a jar! Spread it from your Bag and, for an hour, Pokémon with a sweet tooth will come.</string>
+    <string name="npc_bug_honey_3">It works like a fishing rod: only one of them at a time. I hope you find a Heracross!</string>
     <string name="npc_breeder_1">Oh, you have the Johto Pokédex! Then you\'ll want to meet baby Pokémon, like Pichu or Togepi. They only hatch from Eggs.</string>
     <string name="npc_breeder_2">Whenever you catch a Pokémon, you might find an Egg. You can carry up to three.</string>
     <string name="npc_breeder_3">Eggs hatch while your phone stays locked: some take 2 hours, others 5 or 10. You can check on them on the Home screen.</string>
@@ -211,10 +218,34 @@
     <string name="settings_summary_new_wallpaper">New wallpaper for your widgets!</string>
     <string name="achievement_progress" translatable="false">%1$d/%2$d</string>
 
+    <!-- Phone (4a) Pro: Poké Ball mode -->
+    <string name="widget_pokeball_name">Poké Ball</string>
+    <string name="widget_pokeball_description">How many Pokémon are waiting. On the Phone (4a) Pro, tap to catch them.</string>
+    <plurals name="home_waiting_pokemon">
+        <item quantity="one">%1$d Pokémon waiting</item>
+        <item quantity="other">%1$d Pokémon waiting</item>
+    </plurals>
+    <string name="home_catch_one">Catch</string>
+    <string name="home_throw_ball">Throw a Poké Ball</string>
+    <string name="home_encounter_wild">A wild %1$s!</string>
+    <plurals name="home_encounter_more">
+        <item quantity="one">%1$d more waiting</item>
+        <item quantity="other">%1$d more waiting</item>
+    </plurals>
+    <string name="home_encounter_caught">Gotcha! %1$s was caught!</string>
+    <string name="oak_poke_ball_1">Ah, one more thing! Your phone plays a little differently.</string>
+    <string name="oak_poke_ball_2">When a Pokémon is waiting, a Poké Ball lights up on the back of your phone.</string>
+    <string name="oak_poke_ball_3">Open the app to see who it is, and throw a Poké Ball to catch it!</string>
+    <string name="oak_poke_ball_4">You can also throw them from the widgets on your home screen. Good luck!</string>
+    <string name="hidden_simulate_4a_title">Play like a Phone (4a) Pro</string>
+    <string name="hidden_simulate_4a_subtitle">A Poké Ball on the Glyph Matrix, and catching from the app and widgets</string>
+
     <!-- Hidden setting -->
     <string name="hidden_settings_unlocked">You found a secret setting!</string>
     <string name="hidden_settings_title">Hidden settings</string>
     <string name="hidden_settings_description">For those who know where to tap</string>
+    <string name="hidden_encounter_card_title">Wild Pokémon on Home</string>
+    <string name="hidden_encounter_card_subtitle">The next Pokémon waiting and a Poké Ball to throw, as on the Phone (4a) Pro</string>
     <string name="hidden_catch_all_title">Catch all button</string>
     <string name="hidden_catch_all_subtitle">On the waiting Pokémon widget, while catching with the phone is on</string>
     <string name="hidden_play_in_use_title">Catch while using the phone</string>
@@ -231,6 +262,14 @@
     <string name="item_exp_share_description">A gift from Professor Oak. While your phone is locked, your whole team earns experience, a little less than the Pokémon you\'re training.</string>
     <string name="item_exp_share_toggle_label">Use Exp. Share</string>
     <string name="item_exp_share_toggle_subtitle">Your team earns experience too</string>
+    <string name="item_super_repel_name">Super Repel</string>
+    <string name="item_super_repel_description">A gift from the clerk. Keeps away wild Pokémon you have in your PC, shinies included. Legendary Pokémon aren\'t scared off.</string>
+    <string name="item_super_repel_toggle_label">Use Super Repel</string>
+    <string name="item_super_repel_toggle_subtitle">Only Pokémon missing from your PC</string>
+    <string name="item_honey_name">Honey</string>
+    <string name="item_honey_description">A gift from a Bug Catcher. For an hour, Pokémon that love sweet things come to taste it. Like the rods, only one works at a time.</string>
+    <string name="item_incense_name">Incense</string>
+    <string name="item_incense_description">Its scent draws Pokémon in: for an hour, they appear twice as fast. It\'s used up when you light it.</string>
     <string name="item_shiny_charm_name">Shiny Charm</string>
     <string name="item_shiny_charm_description">The reward from Professor Oak for completing the Pokédex. Shiny Pokémon are three times as common.</string>
     <string name="item_shiny_charm_toggle_label">Use Shiny Charm</string>

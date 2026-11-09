@@ -246,7 +246,7 @@
     <string name="item_linking_cord_name">Cordón Unión</string>
     <string name="item_linking_cord_description">Hace evolucionar a ciertas especies de Pokémon.</string>
     <string name="item_repel_name">Repelente</string>
-    <string name="item_repel_description">Aleja a los Pokémon salvajes. No afecta a las especies que aún no tienes.</string>
+    <string name="item_repel_description">Aleja a los Pokémon salvajes que ya tienes registrados, también los variocolor. Los legendarios no se asustan.</string>
     <string name="item_shiny_stone_name">Piedra Día</string>
     <string name="item_shiny_stone_description">Brilla con una luz deslumbrante que provoca evoluciones.</string>
     <string name="item_dusk_stone_name">Piedra Noche</string>

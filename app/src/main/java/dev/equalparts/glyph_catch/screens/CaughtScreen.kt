@@ -227,6 +227,7 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
                         val ids = validSelection.toList()
                         scope.launch {
                             pokemonDao.deleteCaught(ids)
+                            preferencesManager.forgetMissingPokemon(db)
                             preferencesManager.releasedCount += ids.size
                             // A Rare Candy for each released Pokémon
                             val inventoryDao = db.inventoryDao()

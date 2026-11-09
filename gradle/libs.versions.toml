@@ -1,4 +1,5 @@
 [versions]
+work = "2.10.0"
 glance = "1.1.1"
 agp = "8.12.3"
 kotlin = "2.2.0"
@@ -18,6 +19,7 @@ navigationCompose = "2.9.0"
 datastore = "1.1.2"
 
 [libraries]
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleViewmodelKtx" }

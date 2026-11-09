@@ -274,6 +274,20 @@ fun createSpawnRules(context: GameplayContext): SpawnRules {
             Pokemon.CORSOLA at 0.7f
         }
 
+        pool("Honey") {
+            activate(70.percent) given { trainer.isUsingItem(Item.HONEY) }
+
+            Pokemon.COMBEE at 2.0f
+            Pokemon.BURMY at 1.0f
+            Pokemon.WURMPLE at 1.0f
+            Pokemon.CHERUBI at 1.0f
+            Pokemon.AIPOM at 1.0f
+            Pokemon.TEDDIURSA at 0.7f
+            Pokemon.HERACROSS at 0.5f
+            // The rare prize of honey trees in Sinnoh
+            Pokemon.MUNCHLAX at 0.15f
+        }
+
         pool("Super Rod") {
             activate(70.percent) given { trainer.isUsingItem(Item.SUPER_ROD) }
 

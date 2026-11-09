@@ -246,7 +246,7 @@
     <string name="item_linking_cord_name">Verbindungsschnur</string>
     <string name="item_linking_cord_description">Lässt bestimmte Pokémon-Arten sich entwickeln.</string>
     <string name="item_repel_name">Schutz</string>
-    <string name="item_repel_description">Hält wilde Pokémon fern. Wirkt nicht auf Arten, die du noch nicht hast.</string>
+    <string name="item_repel_description">Hält wilde Pokémon fern, die du schon registriert hast, auch schillernde. Legendäre Pokémon lassen sich nicht verscheuchen.</string>
     <string name="item_shiny_stone_name">Leuchtstein</string>
     <string name="item_shiny_stone_description">Funkelt in einem blendenden Licht, das Entwicklungen auslöst.</string>
     <string name="item_dusk_stone_name">Finsterstein</string>

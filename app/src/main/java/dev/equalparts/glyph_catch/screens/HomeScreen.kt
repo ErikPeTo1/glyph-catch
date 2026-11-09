@@ -28,12 +28,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -43,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -67,6 +70,7 @@ import dev.equalparts.glyph_catch.data.Stat
 import dev.equalparts.glyph_catch.data.displayName
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.gameplay.LevelCalculator
+import dev.equalparts.glyph_catch.gameplay.PokemonGlyphToyService
 import dev.equalparts.glyph_catch.gameplay.spawner.Weather
 import dev.equalparts.glyph_catch.gameplay.spawner.WeatherProvider
 import dev.equalparts.glyph_catch.ndotFontFamily
@@ -79,11 +83,13 @@ import dev.equalparts.glyph_catch.screens.professor.rememberPendingCalls
 import dev.equalparts.glyph_catch.util.ActiveItemStatus
 import dev.equalparts.glyph_catch.util.AvailableUpdate
 import dev.equalparts.glyph_catch.util.EventHelpers
+import dev.equalparts.glyph_catch.util.GlyphDevice
 import dev.equalparts.glyph_catch.util.TrainerTipsProvider
 import dev.equalparts.glyph_catch.util.UpdateChecker
 import dev.equalparts.glyph_catch.util.rememberActiveItemStatus
 import dev.equalparts.glyph_catch.util.rememberSleepBonusStatus
 import dev.equalparts.glyph_catch.widget.Achievements
+import dev.equalparts.glyph_catch.widget.WidgetUpdater
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -124,11 +130,16 @@ fun HomeScreen(
     val oldRodStatus by rememberActiveItemStatus(db, Item.OLD_ROD)
     val goodRodStatus by rememberActiveItemStatus(db, Item.GOOD_ROD)
     val superRodStatus by rememberActiveItemStatus(db, Item.SUPER_ROD)
-    val activeRod = listOf(
+    val honeyStatus by rememberActiveItemStatus(db, Item.HONEY)
+    val incenseStatus by rememberActiveItemStatus(db, Item.INCENSE)
+    // A rod or the Honey, plus an Incense, can be going at once
+    val activeItems = listOf(
         Item.OLD_ROD to oldRodStatus,
         Item.GOOD_ROD to goodRodStatus,
-        Item.SUPER_ROD to superRodStatus
-    ).firstOrNull { it.second.isActive }
+        Item.SUPER_ROD to superRodStatus,
+        Item.HONEY to honeyStatus,
+        Item.INCENSE to incenseStatus
+    ).filter { it.second.isActive }
     val isSleepBonusActive by rememberSleepBonusStatus(preferencesManager)
 
     val evolutionNotificationsFlow =
@@ -169,13 +180,14 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(AppSizes.spacingXLarge))
             UpdateBanner()
+            WaitingPokemonCard()
             if (!glyphToyHasTicked) {
                 OnboardingCard()
             } else {
                 StatusBanners(
                     showSuperRodIndicator = showSuperRodIndicator,
                     showRepelIndicator = showRepelIndicator,
-                    activeRod = activeRod,
+                    activeItems = activeItems,
                     isSleepBonusActive = isSleepBonusActive,
                     isHalloween = EventHelpers.isHalloween(),
                     isChristmas = EventHelpers.isChristmas(),
@@ -761,7 +773,7 @@ private fun EvolutionNotificationOverlay(notification: EvolutionNotification, on
 private fun StatusBanners(
     showSuperRodIndicator: Boolean,
     showRepelIndicator: Boolean,
-    activeRod: Pair<Item, ActiveItemStatus>?,
+    activeItems: List<Pair<Item, ActiveItemStatus>>,
     isSleepBonusActive: Boolean,
     isHalloween: Boolean,
     isChristmas: Boolean,
@@ -785,7 +797,7 @@ private fun StatusBanners(
     if (
         showSuperRodIndicator ||
         showRepelIndicator ||
-        activeRod != null ||
+        activeItems.isNotEmpty() ||
         isSleepBonusActive ||
         hasActiveEvent
     ) {
@@ -811,10 +823,9 @@ private fun StatusBanners(
                     badge = stringResource(R.string.home_repel_new_badge)
                 )
             }
-            if (activeRod != null) {
-                val (rod, status) = activeRod
+            activeItems.forEach { (item, status) ->
                 HomeStatusBanner(
-                    text = stringResource(R.string.home_super_rod_active_banner, stringResource(rod.nameRes())),
+                    text = stringResource(R.string.home_super_rod_active_banner, stringResource(item.nameRes())),
                     modifier = Modifier.fillMaxWidth(),
                     highlight = true,
                     badge = stringResource(R.string.home_super_rod_active_badge, status.remainingMinutes)
@@ -1006,4 +1017,91 @@ private fun rememberNewWallpapers(): Boolean {
     val context = LocalContext.current
     val hasNew by produceState(false) { value = Achievements.refresh(context).unseen.isNotEmpty() }
     return hasNew
+}
+
+/**
+ * The next Pokémon waiting, to throw a Poké Ball at from the app: on the Phone (4a) Pro the button
+ * can't catch, and the small matrix can't show who's there. One at a time, so you see each catch.
+ */
+@Composable
+private fun WaitingPokemonCard() {
+    val context = LocalContext.current
+    val preferences = remember { PreferencesManager(context) }
+    if (!GlyphDevice.pokeBallMode(preferences) && !preferences.encounterCard) return
+    val change by WidgetUpdater.changes.collectAsState()
+    val queue = remember(change) { PokemonGlyphToyService.readSavedQueue(context) }
+    val throwing by PokemonGlyphToyService.throwing.collectAsState()
+    val lastCaught by PokemonGlyphToyService.lastThrowCatch.collectAsState()
+    val next = queue.firstOrNull()
+    // Stays up while the last throw plays, so its catch is seen
+    if (next == null && !throwing) return
+    val catchAll = preferences.playWhileInUse && preferences.catchAllButton
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(AppSizes.spacingLarge),
+            verticalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)
+        ) {
+            lastCaught?.let { caught ->
+                Text(
+                    text = stringResource(
+                        R.string.home_encounter_caught,
+                        Pokemon[caught.speciesId]?.displayName ?: stringResource(R.string.common_unknown)
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            if (next != null) {
+                val name = Pokemon[next.pokemonId]?.displayName ?: stringResource(R.string.common_unknown)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingMedium)
+                ) {
+                    PokemonSpriteCircle(
+                        modifier = Modifier.size(AppSizes.homeTileHeight),
+                        pokemonId = next.pokemonId,
+                        pokemonName = name,
+                        shiny = next.isShiny,
+                        form = next.form
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.home_encounter_wild, name),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        if (queue.size > 1) {
+                            Text(
+                                text = pluralStringResource(
+                                    R.plurals.home_encounter_more,
+                                    queue.size - 1,
+                                    queue.size - 1
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(AppSizes.spacingSmall)) {
+                    Button(
+                        onClick = { PokemonGlyphToyService.catchOne(context) },
+                        enabled = !throwing,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.home_throw_ball))
+                    }
+                    if (catchAll && queue.size > 1) {
+                        OutlinedButton(
+                            onClick = { PokemonGlyphToyService.catchAllFromWidget(context) },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(stringResource(R.string.widget_catch_all))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
 }

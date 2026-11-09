@@ -11,13 +11,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.scale
-import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.action.Action
 import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
@@ -41,6 +41,7 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
@@ -51,6 +52,7 @@ import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.gameplay.PersistentSpawn
 import dev.equalparts.glyph_catch.gameplay.PokemonGlyphToyService
+import dev.equalparts.glyph_catch.util.GlyphDevice
 import dev.equalparts.glyph_catch.util.PokemonSpriteUtils
 import kotlin.math.ceil
 import kotlin.math.min
@@ -101,6 +103,7 @@ object WidgetUpdater {
         scope.launch {
             runCatching { TeamWidget().updateAll(app) }
             runCatching { QueueWidget().updateAll(app) }
+            runCatching { PokeBallWidget().updateAll(app) }
         }
     }
 }
@@ -186,6 +189,36 @@ private fun WidgetFrame(background: WidgetBackground, content: @Composable (inse
 
 private fun textColor(background: WidgetBackground) = ColorProvider(if (background.dark) Color.White else Color.Black)
 
+/**
+ * A see-through pill in the widget's own text color, so it sits well on any background instead of
+ * the system's solid button.
+ */
+@Composable
+private fun WidgetButton(background: WidgetBackground, text: String, onClick: Action) {
+    val tint = if (background.dark) Color.White else Color.Black
+    // On narrow widgets a smaller label keeps it on one line
+    val narrow = LocalSize.current.width < 200.dp
+    Box(
+        modifier = GlanceModifier
+            .background(ColorProvider(tint.copy(alpha = if (background.dark) 0.22f else 0.12f)))
+            .cornerRadius(50.dp)
+            .padding(horizontal = if (narrow) 12.dp else 18.dp, vertical = 8.dp)
+            .clickable(onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(
+                color = textColor(background),
+                fontSize = if (narrow) 12.sp else 14.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            ),
+            maxLines = 1
+        )
+    }
+}
+
 /** What a team member looks like; the widget only redraws when one of these changes. */
 private data class TeamLook(val speciesId: Int, val shiny: Boolean, val form: String?)
 
@@ -244,7 +277,14 @@ class TeamWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = TeamWidget()
 }
 
-private data class QueueState(val background: WidgetBackground, val canCatch: Boolean, val sprites: List<WidgetSprite?>)
+private data class QueueState(
+    val background: WidgetBackground,
+    val canThrow: Boolean,
+    val canCatchAll: Boolean,
+    val sprites: List<WidgetSprite?>
+) {
+    val canCatch: Boolean get() = canThrow || canCatchAll
+}
 
 /**
  * The Pokémon waiting on the Glyph Matrix. With the hidden "play while in use" setting, they
@@ -261,7 +301,8 @@ class QueueWidget : GlanceAppWidget() {
             val background = WidgetBackground.from(preferences.queueWidgetBackground)
             return QueueState(
                 background = (background as? WidgetBackground.Auto)?.resolve(queue.firstOrNull()) ?: background,
-                canCatch = preferences.playWhileInUse && preferences.catchAllButton,
+                canThrow = GlyphDevice.pokeBallMode(preferences) || preferences.playWhileInUse,
+                canCatchAll = preferences.playWhileInUse && preferences.catchAllButton,
                 sprites = queue.map { loadSprite(context, it.pokemonId, it.isShiny, it.form, color) }
             )
         }
@@ -296,9 +337,17 @@ class QueueWidget : GlanceAppWidget() {
                         )
                         if (state.canCatch) {
                             Spacer(modifier = GlanceModifier.height(4.dp))
-                            Button(
-                                text = LocalContext.current.getString(R.string.widget_catch_all),
-                                onClick = actionRunCallback<CatchAllAction>()
+                            // Your own throws, one Pokémon at a time; catching them all is a hidden extra
+                            WidgetButton(
+                                background = state.background,
+                                text = LocalContext.current.getString(
+                                    if (state.canCatchAll) R.string.widget_catch_all else R.string.home_throw_ball
+                                ),
+                                onClick = if (state.canCatchAll) {
+                                    actionRunCallback<CatchAllAction>()
+                                } else {
+                                    actionRunCallback<CatchOneAction>()
+                                }
                             )
                         }
                     }
@@ -318,8 +367,87 @@ class QueueWidgetReceiver : GlanceAppWidgetReceiver() {
 class CatchAllAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         val preferences = PreferencesManager(context)
-        if (preferences.playWhileInUse && preferences.catchAllButton) {
-            PokemonGlyphToyService.catchAllFromWidget()
+        if (GlyphDevice.pokeBallMode(preferences) || (preferences.playWhileInUse && preferences.catchAllButton)) {
+            PokemonGlyphToyService.catchAllFromWidget(context)
+        }
+    }
+}
+
+/**
+ * A Poké Ball with how many Pokémon are waiting. On the Phone (4a) Pro, where the button can't
+ * catch, each tap catches the first one; elsewhere it opens the app.
+ */
+class PokeBallWidget : GlanceAppWidget() {
+    override val sizeMode = SizeMode.Exact
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val preferences = PreferencesManager(context)
+        fun load() = PokemonGlyphToyService.readSavedQueue(context).size
+        val states = WidgetUpdater.changes.map { load() }
+        val initial = load()
+        val ball = BitmapFactory.decodeResource(
+            context.resources,
+            R.drawable.widget_poke_ball,
+            BitmapFactory.Options().apply { inScaled = false }
+        ).let { it.scale(it.width * 8, it.height * 8, false) }
+
+        provideContent {
+            val waiting by states.collectAsState(initial)
+            val canCatch = GlyphDevice.pokeBallMode(preferences)
+            val size = LocalSize.current
+            val ballSize = (minOf(size.width.value, size.height.value) * 0.62f).dp
+            Box(
+                modifier = GlanceModifier
+                    .fillMaxSize()
+                    .clickable(
+                        if (canCatch && waiting > 0) {
+                            actionRunCallback<CatchOneAction>()
+                        } else {
+                            actionStartActivity<MainActivity>()
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    provider = ImageProvider(ball),
+                    contentDescription = null,
+                    modifier = GlanceModifier.size(ballSize)
+                )
+                if (waiting > 0) {
+                    // Inset so the launcher doesn't clip the count at the edge
+                    Box(
+                        modifier = GlanceModifier.fillMaxSize().padding(6.dp),
+                        contentAlignment = Alignment.BottomEnd
+                    ) {
+                        Box(
+                            modifier = GlanceModifier
+                                .background(Color(0xFFD71921))
+                                .cornerRadius(12.dp)
+                                .padding(horizontal = 8.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = waiting.toString(),
+                                style = TextStyle(color = ColorProvider(Color.White), fontSize = 14.sp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+class PokeBallWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = PokeBallWidget()
+}
+
+class CatchOneAction : ActionCallback {
+    override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
+        val preferences = PreferencesManager(context)
+        if (GlyphDevice.pokeBallMode(preferences) ||
+            preferences.playWhileInUse
+        ) {
+            PokemonGlyphToyService.catchOne(context)
         }
     }
 }

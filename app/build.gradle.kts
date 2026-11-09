@@ -27,8 +27,8 @@ android {
         applicationId = "dev.erikpeto.glyphcatch"
         minSdk = 35
         targetSdk = 36
-        versionCode = 36100
-        versionName = "3.6.1"
+        versionCode = 37000
+        versionName = "3.7.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.work.runtime)
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     androidTestImplementation(libs.androidx.junit)

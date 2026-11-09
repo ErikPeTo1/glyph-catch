@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,8 @@ import dev.equalparts.glyph_catch.data.ProfessorEvent
 import dev.equalparts.glyph_catch.data.ProfessorEvents
 import dev.equalparts.glyph_catch.data.Region
 import dev.equalparts.glyph_catch.util.EventHelpers
+import dev.equalparts.glyph_catch.util.GlyphDevice
+import dev.equalparts.glyph_catch.widget.WidgetUpdater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -87,6 +90,20 @@ fun ProfessorEventHost(db: PokemonDatabase, preferencesManager: PreferencesManag
     }
     val owned = inventory?.ownedItems() ?: return
     EventHelpers.hasShinyCharm = Item.SHINY_CHARM in owned && preferencesManager.shinyCharmEnabled
+    var pokeBallTipSeen by remember { mutableStateOf(preferencesManager.pokeBallTipSeen) }
+    // Settings changes come through here, so switching to the Poké Ball mode brings Oak right away
+    val settingsChange by WidgetUpdater.changes.collectAsState()
+    val pokeBallMode = remember(settingsChange) { GlyphDevice.pokeBallMode(preferencesManager) }
+    if (introSeen && !pokeBallTipSeen && pokeBallMode) {
+        // The Phone (4a) Pro's button can't catch, so Oak explains the Poké Ball right away
+        val context = LocalContext.current
+        val pages = remember { ProfessorScripts.pokeBallTip(context) }
+        ProfessorDialog(professor = Professor.OAK, pages = pages, onFinish = {
+            preferencesManager.pokeBallTipSeen = true
+            pokeBallTipSeen = true
+        })
+        return
+    }
     if (introSeen) {
         NpcEventHost(db, preferencesManager, inventory.orEmpty())
         return

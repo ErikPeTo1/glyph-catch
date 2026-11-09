@@ -32,7 +32,7 @@ object Eggs {
         458 to 5, // Mantyke
         236 to 10, // Tyrogue
         440 to 10, // Happiny
-        446 to 10, // Munchlax
+        // Munchlax (446) is on hold: for now it only comes to Honey
         447 to 10 // Riolu
     )
 

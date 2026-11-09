@@ -42,7 +42,7 @@ abstract class GlyphMatrixService(private val tag: String) : Service() {
         override fun onServiceConnected(p0: ComponentName?) {
             glyphMatrixManager?.let { gmm ->
                 Log.d(TAG, "$tag: onServiceConnected")
-                gmm.register(Glyph.DEVICE_23112)
+                gmm.register(if (GlyphDevice.isPhone4aPro) Glyph.DEVICE_25111p else Glyph.DEVICE_23112)
                 performOnServiceConnected(applicationContext, gmm)
             }
         }

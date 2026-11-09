@@ -30,16 +30,16 @@ import dev.equalparts.glyph_catch.AppSizes
 import dev.equalparts.glyph_catch.ItemGlyphCircle
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.ActiveItem
-import dev.equalparts.glyph_catch.data.FISHING_RODS
 import dev.equalparts.glyph_catch.data.Item
+import dev.equalparts.glyph_catch.data.LURES
 import dev.equalparts.glyph_catch.data.LegendaryItems
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.Region
 import dev.equalparts.glyph_catch.data.descriptionRes
 import dev.equalparts.glyph_catch.data.effectDurationMinutes
-import dev.equalparts.glyph_catch.data.isFishingRod
 import dev.equalparts.glyph_catch.data.isKeyItem
+import dev.equalparts.glyph_catch.data.isUsedUp
 import dev.equalparts.glyph_catch.data.nameRes
 import dev.equalparts.glyph_catch.ndotFontFamily
 import dev.equalparts.glyph_catch.screens.professor.ownedItems
@@ -69,8 +69,13 @@ fun InventoryItemContent(
     )
 
     when {
-        durationMinutes != null -> TimedItemActions(db, item, name, durationMinutes)
+        durationMinutes != null -> TimedItemActions(db, item, name, durationMinutes, quantity)
         item == Item.REPEL -> RepelToggleCard(preferencesManager)
+        item == Item.SUPER_REPEL -> KeyItemToggleCard(
+            label = stringResource(R.string.item_super_repel_toggle_label),
+            subtitle = stringResource(R.string.item_super_repel_toggle_subtitle),
+            initial = preferencesManager.isSuperRepelActive
+        ) { on -> preferencesManager.isSuperRepelActive = on }
         item == Item.TOWN_MAP -> RegionFilterCard(db, preferencesManager)
         item == Item.SHINY_CHARM -> KeyItemToggleCard(
             label = stringResource(R.string.item_shiny_charm_toggle_label),
@@ -134,7 +139,7 @@ private fun InventoryItemInfoCard(item: Item, name: String, description: String,
 }
 
 @Composable
-private fun TimedItemActions(db: PokemonDatabase, item: Item, itemName: String, durationMinutes: Int) {
+private fun TimedItemActions(db: PokemonDatabase, item: Item, itemName: String, durationMinutes: Int, quantity: Int) {
     val status by rememberActiveItemStatus(db, item)
     val scope = rememberCoroutineScope()
     var isActivating by remember { mutableStateOf(false) }
@@ -152,7 +157,7 @@ private fun TimedItemActions(db: PokemonDatabase, item: Item, itemName: String, 
                 }
             }
         },
-        enabled = !status.isActive && !isActivating,
+        enabled = !status.isActive && !isActivating && (!item.isUsedUp || quantity > 0),
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
@@ -164,7 +169,8 @@ private fun TimedItemActions(db: PokemonDatabase, item: Item, itemName: String, 
         )
     }
 
-    if (status.isActive) {
+    // Switching off an Incense would waste it
+    if (status.isActive && !item.isUsedUp) {
         OutlinedButton(
             onClick = {
                 scope.launch {
@@ -231,9 +237,10 @@ private suspend fun activateItem(db: PokemonDatabase, item: Item, durationMinute
     val now = System.currentTimeMillis()
     val expiresAt = now + durationMinutes * 60_000L
     withContext(Dispatchers.IO) {
-        if (item.isFishingRod) {
-            FISHING_RODS.filter { it != item }.forEach { db.activeItemDao().deactivateItem(it.ordinal) }
+        if (item in LURES) {
+            LURES.filter { it != item }.forEach { db.activeItemDao().deactivateItem(it.ordinal) }
         }
+        if (item.isUsedUp) db.inventoryDao().useItem(item.ordinal)
         db.activeItemDao().activateItem(
             ActiveItem(
                 itemId = item.ordinal,

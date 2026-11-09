@@ -2,6 +2,19 @@
 
 All notable changes to Glyph Catch since it was continued from [Equal Parts' original](https://github.com/equalparts/glyph-catch).
 
+## 3.7.0
+
+- Phone (4a) Pro support (beta): a Poké Ball lights up on the Glyph Matrix when a Pokémon is waiting. See who it is on Home or in the waiting Pokémon widget and throw a Poké Ball to catch it, with the catch playing on the Glyph Matrix. There's also a Poké Ball widget, and Professor Oak explains it all the first time.
+- Super Repel: the clerk brings it at 150 species. While it's on, only Pokémon you don't have in your PC come close.
+- Honey: a Bug Catcher gives it to you soon after the Sinnoh Pokédex. Spread it from your Bag and Pokémon with a sweet tooth, like Combee or Heracross, come for an hour. Munchlax is only found this way now, it no longer hatches from Eggs.
+- Incense: Pokémon appear twice as fast for an hour. Win it in missions or find one now and then when you catch a Pokémon.
+- Legendary Pokémon are never scared off by a repel.
+- Home shows a banner while Honey or an Incense is working.
+- Fixed the team looking full after releasing one of its Pokémon. Existing saves are fixed when you open the app.
+- The Plain wallpaper keeps its frame on tall widgets.
+- Updated to Nothing's Glyph Matrix SDK 2.0.
+- 3 new tips.
+
 ## 3.6.1
 
 - Fixed Pokémon looking like a negative on the Glyph Matrix when dimmed (the companion and the "Lower brightness" setting): highlights and shadows are back where they belong.

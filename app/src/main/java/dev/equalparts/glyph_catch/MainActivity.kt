@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -34,8 +35,12 @@ import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PokemonNames
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.debug.DebugExceptionTracker
+import dev.equalparts.glyph_catch.gameplay.HiddenCatchUp
 import dev.equalparts.glyph_catch.navigation.AppNavigationGraph
 import dev.equalparts.glyph_catch.navigation.AppScreen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +51,9 @@ class MainActivity : ComponentActivity() {
 
         PokemonNames.init(this)
 
+        val preferences = PreferencesManager(this)
+        HiddenCatchUp.schedule(this, preferences.playWhileInUse)
+
         setContent {
             AppTheme {
                 val preferencesManager = remember { PreferencesManager(this) }
@@ -54,6 +62,18 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(LocalColorSprites provides colorSprites) {
                     MainScreen(db)
                 }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            HiddenCatchUp.run(applicationContext)
+            withContext(Dispatchers.IO) {
+                PreferencesManager(
+                    applicationContext
+                ).forgetMissingPokemon(PokemonDatabase.getInstance(applicationContext))
             }
         }
     }

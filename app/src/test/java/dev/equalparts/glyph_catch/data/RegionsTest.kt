@@ -96,4 +96,21 @@ class RegionsTest {
         assertEquals(setOf(106, 107, 237), Pokemon[236]!!.evolvesTo.toSet())
         assertEquals(EvolutionRequirement.Level(20), Pokemon[106]!!.evolutionRequirement)
     }
+
+    @Test
+    fun `the clerk brings the Super Repel at 150 species`() {
+        val bag = setOf(Item.REPEL)
+        assertTrue(NpcEvent.SuperRepel !in NpcEvents.pending(0, 149, bag, true))
+        assertTrue(NpcEvent.SuperRepel in NpcEvents.pending(0, 150, bag, true))
+        assertTrue(NpcEvent.SuperRepel !in NpcEvents.pending(0, 300, bag + Item.SUPER_REPEL, true))
+    }
+
+    @Test
+    fun `a Bug Catcher brings the Honey five species after Sinnoh opens`() {
+        val bag = setOf(Item.POKEDEX_SINNOH)
+        assertTrue(NpcEvent.Honey !in NpcEvents.pending(0, 204, bag, true))
+        assertTrue(NpcEvent.Honey in NpcEvents.pending(0, 205, bag, true))
+        assertTrue(NpcEvent.Honey !in NpcEvents.pending(0, 300, emptySet(), true))
+        assertTrue(NpcEvent.Honey !in NpcEvents.pending(0, 300, bag + Item.HONEY, true))
+    }
 }

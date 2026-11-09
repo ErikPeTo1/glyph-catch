@@ -237,7 +237,7 @@ module.exports = {
     item_linking_cord_name: 'Cordón Unión',
     item_linking_cord_description: 'Hace evolucionar a ciertas especies de Pokémon.',
     item_repel_name: 'Repelente',
-    item_repel_description: 'Aleja a los Pokémon salvajes. No afecta a las especies que aún no tienes.',
+    item_repel_description: "Aleja a los Pokémon salvajes que ya tienes registrados, también los variocolor. Los legendarios no se asustan.",
     item_shiny_stone_name: 'Piedra Día',
     item_shiny_stone_description: 'Brilla con una luz deslumbrante que provoca evoluciones.',
     item_dusk_stone_name: 'Piedra Noche',
@@ -400,6 +400,9 @@ module.exports = {
     "Algunos fondos de las cajas del PC están bloqueados: cada uno es un logro, como atrapar un Pikachu o eclosionar 10 Huevos. Los tienes en Ajustes → Apariencia.",
     "Sin Pokémon salvajes cerca, tu Glyph Matrix puede mostrar un compañero en lugar del reloj. Elígelo con «Mostrar en el Glyph» en su ficha.",
     "Cada captura de una especie suma a su cadena variocolor: a las 10, 25 y 50 capturas su variocolor es más probable. La ficha de cada Pokémon te dice cuánto te falta.",
-    "¿Demasiados Pidgey? En el PC, el filtro Repetidos muestra solo las especies que tienes más de una vez, y «Todos menos uno» las selecciona para liberarlas dejando una de cada."
+    "¿Demasiados Pidgey? En el PC, el filtro Repetidos muestra solo las especies que tienes más de una vez, y «Todos menos uno» las selecciona para liberarlas dejando una de cada.",
+    "Al poco de tener la Pokédex de Sinnoh, un Cazabichos te regala Miel. Úntala desde la Mochila y, durante una hora, vendrán Pokémon golosos como Combee o Heracross.",
+    "Enciende un Incienso y los Pokémon aparecerán el doble de rápido durante una hora. Se ganan en misiones o, a veces, al atrapar un Pokémon.",
+    "A las 150 especies, el dependiente te trae el Superrepelente: solo se acercan los Pokémon que no tienes en el PC. Los legendarios nunca se asustan con un repelente."
   ]
 };

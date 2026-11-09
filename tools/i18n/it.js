@@ -237,7 +237,7 @@ module.exports = {
     item_linking_cord_name: 'Filo dell\'unione',
     item_linking_cord_description: 'Fa evolvere alcune specie di Pokémon.',
     item_repel_name: 'Repellente',
-    item_repel_description: 'Tiene lontani i Pokémon selvatici. Non influisce sulle specie che non hai ancora.',
+    item_repel_description: "Tiene lontani i Pokémon selvatici che hai già registrato, anche i cromatici. I leggendari non si spaventano.",
     item_shiny_stone_name: 'Pietrabrillo',
     item_shiny_stone_description: 'Brilla di una luce abbagliante che provoca evoluzioni.',
     item_dusk_stone_name: 'Neropietra',
@@ -398,6 +398,9 @@ module.exports = {
     "Alcuni sfondi dei box del PC sono bloccati: ognuno è un obiettivo, come catturare un Pikachu o far schiudere 10 Uova. Li trovi in Impostazioni → Aspetto.",
     "Senza Pokémon selvatici in giro, la tua Glyph Matrix può mostrare un compagno al posto dell’orologio. Sceglilo con «Mostra sulla Glyph Matrix» nella sua scheda.",
     "Ogni cattura di una specie conta per la sua catena cromatica: a 10, 25 e 50 catture il suo cromatico diventa più probabile. La scheda di ogni Pokémon mostra a che punto sei.",
-    "Troppi Pidgey? Nel PC, il filtro Doppioni mostra solo le specie che hai più di una volta, e «Tutti tranne uno» le seleziona da liberare tenendone uno per specie."
+    "Troppi Pidgey? Nel PC, il filtro Doppioni mostra solo le specie che hai più di una volta, e «Tutti tranne uno» le seleziona da liberare tenendone uno per specie.",
+    "Poco dopo il Pokédex di Sinnoh, un Pigliamosche ti regala il Miele. Spalmalo dallo Zaino e per un’ora arriveranno Pokémon golosi come Combee o Heracross.",
+    "Accendi un Incenso e i Pokémon appariranno due volte più in fretta per un’ora. Si vince con le missioni o a volte catturando un Pokémon.",
+    "A 150 specie, il commesso ti porta il Superrepellente: si avvicinano solo i Pokémon che non hai nel PC. I leggendari non si spaventano mai con un repellente."
   ]
 };

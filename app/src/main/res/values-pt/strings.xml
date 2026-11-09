@@ -246,7 +246,7 @@
     <string name="item_linking_cord_name">Cordão de Ligação</string>
     <string name="item_linking_cord_description">Faz evoluir certas espécies de Pokémon.</string>
     <string name="item_repel_name">Repelente</string>
-    <string name="item_repel_description">Afasta os Pokémon selvagens. Não afeta as espécies que você ainda não tem.</string>
+    <string name="item_repel_description">Afasta os Pokémon selvagens que você já registrou, inclusive os brilhantes. Lendários não se assustam.</string>
     <string name="item_shiny_stone_name">Pedra Brilhante</string>
     <string name="item_shiny_stone_description">Brilha com uma luz ofuscante que provoca evoluções.</string>
     <string name="item_dusk_stone_name">Pedra do Crepúsculo</string>

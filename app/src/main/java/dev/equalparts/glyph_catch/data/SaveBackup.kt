@@ -107,7 +107,7 @@ object SaveBackup {
             db.inventoryDao().insertAllItems(save.inventory.filter { it.itemId in validItems })
 
             db.eggDao().deleteAll()
-            db.eggDao().insertAll(save.eggs.filter { it.speciesId in Eggs.hatchHours }.take(Eggs.MAX_EGGS))
+            db.eggDao().insertAll(save.eggs.filter { Pokemon[it.speciesId] != null }.take(Eggs.MAX_EGGS))
 
             db.activeItemDao().deleteAll()
             db.activeItemDao().insertAll(save.activeItems.filter { it.itemId in validItems })

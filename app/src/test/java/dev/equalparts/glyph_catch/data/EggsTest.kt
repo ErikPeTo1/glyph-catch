@@ -9,8 +9,10 @@ import org.junit.Test
 class EggsTest {
 
     @Test
-    fun `every baby Pokémon hatches from an egg`() {
-        assertEquals(18, Eggs.species.size)
+    fun `every baby Pokémon but Munchlax hatches from an egg`() {
+        // Munchlax is on hold: for now it only comes to Honey
+        assertEquals(17, Eggs.species.size)
+        assertTrue(Eggs.species.none { it.id == 446 })
         Eggs.species.forEach { baby ->
             assertNull("${baby.name} shouldn't evolve from anything", baby.evolutionRequirement)
             assertTrue("${baby.name} should evolve into something", baby.evolvesTo.isNotEmpty())
