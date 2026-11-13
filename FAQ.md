@@ -32,7 +32,14 @@ Note that Essential Notifications may disconnect the Glyph Toy and disrupt the t
 
 ## Can I keep my progress from the original Glyph Catch?
 
-Unfortunately not: this version is a separate app, so it installs alongside the original and starts a fresh save. From now on, you can back up your progress under Settings > Backup.
+Yes! Your Pokémon, Pokédex and Bag come along:
+
+1. Update the original Glyph Catch to [v1.3.0](https://github.com/equalparts/glyph-catch/releases/tag/v1.3.0).
+2. In the original app, go to Settings > Export progress and save the file.
+3. Install this version (it installs alongside the original), go to Settings > Backup > Import progress and pick that file.
+4. Set this version as your Always-on Glyph Toy. Once everything is there, you can uninstall the original.
+
+Importing replaces the progress you have in this version, so do it before you start playing. From then on, you can back up your progress under Settings > Backup.
 
 ## Privacy
 
