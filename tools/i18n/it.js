@@ -118,7 +118,7 @@ module.exports = {
     sleep_change_bedtime: 'Cambia l\'ora di dormire',
     caught_screen_title: 'POKÉMON',
     caught_screen_total_caught: '%1$d catturati',
-    caught_screen_search_placeholder: 'Cerca Pokémon…',
+    caught_screen_search_placeholder: 'Nome, numero, tipo…',
     caught_screen_clear_search: 'Cancella ricerca',
     caught_screen_filter_favorites: 'Preferiti',
     caught_screen_filter_event: 'Evento',
@@ -200,6 +200,7 @@ module.exports = {
     pool_uncommon: 'Non comune',
     pool_rare: 'Raro',
     pool_egg: "Uovo",
+    pool_evolution: "Evoluzione",
     pool_very_rare: 'Molto raro',
     caught_detail_encounter_event: 'Evento',
     caught_detail_empty_title: 'Pokémon non trovato',
@@ -389,7 +390,7 @@ module.exports = {
     "Ogni professore ti dà il Pokédex della sua regione man mano che il tuo cresce: Johto a 50 Pokémon, Hoenn a 120, Sinnoh a 200 e Unima a 300.",
     "Tocca il telefono in alto nella schermata Home per aprire il Pokégear. Un punto rosso vuol dire che un professore ha qualcosa per te; altrimenti ti dirà come va il tuo Pokédex e le ultime voci.",
     "Alcuni Pokémon leggendari non appaiono senza il loro strumento chiave, come il Biglietto Eone. Quando senti la loro voce, il loro professore te lo tiene da parte sul Pokégear.",
-    "Un Pokémon leggendario liberato può apparire di nuovo, uno alla volta. Bella notizia per i cacciatori di cromatici!",
+    "Un Pokémon leggendario liberato può apparire di nuovo, uno alla volta. Bella notizia per i cacciatori di cromatici: un leggendario è cromatico 1 volta su 32!",
     "Con tutti e quattro i Pokédex regionali, il Professor Oak ti dà la Mappa per scegliere da quali regioni appaiono i Pokémon.",
     "Completa il Pokédex Nazionale e il Professor Oak ti ricompenserà con il Cromamuleto.",
     "Lasci il telefono in carica? I Pokémon di tipo Elettro come Pikachu, Magnemite o Shinx gli si radunano intorno.",
@@ -401,6 +402,7 @@ module.exports = {
     "Troppi Pidgey? Nel PC, il filtro Doppioni mostra solo le specie che hai più di una volta, e «Tutti tranne uno» le seleziona da liberare tenendone uno per specie.",
     "Poco dopo il Pokédex di Sinnoh, un Pigliamosche ti regala il Miele. Spalmalo dallo Zaino e per un’ora arriveranno Pokémon golosi come Combee o Heracross.",
     "Accendi un Incenso e i Pokémon appariranno due volte più in fretta per un’ora. Si vince con le missioni o a volte catturando un Pokémon.",
-    "A 150 specie, il commesso ti porta il Superrepellente: si avvicinano solo i Pokémon che non hai nel PC. I leggendari non si spaventano mai con un repellente."
+    "A 150 specie, il commesso ti porta il Superrepellente: si avvicinano solo i Pokémon che non hai nel PC. I leggendari non si spaventano mai con un repellente.",
+    "Tieni i tuoi preferiti in squadra e allenali. Con molta amicizia si allenano di più, e alcune specie si evolvono solo grazie a essa."
   ]
 };

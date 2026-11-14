@@ -9,6 +9,7 @@ import androidx.work.WorkerParameters
 import dev.equalparts.glyph_catch.data.Forms
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.LEGENDARY_SPECIES
+import dev.equalparts.glyph_catch.data.PokedexData
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.gameplay.spawner.GameplayContext
@@ -60,12 +61,14 @@ object HiddenCatchUp {
             val engine = SpawnRulesEngine(
                 rules = createSpawnRules(gameplay),
                 speciesFilter = { gameplay.trainer.canSpawn(it.id) },
-                shinyMultiplier = { EventHelpers.catchShinyMultiplier(gameplay.trainer.catchCounts[it.id] ?: 0) }
+                shinyMultiplier = { EventHelpers.shinyMultiplier(it.id, gameplay.trainer.catchCounts[it.id] ?: 0) }
             )
             val db = PokemonDatabase.getInstance(app)
             repeat(minOf(missed, room)) {
                 val spawn = engine.spawn(SPAWN_MINUTES)
                 if (isRepelled(spawn, preferences, db)) return@repeat
+                // Special Pokémon like Mew are one of a kind: never a second one while one waits
+                if (spawn.pool.isSpecial && queue.any { it.pokemonId == spawn.pokemon.id }) return@repeat
                 queue += PersistentSpawn(
                     pokemonId = spawn.pokemon.id,
                     poolName = spawn.pool.name,
@@ -99,6 +102,7 @@ object HiddenCatchUp {
 
     class Worker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
+            PokedexData.init(applicationContext)
             run(applicationContext)
             return Result.success()
         }

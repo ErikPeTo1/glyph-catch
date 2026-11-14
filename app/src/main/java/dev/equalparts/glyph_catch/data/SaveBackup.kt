@@ -113,6 +113,7 @@ object SaveBackup {
             db.activeItemDao().insertAll(save.activeItems.filter { it.itemId in validItems })
         }
         importPreferences(context, save.preferences)
+        GardenStore.get(context).reload()
         // The widgets show the imported team and backgrounds right away
         WidgetUpdater.refresh(context)
     }

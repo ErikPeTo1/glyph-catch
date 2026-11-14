@@ -118,7 +118,7 @@ module.exports = {
     sleep_change_bedtime: 'Schlafenszeit ändern',
     caught_screen_title: 'POKÉMON',
     caught_screen_total_caught: '%1$d gefangen',
-    caught_screen_search_placeholder: 'Pokémon suchen…',
+    caught_screen_search_placeholder: 'Name, Nummer, Typ…',
     caught_screen_clear_search: 'Suche löschen',
     caught_screen_filter_favorites: 'Favoriten',
     caught_screen_filter_event: 'Event',
@@ -200,6 +200,7 @@ module.exports = {
     pool_uncommon: 'Ungewöhnlich',
     pool_rare: 'Selten',
     pool_egg: "Ei",
+    pool_evolution: "Entwicklung",
     pool_very_rare: 'Sehr selten',
     caught_detail_encounter_event: 'Event',
     caught_detail_empty_title: 'Pokémon nicht gefunden',
@@ -389,7 +390,7 @@ module.exports = {
     "Jeder Professor gibt dir den Pokédex seiner Region, während deiner wächst: Johto bei 50 Pokémon, Hoenn bei 120, Sinnoh bei 200 und Einall bei 300.",
     "Tippe auf das Telefon oben auf dem Startbildschirm, um den PokéCom zu öffnen. Ein roter Punkt bedeutet, dass ein Professor etwas für dich hat; sonst erzählt er dir, wie dein Pokédex vorankommt, und die neuesten Gerüchte.",
     "Manche legendären Pokémon erscheinen nicht ohne ihr Basis-Item, wie das Äon-Ticket. Wenn du ihr Gerücht hörst, hält ihr Professor es im PokéCom für dich bereit.",
-    "Ein freigelassenes legendäres Pokémon kann wieder erscheinen, eins nach dem anderen. Gute Nachricht für Shiny-Jäger!",
+    "Ein freigelassenes legendäres Pokémon kann wieder erscheinen, eins nach dem anderen. Gute Nachricht für Shiny-Jäger: Ein legendäres Pokémon schillert in 1 von 32 Fällen!",
     "Mit allen vier regionalen Pokédex gibt dir Professor Eich die Karte, mit der du wählst, aus welchen Regionen Pokémon erscheinen.",
     "Vervollständige den Nationaldex, und Professor Eich belohnt dich mit dem Schillerpin.",
     "Lädst du dein Handy? Elektro-Pokémon wie Pikachu, Magnetilo oder Sheinux versammeln sich darum.",
@@ -401,6 +402,7 @@ module.exports = {
     "Zu viele Taubsi? Im PC zeigt der Filter Doppelte nur Arten, die du mehrfach hast, und „Alle außer einem“ wählt sie zum Freilassen aus, wobei je eines bleibt.",
     "Kurz nach dem Sinnoh-Pokédex schenkt dir ein Käfersammler Honig. Streiche ihn über den Beutel auf, und eine Stunde lang kommen naschhafte Pokémon wie Wadribie oder Skaraborn.",
     "Zünde einen Rauch an, und eine Stunde lang erscheinen Pokémon doppelt so schnell. Du bekommst ihn bei Missionen oder ab und zu beim Fangen.",
-    "Bei 150 Arten bringt dir der Verkäufer den Superschutz: Nur Pokémon, die nicht in deinem PC sind, kommen näher. Legendäre lassen sich nie verscheuchen."
+    "Bei 150 Arten bringt dir der Verkäufer den Superschutz: Nur Pokémon, die nicht in deinem PC sind, kommen näher. Legendäre lassen sich nie verscheuchen.",
+    "Nimm deine Lieblinge ins Team und trainiere sie. Mit viel Freundschaft trainieren sie fleißiger, und manche Arten entwickeln sich nur dadurch."
   ]
 };

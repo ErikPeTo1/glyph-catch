@@ -5,12 +5,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.core.graphics.scale
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.Eggs
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.Type
 import dev.equalparts.glyph_catch.gameplay.PersistentSpawn
+import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -20,7 +20,9 @@ import kotlin.math.roundToInt
  * The PC box wallpapers from Pokémon Emerald. The inside of some of them is a pattern that
  * repeats every [periodX] / [periodY] pixels; the rest are scenes (0), which are cropped to fit:
  * around the middle sideways, and keeping the bottom (shores, clouds, the Poké Ball) up and down,
- * unless the scene is [centered]. The ones with an [achievement] stay locked until it's reached.
+ * unless the scene is [centered]. [stretched] ones are just frames and grow from their plainest line;
+ * [fitHeight] ones have bands at the top and bottom that always show. The ones with an [achievement]
+ * stay locked until it's reached.
  */
 enum class BoxWallpaper(
     @param:DrawableRes val drawable: Int,
@@ -30,7 +32,8 @@ enum class BoxWallpaper(
     val dark: Boolean,
     val centered: Boolean = false,
     val achievement: Achievement? = null,
-    val stretched: Boolean = false
+    val stretched: Boolean = false,
+    val fitHeight: Boolean = false
 ) {
     FOREST(R.drawable.box_wallpaper_forest, R.string.box_wallpaper_forest, 32, 16, false),
     CITY(R.drawable.box_wallpaper_city, R.string.box_wallpaper_city, 32, 16, false),
@@ -108,7 +111,16 @@ enum class BoxWallpaper(
         false,
         Achievement.EGGS
     ),
-    STARS(R.drawable.box_wallpaper_stars, R.string.box_wallpaper_stars, 0, 0, true, true, Achievement.SHINY),
+    STARS(
+        R.drawable.box_wallpaper_stars,
+        R.string.box_wallpaper_stars,
+        0,
+        0,
+        true,
+        true,
+        Achievement.SHINY,
+        fitHeight = true
+    ),
     HEARTS(R.drawable.box_wallpaper_hearts, R.string.box_wallpaper_hearts, 0, 0, true, true, Achievement.LEVEL_100),
     DUSCLOPS(
         R.drawable.box_wallpaper_dusclops,
@@ -117,9 +129,19 @@ enum class BoxWallpaper(
         0,
         false,
         true,
-        Achievement.GHOSTS
+        Achievement.GHOSTS,
+        fitHeight = true
     ),
-    MEANDER(R.drawable.box_wallpaper_meander, R.string.box_wallpaper_meander, 96, 0, false, true, Achievement.MISSIONS),
+    MEANDER(
+        R.drawable.box_wallpaper_meander,
+        R.string.box_wallpaper_meander,
+        96,
+        0,
+        false,
+        true,
+        Achievement.MISSIONS,
+        fitHeight = true
+    ),
     STRIPES(R.drawable.box_wallpaper_stripes, R.string.box_wallpaper_stripes, 0, 0, false, true, Achievement.DAYS),
     BRICKS(R.drawable.box_wallpaper_bricks, R.string.box_wallpaper_bricks, 16, 16, true, false, Achievement.MINUTES),
     LEGENDARY(
@@ -242,8 +264,9 @@ sealed interface WidgetBackground {
 class RenderedWallpaper(val bitmap: Bitmap, val frameDp: Float)
 
 /**
- * Fits a box wallpaper to any widget size without stretching its pixels: the frame stays the
- * same (thinner on narrow widgets), patterns repeat, and scenes are cropped to fit.
+ * Fits a box wallpaper to any widget size without stretching its pixels. The frame keeps its look
+ * (thinner on narrow widgets); inside, patterns repeat and scenes grow until they cover the widget,
+ * then are cropped. Where a scene is still too short, its plainest line repeats.
  */
 object WallpaperRenderer {
     private const val WIDTH = 160
@@ -260,60 +283,96 @@ object WallpaperRenderer {
         val heightPx = (heightDp * density).roundToInt()
         if (widthPx <= 0 || heightPx <= 0) return null
 
-        // Scenes can't repeat, so their pixels grow until the scene covers the widget, but never
-        // so much that the frame eats a narrow widget: what's left uncovered extends the scene's edges
-        var pixel = max(1, (PIXEL_DP * density).roundToInt())
-        if (wallpaper.periodX == 0) pixel = max(pixel, ceil(widthPx / WIDTH.toFloat()).toInt())
-        if (wallpaper.periodY == 0) pixel = max(pixel, ceil(heightPx / HEIGHT.toFloat()).toInt())
-        val thickest = (min(widthPx, heightPx) * MAX_FRAME_SHARE / FRAME).toInt()
-        pixel = pixel.coerceAtMost(thickest).coerceAtLeast(1)
-        val width = max(FRAME * 2 + 1, ceil(widthPx / pixel.toFloat()).toInt())
-        val height = max(FRAME * 2 + 1, ceil(heightPx / pixel.toFloat()).toInt())
-
         val options = BitmapFactory.Options().apply { inScaled = false }
         val source = BitmapFactory.decodeResource(context.resources, wallpaper.drawable, options) ?: return null
         val sourcePixels = IntArray(WIDTH * HEIGHT)
         source.getPixels(sourcePixels, 0, WIDTH, 0, 0, WIDTH, HEIGHT)
 
-        val xs = IntArray(width) {
-            if (wallpaper.stretched) {
-                stretchAxis(
-                    it,
-                    width,
-                    WIDTH
+        val base = max(1, (PIXEL_DP * density).roundToInt())
+        val thickest = max(1, (min(widthPx, heightPx) * MAX_FRAME_SHARE / FRAME).toInt())
+        val insideWidth = WIDTH - FRAME * 2
+        val insideHeight = HEIGHT - FRAME * 2
+
+        // The scene's own pixel size, big enough to cover the inside whatever the widget's shape
+        val firstFrame = min(base, thickest)
+        var scene = base
+        if (wallpaper.periodX == 0) {
+            scene = max(scene, ceil((widthPx - 2f * FRAME * firstFrame) / insideWidth).toInt())
+        }
+        if (wallpaper.periodY == 0) {
+            scene = max(scene, ceil((heightPx - 2f * FRAME * firstFrame) / insideHeight).toInt())
+        }
+        // Bands along the top and bottom: the whole height always shows, however short the widget
+        if (wallpaper.fitHeight) scene = max(1, ((heightPx - 2 * FRAME * firstFrame) / insideHeight))
+        val frame = scene.coerceIn(1, thickest)
+
+        val edge = FRAME * frame
+        val columns = ceil((widthPx - 2f * edge) / scene).toInt()
+        val rows = ceil((heightPx - 2f * edge) / scene).toInt()
+        val frameColumns = ceil(widthPx / frame.toFloat()).toInt()
+        val frameRows = ceil(heightPx / frame.toFloat()).toInt()
+        val quietX = quietLine(sourcePixels, alongX = true)
+        val quietY = quietLine(sourcePixels, alongX = false)
+
+        val xs = IntArray(widthPx) { x ->
+            when {
+                wallpaper.stretched || x < edge || x >= widthPx - edge -> stretch(
+                    x / frame,
+                    frameColumns,
+                    WIDTH,
+                    quietX
                 )
-            } else {
-                mapAxis(it, width, WIDTH, wallpaper.periodX, false)
+                else -> inside((x - edge) / scene, columns, insideWidth, wallpaper.periodX, keepEnd = false, quietX)
             }
         }
-        val ys = IntArray(height) {
-            if (wallpaper.stretched) {
-                stretchAxis(it, height, HEIGHT)
+        val frameXs = IntArray(widthPx) { stretch(it / frame, frameColumns, WIDTH, quietX) }
+        val pixels = IntArray(widthPx * heightPx)
+        for (y in 0 until heightPx) {
+            val inFrame = wallpaper.stretched || y < edge || y >= heightPx - edge
+            val sy = if (inFrame) {
+                stretch(y / frame, frameRows, HEIGHT, quietY)
             } else {
-                mapAxis(it, height, HEIGHT, wallpaper.periodY, keepEnd = !wallpaper.centered)
+                inside((y - edge) / scene, rows, insideHeight, wallpaper.periodY, !wallpaper.centered, quietY)
             }
+            val row = if (inFrame) frameXs else xs
+            for (x in 0 until widthPx) pixels[y * widthPx + x] = sourcePixels[sy * WIDTH + row[x]]
         }
-        val pixels = IntArray(width * height) { sourcePixels[ys[it / width] * WIDTH + xs[it % width]] }
-        val small = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
-        return RenderedWallpaper(small.scale(width * pixel, height * pixel, false), FRAME * pixel / density)
+        val bitmap = Bitmap.createBitmap(pixels, widthPx, heightPx, Bitmap.Config.ARGB_8888)
+        return RenderedWallpaper(bitmap, edge / density)
     }
 
-    /** Keeps both ends of the source and repeats its middle row or column in between. */
-    private fun stretchAxis(index: Int, size: Int, sourceSize: Int): Int {
-        val half = sourceSize / 2
-        return if (index < size / 2) min(index, half) else max(sourceSize - (size - index), half)
+    /** Where the inside of the source shows at [index] of [size] lines. */
+    private fun inside(index: Int, size: Int, sourceSize: Int, period: Int, keepEnd: Boolean, quiet: Int): Int {
+        if (period > 0) return FRAME + index % period
+        if (size > sourceSize) return FRAME + stretch(index, size, sourceSize, quiet - FRAME)
+        val crop = if (keepEnd) sourceSize - size else (sourceSize - size) / 2
+        return FRAME + crop + index
     }
 
-    private fun mapAxis(index: Int, size: Int, sourceSize: Int, period: Int, keepEnd: Boolean): Int {
-        val inside = sourceSize - FRAME * 2
-        val target = size - FRAME * 2
-        val crop = if (keepEnd) inside - target else (inside - target) / 2
-        return when {
-            index < FRAME -> index
-            index >= size - FRAME -> sourceSize - (size - index)
-            period > 0 -> FRAME + (index - FRAME) % period
-            // Past the scene's edge, its last row or column repeats
-            else -> (FRAME + crop + (index - FRAME)).coerceIn(FRAME, sourceSize - FRAME - 1)
-        }.coerceIn(0, sourceSize - 1)
+    /**
+     * Keeps both ends of the source: when [size] is longer, line [quiet] repeats in between;
+     * when shorter, the ends meet in the middle.
+     */
+    private fun stretch(index: Int, size: Int, sourceSize: Int, quiet: Int): Int {
+        if (size <= sourceSize) {
+            val half = sourceSize / 2
+            return if (index < size / 2) min(index, half) else max(sourceSize - (size - index), half)
+        }
+        val tail = sourceSize - quiet
+        return if (index < size - tail) min(index, quiet) else sourceSize - (size - index)
+    }
+
+    /** The plainest column (or row) in the middle half, so repeating it doesn't smear a detail. */
+    private fun quietLine(pixels: IntArray, alongX: Boolean): Int {
+        val length = if (alongX) WIDTH else HEIGHT
+        val across = if (alongX) HEIGHT else WIDTH
+        val background = pixels[HEIGHT / 2 * WIDTH + WIDTH / 2]
+        return (length / 4 until length * 3 / 4).minBy { line ->
+            val busy = (FRAME until across - FRAME).count { other ->
+                val pixel = if (alongX) pixels[other * WIDTH + line] else pixels[line * WIDTH + other]
+                pixel != background
+            }
+            busy * 1000 + abs(line - length / 2)
+        }
     }
 }

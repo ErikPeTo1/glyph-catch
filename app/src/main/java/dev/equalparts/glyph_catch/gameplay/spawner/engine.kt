@@ -53,7 +53,7 @@ class SpawnRulesEngine(
             pool,
             screenOffDurationMinutes,
             System.currentTimeMillis(),
-            isShiny = random.nextInt((EventHelpers.shinyOdds() / shinyMultiplier(pokemon)).coerceAtLeast(1)) == 0
+            isShiny = random.nextInt(EventHelpers.wildShinyOdds(shinyMultiplier(pokemon))) == 0
         )
     }
 

@@ -60,13 +60,13 @@ fun PokemonSelectionScreen(
 
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showFavoritesOnly by remember { mutableStateOf(false) }
-    var showEventOnly by remember { mutableStateOf(false) }
+    var showShinyOnly by remember { mutableStateOf(false) }
     var sort by rememberSaveable { mutableStateOf(PokemonSort.LEVEL_HIGH) }
 
     val filterState = PokemonFilterState(
         searchQuery = searchQuery,
         showFavoritesOnly = showFavoritesOnly,
-        showEventOnly = showEventOnly,
+        showShinyOnly = showShinyOnly,
         sort = sort
     )
 
@@ -94,7 +94,7 @@ fun PokemonSelectionScreen(
                 onSearchChange = { searchQuery = it },
                 onClearSearch = { searchQuery = "" },
                 onToggleFavorites = { showFavoritesOnly = !showFavoritesOnly },
-                onToggleEvent = { showEventOnly = !showEventOnly },
+                onToggleShiny = { showShinyOnly = !showShinyOnly },
                 onSortChange = { sort = it }
             )
 

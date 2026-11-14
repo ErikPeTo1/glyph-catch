@@ -411,7 +411,7 @@ data class GameplayContext(
                 if (!preferences.hasCatchCounts) {
                     preferences.seedCatchCounts(dao.countOwnedBySpecies().associate { it.speciesId to it.count })
                 }
-                catchCounts = preferences.catchCounts
+                catchCounts = preferences.shinyChainCounts
 
                 val activePartner = dao.getActiveTrainingPartner()
                 companion = preferences.companionId?.let { dao.getCaughtPokemon(it) } ?: activePartner

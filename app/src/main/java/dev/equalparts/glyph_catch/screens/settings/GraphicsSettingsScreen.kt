@@ -1,5 +1,8 @@
 package dev.equalparts.glyph_catch.screens.settings
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,6 +56,7 @@ import dev.equalparts.glyph_catch.AppCard
 import dev.equalparts.glyph_catch.AppSizes
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.data.PreferencesManager
+import dev.equalparts.glyph_catch.gameplay.WaitingNotification
 import dev.equalparts.glyph_catch.widget.Achievement
 import dev.equalparts.glyph_catch.widget.AchievementState
 import dev.equalparts.glyph_catch.widget.Achievements
@@ -75,6 +79,25 @@ fun GraphicsSettingsScreen(modifier: Modifier) {
         verticalArrangement = Arrangement.spacedBy(AppSizes.spacingLarge)
     ) {
         IdleDisplayCard(prefs)
+
+        var notify by remember { mutableStateOf(prefs.waitingNotification && WaitingNotification.canPost(context)) }
+        val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            prefs.waitingNotification = granted
+            notify = granted
+        }
+        VisualToggleCard(
+            title = stringResource(R.string.settings_waiting_notification_title),
+            subtitle = stringResource(R.string.settings_waiting_notification_subtitle),
+            checked = notify,
+            onCheckedChange = { enabled ->
+                if (enabled && !WaitingNotification.canPost(context)) {
+                    askPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    prefs.waitingNotification = enabled
+                    notify = enabled
+                }
+            }
+        )
 
         VisualToggleCard(
             title = stringResource(R.string.settings_graphics_brightness_title),
@@ -154,6 +177,8 @@ private fun IdleDisplayCard(prefs: PreferencesManager) {
                         onClick = {
                             selected = value
                             prefs.glyphIdleDisplay = value
+                            // Picked here on purpose: no going back to an older choice
+                            prefs.idleBeforeCompanion = null
                         },
                         label = { Text(stringResource(label)) }
                     )

@@ -20,11 +20,13 @@ import dev.equalparts.glyph_catch.screens.CaughtScreen
 import dev.equalparts.glyph_catch.screens.HomeScreen
 import dev.equalparts.glyph_catch.screens.InventoryScreen
 import dev.equalparts.glyph_catch.screens.MissionsScreen
+import dev.equalparts.glyph_catch.screens.PokedexEntryScreen
 import dev.equalparts.glyph_catch.screens.PokedexScreen
 import dev.equalparts.glyph_catch.screens.PokemonSelectionScreen
 import dev.equalparts.glyph_catch.screens.RumorsScreen
 import dev.equalparts.glyph_catch.screens.SettingsScreen
 import dev.equalparts.glyph_catch.screens.StatsScreen
+import dev.equalparts.glyph_catch.screens.garden.GardenScreen
 import dev.equalparts.glyph_catch.screens.inventory.InventoryItemDetailScreen
 import dev.equalparts.glyph_catch.screens.professor.PokegearScreen
 import dev.equalparts.glyph_catch.util.TrainerTipsProvider
@@ -76,6 +78,13 @@ fun AppNavigationGraph(navController: NavHostController, db: PokemonDatabase) {
                 onPokegearClick = { navController.navigate("home/pokegear") }
             )
         }
+        composable(AppScreen.Garden.route) {
+            GardenScreen(
+                db = db,
+                preferencesManager = preferencesManager,
+                onPokemonClick = { navController.navigateToCaughtDetail(it.id) }
+            )
+        }
         composable("home/pokegear") {
             PokegearScreen(db = db, preferencesManager = preferencesManager, onBackClick = {
                 navController.navigateUp()
@@ -92,10 +101,19 @@ fun AppNavigationGraph(navController: NavHostController, db: PokemonDatabase) {
         composable(AppScreen.Pokedex.route) {
             PokedexScreen(
                 db = db,
-                onPokemonClick = { speciesId ->
-                    navController.navigateToPokemon(speciesId)
-                },
+                onPokemonClick = { speciesId -> navController.navigate("pokedex/entry/$speciesId") },
                 onRumorsClick = { navController.navigate("pokedex/rumors") }
+            )
+        }
+        composable(
+            route = "pokedex/entry/{speciesId}",
+            arguments = listOf(navArgument("speciesId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            PokedexEntryScreen(
+                db = db,
+                speciesId = backStackEntry.arguments?.getInt("speciesId") ?: 1,
+                onSeeInPc = { navController.navigateToPokemon(it) },
+                onNavigateUp = { navController.navigateUp() }
             )
         }
         composable("pokedex/rumors") {

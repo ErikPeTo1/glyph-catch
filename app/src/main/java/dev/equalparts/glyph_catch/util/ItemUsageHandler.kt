@@ -2,6 +2,7 @@ package dev.equalparts.glyph_catch.util
 
 import androidx.room.withTransaction
 import dev.equalparts.glyph_catch.data.CaughtPokemon
+import dev.equalparts.glyph_catch.data.FriendshipRules
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PokemonSpecies
@@ -127,7 +128,9 @@ private suspend fun applyRareCandy(
         val newLevel = pokemon.level + 1
         inventoryDao.useItem(Item.RARE_CANDY.ordinal)
         pokemonDao.updateTrainingProgress(pokemon.id, 0, newLevel)
-        pokemon = pokemon.copy(level = newLevel, exp = 0)
+        val friendship = FriendshipRules.afterLevelUps(pokemon.friendship, 1)
+        pokemonDao.updateFriendship(pokemon.id, friendship)
+        pokemon = pokemon.copy(level = newLevel, exp = 0, friendship = friendship)
 
         val evolution = findLevelEvolutionTarget(pokemon)
         if (evolution != null) {

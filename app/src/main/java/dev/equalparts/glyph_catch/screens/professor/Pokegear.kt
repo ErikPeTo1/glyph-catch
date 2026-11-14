@@ -1,5 +1,8 @@
 package dev.equalparts.glyph_catch.screens.professor
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,6 +45,7 @@ import dev.equalparts.glyph_catch.data.Professor
 import dev.equalparts.glyph_catch.data.ProfessorEvent
 import dev.equalparts.glyph_catch.data.ProfessorEvents
 import dev.equalparts.glyph_catch.data.Region
+import dev.equalparts.glyph_catch.gameplay.WaitingNotification
 import dev.equalparts.glyph_catch.util.EventHelpers
 import dev.equalparts.glyph_catch.util.GlyphDevice
 import dev.equalparts.glyph_catch.widget.WidgetUpdater
@@ -98,10 +102,23 @@ fun ProfessorEventHost(db: PokemonDatabase, preferencesManager: PreferencesManag
         // The Phone (4a) Pro's button can't catch, so Oak explains the Poké Ball right away
         val context = LocalContext.current
         val pages = remember { ProfessorScripts.pokeBallTip(context) }
+        val askPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+            WidgetUpdater.refresh(context)
+        }
         ProfessorDialog(professor = Professor.OAK, pages = pages, onFinish = {
             preferencesManager.pokeBallTipSeen = true
             pokeBallTipSeen = true
+            if (preferencesManager.waitingNotification && !WaitingNotification.canPost(context)) {
+                askPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
         })
+        return
+    }
+    var nameKnown by remember { mutableStateOf(preferencesManager.playerName != null) }
+    if (introSeen && !nameKnown) {
+        val context = LocalContext.current
+        val pages = remember { ProfessorScripts.forgotName(context) }
+        ProfessorDialog(professor = Professor.OAK, pages = pages, onFinish = { nameKnown = true })
         return
     }
     if (introSeen) {
@@ -114,6 +131,7 @@ fun ProfessorEventHost(db: PokemonDatabase, preferencesManager: PreferencesManag
     val scope = rememberCoroutineScope()
     ProfessorDialog(professor = Professor.OAK, pages = pages, onFinish = {
         introSeen = true
+        nameKnown = true
         scope.launch {
             withContext(Dispatchers.IO) { ProfessorEvents.complete(ProfessorEvent.Intro, db, preferencesManager) }
         }

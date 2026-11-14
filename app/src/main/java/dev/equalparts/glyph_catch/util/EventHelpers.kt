@@ -1,5 +1,6 @@
 package dev.equalparts.glyph_catch.util
 
+import dev.equalparts.glyph_catch.data.LEGENDARY_SPECIES
 import java.time.Duration
 import java.time.LocalDate
 import java.time.Month
@@ -50,18 +51,36 @@ object EventHelpers {
 
     private const val SHINY_CHARM_FACTOR = 3
 
-    /** Catches of a species needed for each step of better shiny odds: ×2, ×3 and ×4. */
-    val CATCH_STREAK_STEPS = listOf(10, 25, 50)
+    /**
+     * Catches of a species needed for each step of better shiny odds, and how much better. The
+     * last two are long on purpose: the chain starts over with every shiny caught.
+     */
+    val CATCH_STREAK_STEPS = listOf(10 to 2, 25 to 3, 50 to 4, 100 to 8, 250 to 16)
+
+    /** Legendary Pokémon can't build a chain (there's only ever one), so every encounter is 1/32. */
+    const val LEGENDARY_SHINY_MULTIPLIER = 16
+
+    /** However lucky everything lines up, a shiny is never likelier than one in this many. */
+    const val MIN_SHINY_ODDS = 8
 
     /**
      * Like the research levels in Legends: Arceus, the more you catch a species, the more
      * likely its shiny becomes. Releasing doesn't undo catches.
      */
-    fun catchShinyMultiplier(timesCaught: Int): Int = 1 + CATCH_STREAK_STEPS.count { timesCaught >= it }
+    fun catchShinyMultiplier(timesCaught: Int): Int =
+        CATCH_STREAK_STEPS.lastOrNull { timesCaught >= it.first }?.second ?: 1
 
     /** Catches still needed for the next step, or `null` at the top. */
     fun catchesToNextStep(timesCaught: Int): Int? =
-        CATCH_STREAK_STEPS.firstOrNull { timesCaught < it }?.minus(timesCaught)
+        CATCH_STREAK_STEPS.firstOrNull { timesCaught < it.first }?.first?.minus(timesCaught)
+
+    /** How much likelier this species' shiny is: its chain, or the legendary odds. */
+    fun shinyMultiplier(speciesId: Int, chain: Int): Int =
+        if (speciesId in LEGENDARY_SPECIES) LEGENDARY_SHINY_MULTIPLIER else catchShinyMultiplier(chain)
+
+    /** One in this many wild Pokémon of a species is shiny today, with [multiplier] on top. */
+    fun wildShinyOdds(multiplier: Int, date: LocalDate = LocalDate.now()): Int =
+        (shinyOdds(date) / multiplier).coerceAtLeast(MIN_SHINY_ODDS)
 
     fun isHalloween(): Boolean {
         val cal = Calendar.getInstance()

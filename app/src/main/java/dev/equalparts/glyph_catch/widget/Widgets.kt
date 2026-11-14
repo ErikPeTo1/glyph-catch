@@ -52,6 +52,7 @@ import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.gameplay.PersistentSpawn
 import dev.equalparts.glyph_catch.gameplay.PokemonGlyphToyService
+import dev.equalparts.glyph_catch.gameplay.WaitingNotification
 import dev.equalparts.glyph_catch.util.GlyphDevice
 import dev.equalparts.glyph_catch.util.PokemonSpriteUtils
 import kotlin.math.ceil
@@ -101,6 +102,7 @@ object WidgetUpdater {
         val app = context.applicationContext
         changes.update { it + 1 }
         scope.launch {
+            runCatching { WaitingNotification.update(app) }
             runCatching { TeamWidget().updateAll(app) }
             runCatching { QueueWidget().updateAll(app) }
             runCatching { PokeBallWidget().updateAll(app) }

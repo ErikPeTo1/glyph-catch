@@ -13,6 +13,10 @@ import com.nothing.ketchum.GlyphMatrixUtils
 import dev.equalparts.glyph_catch.R
 import dev.equalparts.glyph_catch.util.PokemonSpriteUtils
 
+/** Around the Poké Ball, clockwise from the top: just outside it, just inside the round matrix. */
+private val DOTS_13 = listOf(6 to 1, 10 to 2, 11 to 6, 10 to 10, 6 to 11, 2 to 10, 1 to 6, 2 to 2)
+private val DOTS_25 = listOf(12 to 0, 20 to 3, 23 to 12, 20 to 20, 12 to 23, 3 to 20, 0 to 12, 3 to 3)
+
 /** Brightest value of a Glyph Matrix LED: frames hold one brightness per LED, not a color. */
 internal const val MAX_LED_BRIGHTNESS = 2047
 
@@ -124,6 +128,29 @@ internal class GlyphMatrixHelper(private val context: Context, val matrixSize: I
     }
 
     fun adjustBrightness(frame: IntArray, factor: Float): IntArray = dimFrame(frame, factor)
+
+    /**
+     * One dot per Pokémon waiting around the Poké Ball, clockwise from the top, up to eight and at
+     * half brightness. The dot at [blinking] (a shiny) is left out when [blinkOn] is false.
+     */
+    fun withWaitingDots(frame: IntArray, count: Int, blinking: Int? = null, blinkOn: Boolean = true): IntArray {
+        val dots = if (matrixSize <= 13) DOTS_13 else DOTS_25
+        val size = if (matrixSize <= 13) 1 else 2
+        val result = frame.copyOf()
+        dots.take(count.coerceAtMost(dots.size)).forEachIndexed { index, (x, y) ->
+            if (index == blinking && !blinkOn) return@forEachIndexed
+            for (dy in 0 until size) {
+                for (dx in 0 until size) {
+                    val px = x + dx
+                    val py = y + dy
+                    if (px in 0 until matrixSize && py in 0 until matrixSize) {
+                        result[py * matrixSize + px] = MAX_LED_BRIGHTNESS / 2
+                    }
+                }
+            }
+        }
+        return result
+    }
 
     /** Equal Parts' Poké Ball from the catch animation, at its true size on the small matrix. */
     fun renderPokeBallFrame(inverted: Boolean): IntArray {

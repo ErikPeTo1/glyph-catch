@@ -16,9 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import dev.equalparts.glyph_catch.AppSizes
-import dev.equalparts.glyph_catch.R
 
 /**
  * A chip showing the current sort order that opens a menu with the available ones.
@@ -37,7 +35,7 @@ fun <T> SortChip(
         FilterChip(
             selected = false,
             onClick = { expanded = true },
-            label = { Text(stringResource(R.string.pokemon_sort_label, label(selected))) },
+            label = { Text(label(selected)) },
             trailingIcon = {
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,

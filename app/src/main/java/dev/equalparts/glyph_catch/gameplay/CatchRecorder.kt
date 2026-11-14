@@ -5,6 +5,7 @@ import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.DailyStats
 import dev.equalparts.glyph_catch.data.Eggs
 import dev.equalparts.glyph_catch.data.EvolutionRequirement
+import dev.equalparts.glyph_catch.data.FriendshipRules
 import dev.equalparts.glyph_catch.data.InventoryItem
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
@@ -70,11 +71,14 @@ internal object CatchRecorder {
             isSpecialSpawn = spawn.poolName.contains("special", ignoreCase = true),
             isConditionalSpawn = spawn.poolName.contains("event", ignoreCase = true),
             isShiny = spawn.isShiny,
-            form = spawn.form
+            form = spawn.form,
+            // Like in the games, a Pokémon that hatched with you trusts you more from the start
+            friendship = if (spawn.poolName == Eggs.POOL_NAME) FriendshipRules.HATCHED else FriendshipRules.CAUGHT
         )
         db.pokemonDao().insert(caught)
         db.pokemonDao().recordPokedexEntry(speciesId, spawn.isShiny, spawn.form)
         preferences.addCatch(speciesId)
+        if (spawn.isShiny) preferences.resetShinyChain(speciesId)
 
         awardItems(db, preferences, speciesId, alreadyDiscovered, canSpawn, onAward)
         with(preferences.dailyStats) {

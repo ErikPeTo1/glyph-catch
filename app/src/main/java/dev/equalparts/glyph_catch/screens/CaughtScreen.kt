@@ -66,18 +66,18 @@ import dev.equalparts.glyph_catch.PokemonExpChip
 import dev.equalparts.glyph_catch.PokemonLevelChip
 import dev.equalparts.glyph_catch.PokemonSpriteCircle
 import dev.equalparts.glyph_catch.R
+import dev.equalparts.glyph_catch.components.GenderSymbol
 import dev.equalparts.glyph_catch.components.PokemonFilterControls
 import dev.equalparts.glyph_catch.components.PokemonFilterState
 import dev.equalparts.glyph_catch.components.PokemonSort
 import dev.equalparts.glyph_catch.components.applyFilters
 import dev.equalparts.glyph_catch.components.copyKey
 import dev.equalparts.glyph_catch.data.CaughtPokemon
-import dev.equalparts.glyph_catch.data.InventoryItem
-import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.displayName
+import dev.equalparts.glyph_catch.data.releasePokemon
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -96,9 +96,9 @@ private data class CaughtActions(
     val onSearchChange: (String) -> Unit,
     val onClearSearch: () -> Unit,
     val onToggleFavorites: () -> Unit,
-    val onToggleEvent: () -> Unit,
     val onToggleShiny: () -> Unit,
     val onToggleDuplicates: () -> Unit,
+    val onToggleTeam: () -> Unit,
     val onSortChange: (PokemonSort) -> Unit,
     val onToggleFavorite: (CaughtPokemon) -> Unit,
     val onPokemonClick: (CaughtPokemon) -> Unit,
@@ -141,9 +141,9 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
 
     var searchQuery by rememberSaveable(initialSearchQuery) { mutableStateOf(initialSearchQuery) }
     var showFavoritesOnly by remember { mutableStateOf(false) }
-    var showEventOnly by remember { mutableStateOf(false) }
     var showShinyOnly by remember { mutableStateOf(false) }
     var showDuplicatesOnly by remember { mutableStateOf(false) }
+    var showTeamOnly by remember { mutableStateOf(false) }
     var sort by rememberSaveable { mutableStateOf(PokemonSort.RECENT) }
     var selectedIds by remember { mutableStateOf(emptySet<String>()) }
     var showReleaseConfirmation by remember { mutableStateOf(false) }
@@ -155,9 +155,10 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
     val filterState = PokemonFilterState(
         searchQuery = searchQuery,
         showFavoritesOnly = showFavoritesOnly,
-        showEventOnly = showEventOnly,
         showShinyOnly = showShinyOnly,
         showDuplicatesOnly = showDuplicatesOnly,
+        showTeamOnly = showTeamOnly,
+        team = if (showTeamOnly) preferencesManager.team.toSet() else emptySet(),
         sort = sort
     )
 
@@ -184,12 +185,15 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
         onSearchChange = { searchQuery = it },
         onClearSearch = { searchQuery = "" },
         onToggleFavorites = { showFavoritesOnly = !showFavoritesOnly },
-        onToggleEvent = { showEventOnly = !showEventOnly },
         onToggleShiny = { showShinyOnly = !showShinyOnly },
         onToggleDuplicates = { showDuplicatesOnly = !showDuplicatesOnly },
+        onToggleTeam = { showTeamOnly = !showTeamOnly },
         onSortChange = { sort = it },
         onToggleFavorite = toggleFavorite,
-        onPokemonClick = onPokemonClick,
+        onPokemonClick = { pokemon ->
+            PokemonBrowse.ids = filteredPokemon.map { it.id }
+            onPokemonClick(pokemon)
+        },
         onToggleSelection = { pokemon ->
             if (!pokemon.isProtected) {
                 selectedIds =
@@ -225,20 +229,7 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
                 TextButton(
                     onClick = {
                         val ids = validSelection.toList()
-                        scope.launch {
-                            pokemonDao.deleteCaught(ids)
-                            preferencesManager.forgetMissingPokemon(db)
-                            preferencesManager.releasedCount += ids.size
-                            // A Rare Candy for each released Pokémon
-                            val inventoryDao = db.inventoryDao()
-                            if (inventoryDao.getItem(Item.RARE_CANDY.ordinal) == null) {
-                                inventoryDao.insertItem(
-                                    InventoryItem(itemId = Item.RARE_CANDY.ordinal, quantity = ids.size)
-                                )
-                            } else {
-                                inventoryDao.addItems(Item.RARE_CANDY.ordinal, ids.size)
-                            }
-                        }
+                        scope.launch { releasePokemon(db, preferencesManager, ids) }
                         selectedIds = emptySet()
                         showReleaseConfirmation = false
                     }
@@ -260,6 +251,9 @@ fun CaughtScreen(db: PokemonDatabase, initialSearchQuery: String = "", onPokemon
 
 @Composable
 private fun CaughtScreenContent(state: CaughtUiState, actions: CaughtActions) {
+    val context = LocalContext.current
+    val preferences = remember { PreferencesManager(context) }
+    var gridView by remember { mutableStateOf(preferences.caughtGridView) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -285,13 +279,32 @@ private fun CaughtScreenContent(state: CaughtUiState, actions: CaughtActions) {
             onSearchChange = actions.onSearchChange,
             onClearSearch = actions.onClearSearch,
             onToggleFavorites = actions.onToggleFavorites,
-            onToggleEvent = actions.onToggleEvent,
-            onSortChange = actions.onSortChange,
             onToggleShiny = actions.onToggleShiny,
-            onToggleDuplicates = actions.onToggleDuplicates
+            onSortChange = actions.onSortChange,
+            onToggleDuplicates = actions.onToggleDuplicates,
+            onToggleTeam = actions.onToggleTeam,
+            trailing = {
+                IconButton(onClick = {
+                    gridView = !gridView
+                    preferences.caughtGridView = gridView
+                }) {
+                    if (gridView) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.List,
+                            contentDescription = stringResource(R.string.caught_screen_list_view)
+                        )
+                    } else {
+                        Icon(
+                            painterResource(R.drawable.icon_grid_dots),
+                            contentDescription = stringResource(R.string.caught_screen_grid_view)
+                        )
+                    }
+                }
+            }
         )
 
-        CaughtResults(state = state, actions = actions)
+        Spacer(modifier = Modifier.height(AppSizes.spacingSmall))
+        CaughtResults(state = state, actions = actions, gridView = gridView)
     }
 }
 
@@ -340,7 +353,7 @@ private fun SelectionHeader(
 }
 
 @Composable
-private fun CaughtResults(state: CaughtUiState, actions: CaughtActions) {
+private fun CaughtResults(state: CaughtUiState, actions: CaughtActions, gridView: Boolean) {
     if (state.caughtPokemon.isEmpty()) {
         AppEmptyState(
             primaryText = if (state.filterState.hasActiveFilters) {
@@ -355,31 +368,8 @@ private fun CaughtResults(state: CaughtUiState, actions: CaughtActions) {
             }
         )
     } else {
-        val context = LocalContext.current
-        val preferences = remember { PreferencesManager(context) }
-        var gridView by remember { mutableStateOf(preferences.caughtGridView) }
         // The first visible Pokémon, shared by both layouts so switching keeps your place
         var anchor by rememberSaveable { mutableIntStateOf(0) }
-
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = {
-                gridView = !gridView
-                preferences.caughtGridView = gridView
-            }) {
-                if (gridView) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.List,
-                        contentDescription = stringResource(R.string.caught_screen_list_view)
-                    )
-                } else {
-                    Icon(
-                        painterResource(R.drawable.icon_grid_dots),
-                        contentDescription = stringResource(R.string.caught_screen_grid_view)
-                    )
-                }
-            }
-        }
 
         val onClick = if (state.isSelecting) actions.onToggleSelection else actions.onPokemonClick
         if (gridView) {
@@ -474,12 +464,16 @@ private fun CaughtPokemonGridCell(
                     )
                 }
             }
-            Text(
-                text = pokemon.nickname ?: species.displayName,
-                style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = pokemon.nickname ?: species.displayName,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                GenderSymbol(pokemon, style = MaterialTheme.typography.labelLarge)
+            }
             PokemonLevelChip(level = pokemon.level)
         }
     }
@@ -541,6 +535,7 @@ fun CaughtPokemonCard(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Medium
                     )
+                    GenderSymbol(pokemon)
                 }
 
                 Spacer(modifier = Modifier.height(AppSizes.spacingTiny))

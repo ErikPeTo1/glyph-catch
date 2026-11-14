@@ -1,48 +1,61 @@
 package dev.equalparts.glyph_catch.util
 
 import dev.equalparts.glyph_catch.data.CaughtPokemon
+import dev.equalparts.glyph_catch.data.DayTime
 import dev.equalparts.glyph_catch.data.EvolutionRequirement
+import dev.equalparts.glyph_catch.data.FriendshipRules
+import dev.equalparts.glyph_catch.data.Gender
 import dev.equalparts.glyph_catch.data.Item
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonSpecies
+import dev.equalparts.glyph_catch.data.canEvolveInto
+import dev.equalparts.glyph_catch.data.gender
+import dev.equalparts.glyph_catch.data.genderAs
 
 const val MAX_POKEMON_LEVEL = 100
 
 /**
  * Species whose evolution the player picks in the app: Tyrogue (by level) and Clamperl
- * (with the Linking Cord). Wurmple and Burmy stay random, like in the main games.
+ * (with the Linking Cord). Wurmple stays random, like in the main games; Burmy goes by gender.
  */
 val CHOICE_EVOLUTIONS = setOf(236, 366)
 
-private fun PokemonSpecies.evolutionTargets(): List<PokemonSpecies> = evolvesTo.mapNotNull { Pokemon[it] }
+/** What this species can evolve into with this gender: only female Combee become Vespiquen. */
+private fun PokemonSpecies.evolutionTargets(gender: Gender): List<PokemonSpecies> =
+    evolvesTo.filter { canEvolveInto(it, gender) }.mapNotNull { Pokemon[it] }
+
+private fun CaughtPokemon.evolutionTargets(): List<PokemonSpecies> =
+    Pokemon[speciesId]?.evolutionTargets(gender).orEmpty()
+
+/** Whether leveling up to [level] with this [friendship] meets this evolution's requirement. */
+private fun PokemonSpecies.evolvesOnLevelUp(level: Int, friendship: Int, time: DayTime): Boolean =
+    when (val requirement = evolutionRequirement) {
+        is EvolutionRequirement.Level -> level >= requirement.level
+        is EvolutionRequirement.Friendship ->
+            friendship >= FriendshipRules.EVOLVES_AT && (requirement.time == null || requirement.time == time)
+        else -> false
+    }
 
 /**
  * The automatic level-up evolution, if any. Pokémon holding an Everstone and those whose
  * evolution is chosen by the player never evolve automatically.
  */
-fun findLevelEvolutionTarget(pokemon: CaughtPokemon): PokemonSpecies? {
+fun findLevelEvolutionTarget(pokemon: CaughtPokemon, time: DayTime = DayTime.now()): PokemonSpecies? {
     if (pokemon.evolutionLocked || pokemon.speciesId in CHOICE_EVOLUTIONS) return null
-    val species = Pokemon[pokemon.speciesId] ?: return null
-    return species.evolutionTargets().filter { candidate ->
-        val requirement = candidate.evolutionRequirement as? EvolutionRequirement.Level
-        requirement != null && pokemon.level >= requirement.level
-    }.randomOrNull()
+    return pokemon.evolutionTargets()
+        .filter { it.evolvesOnLevelUp(pokemon.level, pokemon.friendship, time) }
+        .randomOrNull()
 }
 
-fun findStoneEvolutionTarget(pokemon: CaughtPokemon, stone: Item): PokemonSpecies? {
-    val species = Pokemon[pokemon.speciesId] ?: return null
-    return species.evolutionTargets().firstOrNull { candidate ->
+fun findStoneEvolutionTarget(pokemon: CaughtPokemon, stone: Item): PokemonSpecies? =
+    pokemon.evolutionTargets().firstOrNull { candidate ->
         val requirement = candidate.evolutionRequirement as? EvolutionRequirement.Stone
         requirement?.item == stone
     }
-}
 
-fun findTradeEvolutionTarget(pokemon: CaughtPokemon): PokemonSpecies? {
-    val species = Pokemon[pokemon.speciesId] ?: return null
-    return species.evolutionTargets().filter { candidate ->
-        candidate.evolutionRequirement == EvolutionRequirement.Trade
-    }.randomOrNull()
-}
+fun findTradeEvolutionTarget(pokemon: CaughtPokemon): PokemonSpecies? = pokemon.evolutionTargets().filter { candidate ->
+    candidate.evolutionRequirement == EvolutionRequirement.Trade
+}.randomOrNull()
 
 fun canUseItemOn(item: Item, pokemon: CaughtPokemon): Boolean = when (item) {
     Item.RARE_CANDY -> pokemon.level < MAX_POKEMON_LEVEL
@@ -65,8 +78,7 @@ fun canUseItemOn(item: Item, pokemon: CaughtPokemon): Boolean = when (item) {
  */
 fun levelChoiceTargets(pokemon: CaughtPokemon): List<PokemonSpecies> {
     if (pokemon.speciesId !in CHOICE_EVOLUTIONS) return emptyList()
-    val species = Pokemon[pokemon.speciesId] ?: return emptyList()
-    return species.evolutionTargets().filter { candidate ->
+    return pokemon.evolutionTargets().filter { candidate ->
         val requirement = candidate.evolutionRequirement as? EvolutionRequirement.Level
         requirement != null && pokemon.level >= requirement.level
     }
@@ -75,10 +87,8 @@ fun levelChoiceTargets(pokemon: CaughtPokemon): List<PokemonSpecies> {
 /**
  * All evolutions reachable with the Linking Cord (two for Clamperl).
  */
-fun tradeTargets(pokemon: CaughtPokemon): List<PokemonSpecies> {
-    val species = Pokemon[pokemon.speciesId] ?: return emptyList()
-    return species.evolutionTargets().filter { it.evolutionRequirement == EvolutionRequirement.Trade }
-}
+fun tradeTargets(pokemon: CaughtPokemon): List<PokemonSpecies> =
+    pokemon.evolutionTargets().filter { it.evolutionRequirement == EvolutionRequirement.Trade }
 
 /**
  * What the item would evolve this Pokémon into (two options for Clamperl).
@@ -94,8 +104,10 @@ fun itemEvolutionTargets(item: Item, pokemon: CaughtPokemon): List<PokemonSpecie
  */
 fun canHoldEverstone(pokemon: CaughtPokemon): Boolean {
     if (pokemon.speciesId in CHOICE_EVOLUTIONS) return false
-    val species = Pokemon[pokemon.speciesId] ?: return false
-    return species.evolutionTargets().any { it.evolutionRequirement is EvolutionRequirement.Level }
+    return pokemon.evolutionTargets().any {
+        it.evolutionRequirement is EvolutionRequirement.Level ||
+            it.evolutionRequirement is EvolutionRequirement.Friendship
+    }
 }
 
 /**
@@ -123,14 +135,15 @@ sealed class CandyEvolution {
     data class Random(val path: List<PokemonSpecies>, val options: List<PokemonSpecies>) : CandyEvolution()
 }
 
-fun candyEvolution(pokemon: CaughtPokemon, candies: Int): CandyEvolution {
+fun candyEvolution(pokemon: CaughtPokemon, candies: Int, time: DayTime = DayTime.now()): CandyEvolution {
     var species = Pokemon[pokemon.speciesId] ?: return CandyEvolution.None
     val path = mutableListOf<PokemonSpecies>()
+    var friendship = pokemon.friendship
     for (level in pokemon.level + 1..minOf(pokemon.level + candies, MAX_POKEMON_LEVEL)) {
-        val targets = species.evolutionTargets().filter { candidate ->
-            val requirement = candidate.evolutionRequirement as? EvolutionRequirement.Level
-            requirement != null && level >= requirement.level
-        }
+        // Each candy is a level up, so it brings them a little closer too
+        friendship = FriendshipRules.afterLevelUps(friendship, 1)
+        val targets = species.evolutionTargets(pokemon.genderAs(species.id))
+            .filter { it.evolvesOnLevelUp(level, friendship, time) }
         if (targets.isEmpty()) continue
         if (pokemon.evolutionLocked) return CandyEvolution.Blocked
         if (species.id in

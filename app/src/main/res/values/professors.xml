@@ -21,6 +21,17 @@
     <string name="oak_intro_4">Myself… I study Pokémon as a profession. And you\'re going to help me!</string>
     <string name="oak_intro_5">Leave your phone face-down and locked. Pokémon will appear on your Glyph Matrix, and you can catch them with a long press.</string>
     <string name="oak_kanto_gift">Take this: your very own Pokédex! It records every Pokémon you register.</string>
+    <string name="oak_ask_look">But enough about me. Tell me a little about yourself: what do you look like?</string>
+    <string name="oak_ask_name">And what\'s your name?</string>
+    <string name="oak_nice_to_meet">So your name is %1$s! Nice to meet you!</string>
+    <string name="oak_forgot_name_1">Oh, silly me! With so many Pokémon around, I never asked you…</string>
+    <string name="oak_forgot_look">Remind me, what do you look like?</string>
+    <string name="oak_forgot_name_2">And what was your name?</string>
+    <string name="oak_forgot_name_3">%1$s! Of course, of course! I won\'t forget it again.</string>
+    <string name="player_name_hint">Your name</string>
+    <string name="player_name_done">OK</string>
+    <string name="oak_ask_name_only">But enough about me. What\'s your name?</string>
+    <string name="oak_forgot_name_only">What was your name again?</string>
     <string name="oak_forgot">Oh! I almost forgot to give you something…</string>
     <string name="oak_intro_6">For now, only Pokémon from Kanto will show up. Keep filling your Pokédex and other professors will want to meet you.</string>
     <string name="oak_intro_7">I\'ve saved my number in your Pokégear. Give me a call and I\'ll tell you about any rumors I hear.</string>
@@ -110,6 +121,7 @@
 
     <!-- Shiny chain card -->
     <string name="shiny_chain_title">Shiny chain</string>
+    <string name="shiny_odds_legendary">Legendary: 1 in %1$d every time it appears.</string>
     <plurals name="shiny_chain_catches">
         <item quantity="one">Caught %1$d time, released ones included</item>
         <item quantity="other">Caught %1$d times, released ones included</item>
@@ -218,7 +230,71 @@
     <string name="settings_summary_new_wallpaper">New wallpaper for your widgets!</string>
     <string name="achievement_progress" translatable="false">%1$d/%2$d</string>
 
+    <!-- Pokémon details -->
+    <string name="nickname_title">Nickname</string>
+    <string name="nickname_remove">Remove</string>
+    <string name="detail_action_train">Train</string>
+    <string name="detail_action_training">Training</string>
+    <string name="detail_action_team">Team</string>
+    <string name="detail_action_glyph">Glyph</string>
+    <string name="detail_section_evolution">Evolution</string>
+    <string name="detail_section_capture">Capture</string>
+
+    <!-- Garden and friendship -->
+    <string name="garden_title">Town</string>
+    <string name="garden_bag">Chest</string>
+    <string name="garden_bag_berries">Berries</string>
+    <string name="garden_bag_decorations">Decorations</string>
+    <string name="garden_bag_backgrounds">Backgrounds</string>
+    <string name="garden_flavor_spicy">Spicy</string>
+    <string name="garden_flavor_dry">Dry</string>
+    <string name="garden_flavor_sweet">Sweet</string>
+    <string name="garden_flavor_bitter">Bitter</string>
+    <string name="garden_flavor_sour">Sour</string>
+    <string name="garden_berries_hint">Tap a berry, then a Pokémon to give it or an empty plot to plant it.</string>
+    <string name="garden_plant_hint">Choose a berry to plant. It grows while your phone is locked, and every stage it gets watered gives one more berry. Water-type Pokémon in the Garden water it for you.</string>
+    <string name="garden_berries_empty">No berries yet. Your Pokémon bring them when they\'re fond of you, and the ones you plant give more.</string>
+    <string name="garden_decorations_empty">No decorations yet. Pokémon that are very fond of you bring them now and then.</string>
+    <string name="garden_decorations_out">In the Garden: %1$d/%2$d</string>
+    <string name="garden_backgrounds_locked">To earn</string>
+    <string name="garden_bg_goal_type">Register %1$d %2$s-type Pokémon</string>
+    <string name="garden_bg_goal_item">Get the %1$s</string>
+    <string name="garden_hand_berry">Tap a Pokémon to give it this berry, or an empty plot to plant it.</string>
+    <string name="garden_gift_decoration">%1$s brought you a decoration! It\'s in your chest.</string>
+    <string name="garden_new_background">New background for the Garden! It\'s in your chest.</string>
+    <string name="garden_planted">Planted! It grows while your phone is locked.</string>
+    <string name="garden_growing">%1$d%% grown. It grows while your phone is locked.</string>
+    <string name="garden_harvest">Berries picked: %1$d</string>
+    <string name="garden_watered_by">%1$s watered the berry!</string>
+    <string name="garden_watered">Watered! It\'ll give one more berry.</string>
+    <string name="garden_empty">Nobody lives in your Garden yet. Add Pokémon to your team from their details in the PC, or start training one.</string>
+    <string name="garden_hint">Tap a Pokémon to pet it, double tap to see how it\'s doing, hold it to carry it around.</string>
+    <string name="garden_pets_today">Pets left today: %1$d/%2$d</string>
+    <string name="garden_see_details">See details</string>
+    <string name="garden_gift">%1$s brought you a berry!</string>
+    <string name="garden_feed_hint">Give it a berry (%1$d more today):</string>
+    <string name="garden_fed">%1$s ate the berry.</string>
+    <string name="garden_fed_favorite">%1$s loved it! That\'s its favorite flavor.</string>
+    <string name="garden_fed_enough">%1$s has had enough berries for today.</string>
+    <string name="garden_limit">Your Garden is full: double tap a decoration to put it away.</string>
+    <string name="garden_deco_hint">Hold a decoration to move it, double tap it to put it away.</string>
+    <string name="garden_pets_done">%1$s is very happy! Come back tomorrow for more.</string>
+    <string name="friendship_title">Friendship</string>
+    <string name="friendship_0">It doesn\'t know you very well yet.</string>
+    <string name="friendship_1">It\'s getting used to you.</string>
+    <string name="friendship_2">It seems to like you.</string>
+    <string name="friendship_3">It\'s quite friendly with you.</string>
+    <string name="friendship_4">It really trusts you.</string>
+    <string name="friendship_5">It adores you! You couldn\'t be any closer.</string>
+    <string name="friendship_evolution_hint">With high friendship, it evolves when it levels up: %1$s</string>
+    <string name="friendship_by_day">%1$s (by day)</string>
+    <string name="friendship_at_night">%1$s (at night)</string>
+
     <!-- Phone (4a) Pro: Poké Ball mode -->
+    <string name="notification_channel_waiting">Pokémon waiting</string>
+    <string name="settings_waiting_notification_title">Notify waiting Pokémon</string>
+    <string name="settings_waiting_notification_subtitle">A quiet notification with a button to throw a Poké Ball from the lock screen, without unlocking</string>
+
     <string name="widget_pokeball_name">Poké Ball</string>
     <string name="widget_pokeball_description">How many Pokémon are waiting. On the Phone (4a) Pro, tap to catch them.</string>
     <plurals name="home_waiting_pokemon">
@@ -301,4 +377,109 @@
     <string name="item_dark_stone_name">Dark Stone</string>
     <string name="item_dna_splicers_name">DNA Splicers</string>
     <string name="item_reveal_glass_name">Reveal Glass</string>
+
+    <!-- Search -->
+    <string name="search_keyword_shiny">shiny</string>
+    <string name="search_keyword_favorite">favorite,favourite</string>
+    <string name="search_keyword_legendary">legendary</string>
+    <string name="search_keyword_mythical">mythical</string>
+    <string name="search_keyword_egg">egg,hatched</string>
+    <string name="search_keyword_event">event</string>
+    <string name="search_keyword_training">training</string>
+    <string name="search_level_prefixes">lv,lvl,level</string>
+    <string name="search_help_title">Searching</string>
+    <string name="search_help_body">Name or nickname: pikachu\nPokédex number: 25 · 1-151\nType: water\nRegion: kanto\nLevel: lv30 · lv30-50\nWhole family: +pikachu\nGender: female
+Legendary: legendary\nMythical: mythical\nHatched from an Egg: egg\nFrom an event: event</string>
+    <string name="caught_screen_filter_duplicates_short">Dup.</string>
+    <string name="caught_screen_filter_team">Team</string>
+
+    <!-- Pokédex entries -->
+    <string name="pokedex_height">Height</string>
+    <string name="pokedex_weight">Weight</string>
+    <string name="pokedex_gender">Gender</string>
+    <string name="pokedex_genderless">Unknown</string>
+    <string name="pokedex_matchups">Weaknesses and resistances</string>
+    <string name="pokedex_weak_to">Weak to</string>
+    <string name="pokedex_resists">Resists</string>
+    <string name="pokedex_immune_to">Immune to</string>
+    <string name="pokedex_no_evolution">It doesn\'t evolve.</string>
+    <string name="pokedex_evolution_level">Lv. %1$d</string>
+    <string name="pokedex_evolution_friendship">Friendship</string>
+    <string name="pokedex_evolution_friendship_day">Friendship, by day</string>
+    <string name="pokedex_evolution_friendship_night">Friendship, at night</string>
+    <string name="pokedex_cry">Cry</string>
+    <string name="pokedex_cry_failed">Couldn\'t download the cry. Check your connection.</string>
+    <string name="pokedex_see_in_pc">See them in the PC</string>
+    <string name="search_keyword_male">male</string>
+    <string name="search_keyword_female">female</string>
+
+    <!-- Town zones -->
+    <string name="zone_meadow">Meadow</string>
+    <string name="zone_meadow_description">Your team hangs out here, brings you gifts and loves being petted.</string>
+    <string name="zone_orchard">Orchard</string>
+    <string name="zone_orchard_description">Berries grow while your phone is locked. Water-types water them and Grass-types make them grow faster.</string>
+    <string name="zone_springs">Hot springs</string>
+    <string name="zone_springs_description">They relax and grow fond of you while your phone is locked. With anyone here, Eggs hatch sooner.</string>
+    <string name="zone_gym">Gym</string>
+    <string name="zone_gym_description">Gym battles and badges.</string>
+    <string name="zone_coming_soon">Coming soon</string>
+    <string name="zone_residents">Residents %1$d/%2$d</string>
+    <string name="zone_pick_title">Who lives here?</string>
+    <string name="zone_pick_hint">Tap to bring a Pokémon or send it back. Each one lives in a single place.</string>
+    <string name="zone_lives_in">In the %1$s</string>
+    <string name="zone_empty">Nobody lives here yet. Tap Residents to bring Pokémon from the PC.</string>
+    <string name="zone_ripe">Berries ready: %1$d</string>
+    <string name="zone_thirsty">Thirsty: %1$d</string>
+    <string name="zone_eggs_faster">Eggs hatch sooner</string>
+    <string name="detail_release_title">Release %1$s?</string>
+    <string name="detail_release_again_title">Are you sure?</string>
+    <string name="detail_release_again_message">%1$s will be gone for good. This can\'t be undone.</string>
+    <string name="detail_release_again_button">Yes, release</string>
+    <string name="detail_release_protected">Favorites and your training partner can\'t be released.</string>
+    <string name="zone_pc">PC</string>
+    <string name="kitchen_hint">Tap the counter to cook, or the TV for today\'s tip.</string>
+    <string name="kitchen_no_berries">There are no berries in the chest. Grow some in the Orchard.</string>
+    <string name="kitchen_busy">Let them finish eating first!</string>
+    <string name="kitchen_pick_title">Who\'s coming for a snack?</string>
+    <string name="kitchen_pick_hint">%1$d of %2$d · one berry each</string>
+    <string name="kitchen_pick_ate">Already had a sweet today</string>
+    <string name="kitchen_next">Next</string>
+    <string name="kitchen_berries_title">Which berries?</string>
+    <string name="kitchen_berries_hint">%1$d of %2$d. The mix decides the flavor.</string>
+    <string name="kitchen_blend">Blend!</string>
+    <string name="kitchen_blender_hint">Tap when the arrow passes your marker!</string>
+    <string name="kitchen_you">You</string>
+    <string name="kitchen_made">%1$s!</string>
+    <string name="kitchen_rpm">Top speed: %1$s RPM</string>
+    <string name="kitchen_serve">Serve</string>
+    <string name="kitchen_gain">%1$s ♥+%2$d</string>
+    <string name="kitchen_tv_title">On TV today</string>
+    <string name="kitchen_tv_1">A Water-type living in the Orchard waters the plants all by itself.</string>
+    <string name="kitchen_tv_2">Every time a berry plant gets watered, it gives one more berry at harvest.</string>
+    <string name="kitchen_tv_3">Berry plants take about eight hours to go from sprout to berries.</string>
+    <string name="kitchen_tv_4">In the Hot Springs, Pokémon grow fonder of you while your phone is locked, and Eggs hatch sooner.</string>
+    <string name="kitchen_tv_5">Every Pokémon has a favorite flavor. You\'ll find it in its details.</string>
+    <string name="kitchen_tv_6">Pokéblocks made with its favorite flavor make a Pokémon happiest. The faster you blend, the better!</string>
+    <string name="kitchen_tv_7">Petting a Pokémon in town makes it like you more, up to ten times a day.</string>
+    <string name="kitchen_tv_8">Your team grows a little closer every day just by being together.</string>
+    <string name="kitchen_tv_9">Pokémon that love you train a bit harder and earn more experience.</string>
+    <string name="kitchen_tv_10">Some Pokémon only evolve once they love you. Eevee becomes Espeon by day and Umbreon by night.</string>
+    <string name="kitchen_tv_11">Every Pokémon you release from the PC leaves you a Rare Candy.</string>
+    <string name="kitchen_tv_12">In the PC you can search by type: try typing «water».</string>
+    <string name="pokeblock_red">Red Pokéblock</string>
+    <string name="pokeblock_blue">Blue Pokéblock</string>
+    <string name="pokeblock_pink">Pink Pokéblock</string>
+    <string name="pokeblock_green">Green Pokéblock</string>
+    <string name="pokeblock_yellow">Yellow Pokéblock</string>
+    <string name="pokeblock_purple">Purple Pokéblock</string>
+    <string name="pokeblock_indigo">Indigo Pokéblock</string>
+    <string name="pokeblock_brown">Brown Pokéblock</string>
+    <string name="pokeblock_liteblue">LiteBlue Pokéblock</string>
+    <string name="pokeblock_olive">Olive Pokéblock</string>
+    <string name="pokeblock_gray">Gray Pokéblock</string>
+    <string name="pokeblock_white">White Pokéblock</string>
+    <string name="pokeblock_gold">Gold Pokéblock</string>
+    <string name="detail_lives_in">Lives in</string>
+    <string name="detail_favorite_flavor">Favorite flavor: %1$s</string>
+    <string name="zone_kitchen">Kitchen</string>
 </resources>

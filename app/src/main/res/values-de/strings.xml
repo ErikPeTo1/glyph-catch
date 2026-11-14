@@ -118,7 +118,7 @@
     <string name="sleep_change_bedtime">Schlafenszeit ändern</string>
     <string name="caught_screen_title">POKÉMON</string>
     <string name="caught_screen_total_caught">%1$d gefangen</string>
-    <string name="caught_screen_search_placeholder">Pokémon suchen…</string>
+    <string name="caught_screen_search_placeholder">Name, Nummer, Typ…</string>
     <string name="caught_screen_clear_search">Suche löschen</string>
     <string name="caught_screen_filter_favorites">Favoriten</string>
     <string name="caught_screen_filter_event">Event</string>
@@ -208,6 +208,7 @@
     <string name="pool_rare">Selten</string>
     <string name="pool_very_rare">Sehr selten</string>
     <string name="pool_egg">Ei</string>
+    <string name="pool_evolution">Entwicklung</string>
     <string name="caught_detail_empty_title">Pokémon nicht gefunden</string>
     <string name="caught_detail_empty_subtitle">Versuch es noch einmal über die Liste der gefangenen Pokémon.</string>
     <plurals name="caught_detail_screen_off_minutes">

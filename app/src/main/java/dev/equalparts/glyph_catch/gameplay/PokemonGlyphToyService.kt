@@ -11,14 +11,24 @@ import androidx.core.content.edit
 import com.nothing.ketchum.GlyphMatrixFrame
 import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphMatrixObject
+import dev.equalparts.glyph_catch.Features
 import dev.equalparts.glyph_catch.data.CaughtPokemon
 import dev.equalparts.glyph_catch.data.Eggs
 import dev.equalparts.glyph_catch.data.Forms
+import dev.equalparts.glyph_catch.data.FriendshipDaily
+import dev.equalparts.glyph_catch.data.FriendshipRules
+import dev.equalparts.glyph_catch.data.GardenCatalog
+import dev.equalparts.glyph_catch.data.GardenStore
+import dev.equalparts.glyph_catch.data.GardenZone
 import dev.equalparts.glyph_catch.data.Item
+import dev.equalparts.glyph_catch.data.PokedexData
 import dev.equalparts.glyph_catch.data.Pokemon
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PreferencesManager
 import dev.equalparts.glyph_catch.data.Stat
+import dev.equalparts.glyph_catch.data.Type
+import dev.equalparts.glyph_catch.data.creditTeamFriendship
+import dev.equalparts.glyph_catch.data.types
 import dev.equalparts.glyph_catch.debug.DebugCaptureManager
 import dev.equalparts.glyph_catch.debug.DebugExceptionTracker
 import dev.equalparts.glyph_catch.debug.DebugSnapshot
@@ -50,6 +60,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -79,6 +90,9 @@ data class PersistentSpawn(
 class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
     private var coroutineScope: CoroutineScope? = null
+
+    /** Blinks a shiny's dot around the Poké Ball; stopped whenever the matrix changes. */
+    private var dotsJob: Job? = null
     private val lifecycleLogScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private lateinit var db: PokemonDatabase
@@ -113,6 +127,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     override fun onCreate() {
         super.onCreate()
         DebugExceptionTracker.install(applicationContext)
+        // Genders, for evolutions only one gender takes
+        PokedexData.init(applicationContext)
 
         coroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob() + coroutineExceptionHandler)
 
@@ -123,7 +139,10 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             glyphFrameHelper = frameFactory,
             glyphMatrixManagerProvider = { glyphMatrixManager ?: error("GlyphMatrixManager not connected") },
             animationDispatcher = Dispatchers.Main.immediate,
-            onAnimationStart = { acquireAnimationWakeLock() },
+            onAnimationStart = {
+                dotsJob?.cancel()
+                acquireAnimationWakeLock()
+            },
             onAnimationEnd = { releaseAnimationWakeLock() }
         )
 
@@ -132,7 +151,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         spawnEngine = SpawnRulesEngine(
             rules = createSpawnRules(gameplayContext),
             speciesFilter = { gameplayContext.trainer.canSpawn(it.id) },
-            shinyMultiplier = { EventHelpers.catchShinyMultiplier(gameplayContext.trainer.catchCounts[it.id] ?: 0) }
+            shinyMultiplier = { EventHelpers.shinyMultiplier(it.id, gameplayContext.trainer.catchCounts[it.id] ?: 0) }
         )
         spawnHistory = SpawnHistoryTracker(preferences = preferencesManager, pokemonDao = db.pokemonDao())
         cadenceController = SpawnCadenceController(spawnEngine = spawnEngine, history = spawnHistory)
@@ -271,6 +290,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         }
         if (gameplayContext.phone.countsAsAway) {
             coroutineScope?.launch { advanceEggs() }
+            // Berries in the Garden grow like Eggs hatch: while the phone is put away
+            if (Features.TOWN) coroutineScope?.launch { growGarden() }
         } else {
             spawnHistory.resetAfterScreenOn()
         }
@@ -359,6 +380,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     /**
      * Runs during ticks to level and/or evolve Pokémon.
      */
+    private val friendshipDaily by lazy { FriendshipDaily(applicationContext) }
+
     private suspend fun applyTrainingExp(minutesOff: Int, isBedtime: Boolean) {
         val dao = db.pokemonDao()
         val active = dao.getActiveTrainingPartner()
@@ -368,7 +391,11 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             0
         }
         val gainedExp = TRAINING_EXP_PER_MINUTE + intervalBonus
-        active?.let { giveExp(it, gainedExp) }
+        active?.let {
+            giveExp(it, gainedExp)
+            if (friendshipDaily.trainMinute(it.id)) dao.addFriendship(it.id, 1)
+        }
+        creditTeamFriendship(applicationContext, db)
 
         // With the Exp. Share on, the rest of the team earns a bit less than the training partner
         val expShare = Item.EXP_SHARE in gameplayContext.trainer.ownedItems && preferencesManager.expShareEnabled
@@ -380,11 +407,15 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     }
 
     private suspend fun giveExp(pokemon: CaughtPokemon, amount: Int) {
-        val result = LevelCalculator.expResult(pokemon.level, pokemon.exp, amount) ?: return
+        val exp = FriendshipRules.withExpBonus(pokemon.friendship, amount)
+        val result = LevelCalculator.expResult(pokemon.level, pokemon.exp, exp) ?: return
         db.pokemonDao().updateTrainingProgress(pokemon.id, result.exp, result.level)
         if (result.leveledUp) {
-            preferencesManager.dailyStats.add(Stat.LEVELS, result.level - pokemon.level)
-            maybeTriggerEvolution(pokemon.copy(level = result.level, exp = result.exp))
+            val levels = result.level - pokemon.level
+            val friendship = FriendshipRules.afterLevelUps(pokemon.friendship, levels)
+            db.pokemonDao().updateFriendship(pokemon.id, friendship)
+            preferencesManager.dailyStats.add(Stat.LEVELS, levels)
+            maybeTriggerEvolution(pokemon.copy(level = result.level, exp = result.exp, friendship = friendship))
         }
     }
 
@@ -401,6 +432,29 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             newSpeciesId = target.id,
             shiny = pokemon.isShiny
         )
+    }
+
+    /**
+     * The town works while the phone is locked: berries grow in the Orchard (watered by its
+     * Water-types, faster with a Grass-type) and the Hot Springs warm up their residents'
+     * friendship and, with anyone there, Eggs hatch half as fast again.
+     */
+    private suspend fun growGarden() {
+        val store = GardenStore.get(this)
+        val state = store.state.value
+        val dao = db.pokemonDao()
+        val minute = System.currentTimeMillis() / 60_000L
+        val orchard = state.residents(GardenZone.ORCHARD).mapNotNull { dao.getCaughtPokemon(it) }
+        store.grow(
+            waterer = orchard.any(GardenCatalog::waters),
+            fast = orchard.any { Pokemon[it.speciesId]?.types?.contains(Type.GRASS) == true },
+            minute = minute
+        )
+        val springs = state.residents(GardenZone.SPRINGS).mapNotNull { dao.getCaughtPokemon(it) }
+        if (springs.isEmpty()) return
+        val daily = FriendshipDaily(this)
+        springs.forEach { if (daily.springsMinute(it.id)) dao.addFriendship(it.id, 1) }
+        if (minute % 2 == 0L) db.eggDao().advanceEggs()
     }
 
     /**
@@ -500,6 +554,8 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
      * Shows the current Pokémon or digital clock on the Glyph Matrix.
      */
     private fun updateGlyphMatrix() {
+        dotsJob?.cancel()
+        dotsJob = null
         val currentSpawn = synchronized(spawnQueue) {
             spawnQueue.firstOrNull()
         }
@@ -562,8 +618,26 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
             return true
         }
         displayedSpawn = waiting.first()
-        val frame = frameFactory.renderPokeBallFrame(inverted = waiting.any { it.isShiny })
-        glyphMatrixManager?.setMatrixFrame(brightnessFactor?.let { frameFactory.adjustBrightness(frame, it) } ?: frame)
+        val ball = frameFactory.renderPokeBallFrame(inverted = waiting.any { it.isShiny })
+        // A dot per Pokémon waiting; a shiny's dot blinks
+        val shiny = waiting.take(8).indexOfFirst { it.isShiny }.takeIf { it >= 0 }
+        fun draw(blinkOn: Boolean) {
+            val frame = frameFactory.withWaitingDots(ball, waiting.size, shiny, blinkOn)
+            glyphMatrixManager?.setMatrixFrame(
+                brightnessFactor?.let { frameFactory.adjustBrightness(frame, it) } ?: frame
+            )
+        }
+        draw(blinkOn = true)
+        if (shiny != null) {
+            dotsJob = coroutineScope?.launch {
+                var on = true
+                while (isActive) {
+                    delay(DOT_BLINK_MS)
+                    on = !on
+                    draw(on)
+                }
+            }
+        }
         return true
     }
 
@@ -983,6 +1057,7 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
         private val GLYPH_MATRIX_CENTER = GLYPH_MATRIX_SIZE / 2
         private const val LOWER_BRIGHTNESS_FACTOR = 0.6f
         private const val COMPANION_BRIGHTNESS = 0.45f
+        private const val DOT_BLINK_MS = 600L
         private const val WAKE_LOCK_TIMEOUT_MS = 6000L
         private const val WAKE_LOCK_TAG = "GlyphCatch:Animation"
 

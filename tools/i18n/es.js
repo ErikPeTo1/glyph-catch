@@ -118,7 +118,7 @@ module.exports = {
     sleep_change_bedtime: 'Cambiar hora de dormir',
     caught_screen_title: 'POKÉMON',
     caught_screen_total_caught: '%1$d capturados',
-    caught_screen_search_placeholder: 'Buscar Pokémon…',
+    caught_screen_search_placeholder: 'Nombre, número, tipo…',
     caught_screen_clear_search: 'Borrar búsqueda',
     caught_screen_filter_favorites: 'Favoritos',
     caught_screen_filter_event: 'Evento',
@@ -200,6 +200,7 @@ module.exports = {
     pool_uncommon: 'Poco común',
     pool_rare: 'Raro',
     pool_egg: "Huevo",
+    pool_evolution: "Evolución",
     pool_very_rare: 'Muy raro',
     caught_detail_encounter_event: 'Evento',
     caught_detail_empty_title: 'No se ha encontrado el Pokémon',
@@ -391,7 +392,7 @@ module.exports = {
     "Cada profesor te da la Pokédex de su región a medida que crece la tuya: Johto con 50 Pokémon, Hoenn con 120, Sinnoh con 200 y Teselia con 300.",
     "Toca el teléfono de arriba en Inicio para abrir el Pokégear. Un punto rojo significa que un profesor tiene algo para ti; si no, te contará cómo va tu Pokédex y los últimos rumores.",
     "Algunos Pokémon legendarios no aparecen sin su objeto clave, como el Ticket Eón. Cuando oyes su rumor, su profesor te lo guarda en el Pokégear.",
-    "Un Pokémon legendario que liberes puede volver a aparecer, de uno en uno. ¡Buena noticia para los cazadores de variocolor!",
+    "Un Pokémon legendario que liberes puede volver a aparecer, de uno en uno. ¡Buena noticia para los cazadores de variocolor: un legendario sale variocolor 1 de cada 32 veces!",
     "Con las cuatro Pokédex regionales, el Profesor Oak te da el Mapa para elegir de qué regiones aparecen Pokémon.",
     "Completa la Pokédex Nacional y el Profesor Oak te recompensará con el Amuleto Iris.",
     "¿Dejas el móvil cargando? Los Pokémon de tipo Eléctrico, como Pikachu, Magnemite o Shinx, se acercan a curiosear.",
@@ -403,6 +404,7 @@ module.exports = {
     "¿Demasiados Pidgey? En el PC, el filtro Repetidos muestra solo las especies que tienes más de una vez, y «Todos menos uno» las selecciona para liberarlas dejando una de cada.",
     "Al poco de tener la Pokédex de Sinnoh, un Cazabichos te regala Miel. Úntala desde la Mochila y, durante una hora, vendrán Pokémon golosos como Combee o Heracross.",
     "Enciende un Incienso y los Pokémon aparecerán el doble de rápido durante una hora. Se ganan en misiones o, a veces, al atrapar un Pokémon.",
-    "A las 150 especies, el dependiente te trae el Superrepelente: solo se acercan los Pokémon que no tienes en el PC. Los legendarios nunca se asustan con un repelente."
+    "A las 150 especies, el dependiente te trae el Superrepelente: solo se acercan los Pokémon que no tienes en el PC. Los legendarios nunca se asustan con un repelente.",
+    "Lleva a tus favoritos en el equipo y entrénalos. Con mucha amistad entrenan con más ganas, y algunas especies solo evolucionan gracias a ella."
   ]
 };

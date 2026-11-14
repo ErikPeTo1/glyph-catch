@@ -51,3 +51,4 @@ viewer/
 # Notes for local coding tools
 CLAUDE.md
 AGENTS.md
+tools/pokedex/cache/

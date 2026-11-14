@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import dev.equalparts.glyph_catch.gameplay.HiddenCatchUp
 import dev.equalparts.glyph_catch.gameplay.PokemonGlyphToyService
+import dev.equalparts.glyph_catch.util.GlyphDevice
 import dev.equalparts.glyph_catch.widget.WidgetBackground
 import dev.equalparts.glyph_catch.widget.WidgetUpdater
 import kotlinx.coroutines.channels.awaitClose
@@ -114,6 +115,11 @@ class PreferencesManager(context: Context) {
             PokemonGlyphToyService.refreshIdleDisplay()
         }
 
+    /** What the Glyph Matrix showed before picking a companion from its details, to go back to it. */
+    var idleBeforeCompanion: String?
+        get() = prefs.getString(KEY_IDLE_BEFORE_COMPANION, null)
+        set(value) = prefs.edit { putString(KEY_IDLE_BEFORE_COMPANION, value) }
+
     /** The Pokémon (caught id) shown as companion; without one, the training partner. */
     var companionId: String?
         get() = prefs.getString(KEY_COMPANION_ID, null)
@@ -182,6 +188,27 @@ class PreferencesManager(context: Context) {
         prefs.edit { putString(KEY_CATCH_COUNTS, json.encodeToString(counts)) }
     }
 
+    /**
+     * Catches towards each species' shiny: every catch since the last shiny of it. The total
+     * catches stay as they are for achievements.
+     */
+    val shinyChainCounts: Map<Int, Int>
+        get() {
+            val starts = shinyChainStarts
+            return catchCounts.mapValues { (species, count) -> (count - (starts[species] ?: 0)).coerceAtLeast(0) }
+        }
+
+    private val shinyChainStarts: Map<Int, Int>
+        get() = prefs.getString(KEY_SHINY_CHAIN_STARTS, null)
+            ?.let { runCatching { json.decodeFromString<Map<Int, Int>>(it) }.getOrNull() }
+            .orEmpty()
+
+    /** A shiny was caught: its chain starts again from zero. */
+    fun resetShinyChain(speciesId: Int) {
+        val starts = shinyChainStarts + (speciesId to (catchCounts[speciesId] ?: 0))
+        prefs.edit { putString(KEY_SHINY_CHAIN_STARTS, json.encodeToString(starts)) }
+    }
+
     /** Saves made before catches were counted start from the Pokémon they still own. */
     fun seedCatchCounts(counts: Map<Int, Int>) {
         if (prefs.contains(KEY_CATCH_COUNTS)) return
@@ -236,6 +263,14 @@ class PreferencesManager(context: Context) {
         set(value) = prefs.edit { putLong(KEY_LAST_TOY_TICK_AT, value) }
 
     /** The waiting Pokémon widget shows its catch-all button (with [playWhileInUse] on). */
+    /** A notification to throw a Poké Ball from the lock screen; on by default on the Phone (4a) Pro. */
+    var waitingNotification: Boolean
+        get() = prefs.getBoolean(KEY_WAITING_NOTIFICATION, GlyphDevice.isPhone4aPro)
+        set(value) {
+            prefs.edit { putBoolean(KEY_WAITING_NOTIFICATION, value) }
+            WidgetUpdater.refresh(appContext)
+        }
+
     /** Shows the next Pokémon waiting on Home, as on the Phone (4a) Pro, to try it on another phone. */
     var encounterCard: Boolean
         get() = prefs.getBoolean(KEY_ENCOUNTER_CARD, false)
@@ -308,6 +343,16 @@ class PreferencesManager(context: Context) {
     var pokeBallTipSeen: Boolean
         get() = prefs.getBoolean(KEY_POKE_BALL_TIP_SEEN, false)
         set(value) = prefs.edit { putBoolean(KEY_POKE_BALL_TIP_SEEN, value) }
+
+    /** What the player told Oak they're called, or null if he hasn't asked yet. */
+    var playerName: String?
+        get() = prefs.getString(KEY_PLAYER_NAME, null)
+        set(value) = prefs.edit { putString(KEY_PLAYER_NAME, value) }
+
+    /** The player's look ([PlayerLook] name). */
+    var playerLook: String?
+        get() = prefs.getString(KEY_PLAYER_LOOK, null)
+        set(value) = prefs.edit { putString(KEY_PLAYER_LOOK, value) }
 
     /** Professor Oak has welcomed the player. */
     var professorIntroSeen: Boolean
@@ -591,12 +636,15 @@ class PreferencesManager(context: Context) {
         const val IDLE_NONE = "none"
         private const val KEY_GLYPH_IDLE_DISPLAY = "glyph_idle_display"
         private const val KEY_COMPANION_ID = "companion_id"
+        private const val KEY_IDLE_BEFORE_COMPANION = "glyph_idle_before_companion"
         private const val PREFS_NAME = "glyph_catch_prefs"
         private const val KEY_TEAM = "team"
         private const val KEY_LAST_TOY_TICK_AT = "last_toy_tick_at"
         private const val KEY_SIMULATE_4A_PRO = "simulate_4a_pro"
         private const val KEY_CATCH_ALL_BUTTON = "catch_all_button"
         private const val KEY_ENCOUNTER_CARD = "encounter_card"
+        private const val KEY_SHINY_CHAIN_STARTS = "shiny_chain_starts"
+        private const val KEY_WAITING_NOTIFICATION = "waiting_notification"
         private const val KEY_POKE_BALL_TIP_SEEN = "poke_ball_tip_seen"
         private const val KEY_WIDGET_BACKGROUND = "widget_background"
         private const val KEY_QUEUE_WIDGET_BACKGROUND = "queue_widget_background"
@@ -625,6 +673,8 @@ class PreferencesManager(context: Context) {
         private const val KEY_REPEL_ACTIVE = "repel_active"
         private const val KEY_SUPER_REPEL_ACTIVE = "super_repel_active"
         private const val KEY_PROFESSOR_INTRO_SEEN = "professor_intro_seen"
+        private const val KEY_PLAYER_NAME = "player_name"
+        private const val KEY_PLAYER_LOOK = "player_look"
         private const val KEY_BREEDER_MET = "breeder_met"
         private const val KEY_CAUGHT_GRID_VIEW = "caught_grid_view"
         private const val KEY_CATCH_COUNTS = "catch_counts"

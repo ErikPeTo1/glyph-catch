@@ -2,6 +2,28 @@
 
 All notable changes to Glyph Catch since it was continued from [Equal Parts' original](https://github.com/equalparts/glyph-catch).
 
+## 3.8.0
+
+- A new Pokédex: tap a registered Pokémon to see its entry, and swipe through all of them. Its animated sprite (female too, where they look different, and its shiny once you've caught one), its cry, category and description, height, weight and gender ratio, weaknesses and resistances, and its evolution line: tap an evolution you've registered to jump to it.
+- Pokémon are male or female, with their species' real ratio: ♂ or ♀ next to their name, and females with their own look, like Pikachu's heart-shaped tail, show it in their details. Search "male" or "female".
+- Evolutions that depend on gender, like in the main games: only female Combee evolve into Vespiquen, female Burmy into Wormadam and male ones into Mothim, and the Dawn Stone evolves male Kirlia into Gallade and female Snorunt into Froslass.
+- Friendship: every Pokémon now has it, shown as hearts in its details. It grows when you keep them in your team, train them and level them up. Pokémon hatched from Eggs start out closer to you.
+- With high friendship, Pokémon train 10% faster.
+- Friendship evolutions, like in the main games: Golbat, Chansey, Togepi, Buneary, Woobat, Swadloon, Munchlax and the babies Pichu, Cleffa, Igglybuff and Azurill evolve when they level up with high friendship. Eevee becomes Espeon by day and Umbreon at night, Budew and Riolu evolve by day and Chingling at night. Sun and Moon Stones no longer evolve Eevee.
+- Search like in Pokémon GO, in the PC and when picking a Pokémon: by name, Pokédex number or range (25, 1-151), type, region, level (lv30-50), whole family (+pikachu) and words like shiny, favorite, legendary or egg. The ⓘ in the search box shows how.
+- Tidier PC filters, all in one row: "Team" shows only your team, the heart and the sparkles light up to show only favorites or shinies, "Dup." shows repeated Pokémon, the list/grid switch sits next to them, and the Event filter is gone (search "event" instead).
+- Release a Pokémon from its own details. It asks twice, so it never happens by accident.
+- Professor Oak finally asks your name.
+- Longer shiny chains: after 100 catches of a species its shiny is 8 times as likely, and after 250, 16 times. The chain still starts over when you catch the shiny.
+- Legendary Pokémon are shiny 1 in 32 times, every time they appear. Their details show it instead of a chain.
+- Even with every bonus at once, a shiny is never likelier than 1 in 8.
+- Phone (4a) Pro: dots around the Poké Ball on the Glyph Matrix show how many Pokémon are waiting, and a shiny's dot blinks.
+- A quiet notification while Pokémon are waiting, with a button to throw a Poké Ball right from the lock screen, without unlocking (so the time with the screen off keeps counting). On by default on the Phone (4a) Pro; switch it on or off in Settings > Glyph Toy.
+- When Nincada evolves into Ninjask, Shedinja joins your PC, like in the main games.
+- Widget backgrounds look right at any size: scenes fill the widget without blocks of color, and the frame keeps its look.
+- Fixed "Show on Glyph": stopping it now really stops, even for the Pokémon you're training, and the Glyph Matrix goes back to what it showed before (clock or nothing) instead of staying on Companion. Thanks AmarS!
+- A new tip.
+
 ## 3.7.0
 
 - Phone (4a) Pro support (beta): a Poké Ball lights up on the Glyph Matrix when a Pokémon is waiting. See who it is on Home or in the waiting Pokémon widget and throw a Poké Ball to catch it, with the catch playing on the Glyph Matrix. There's also a Poké Ball widget, and Professor Oak explains it all the first time.

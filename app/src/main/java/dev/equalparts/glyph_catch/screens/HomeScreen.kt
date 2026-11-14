@@ -227,7 +227,10 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
                 RecentCatches(
                     recentCatches = recentCatches,
-                    onPokemonClick = onPokemonClick
+                    onPokemonClick = { pokemon ->
+                        PokemonBrowse.ids = recentCatches.map { it.id }
+                        onPokemonClick(pokemon)
+                    }
                 )
             }
         }

@@ -124,7 +124,7 @@
     <string name="sleep_change_bedtime">Change bedtime</string>
     <string name="caught_screen_title">POKÉMON</string>
     <string name="caught_screen_total_caught">%1$d caught</string>
-    <string name="caught_screen_search_placeholder">Search Pokémon…</string>
+    <string name="caught_screen_search_placeholder">Name, number, type…</string>
     <string name="caught_screen_clear_search">Clear search</string>
     <string name="caught_screen_filter_favorites">Favorites</string>
     <string name="caught_screen_filter_event">Event</string>
@@ -219,6 +219,7 @@
     <string name="pool_rare">Rare</string>
     <string name="pool_very_rare">Very rare</string>
     <string name="pool_egg">Egg</string>
+    <string name="pool_evolution">Evolution</string>
     <string name="caught_detail_empty_title">Pokémon not found</string>
     <string name="caught_detail_empty_subtitle">Try again from the caught list.</string>
     <plurals name="caught_detail_screen_off_minutes">
@@ -295,4 +296,5 @@
     <string name="components_level_chip">Lv. %1$d</string>
     <string name="components_exp_chip">%1$d/%2$d EXP</string>
     <string name="components_exp_chip_max">MAX</string>
+    <string name="caught_detail_position" translatable="false">%1$d / %2$d</string>
 </resources>

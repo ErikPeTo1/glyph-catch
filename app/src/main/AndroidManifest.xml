@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="true"
@@ -61,6 +62,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <receiver
+            android:name="dev.equalparts.glyph_catch.gameplay.ThrowPokeBallReceiver"
+            android:exported="false" />
         <receiver
             android:name=".widget.TeamWidgetReceiver"
             android:exported="true"

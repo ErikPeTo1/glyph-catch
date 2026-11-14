@@ -45,7 +45,8 @@ data class CaughtPokemon(
     @ColumnInfo(defaultValue = "0") val screenOffDurationMinutes: Int = 0,
     @ColumnInfo(defaultValue = "0") val isShiny: Boolean = false,
     @ColumnInfo(defaultValue = "0") val evolutionLocked: Boolean = false,
-    val form: String? = null
+    val form: String? = null,
+    @ColumnInfo(defaultValue = "70") val friendship: Int = FriendshipRules.CAUGHT
 )
 
 /** How many Pokémon of a species are in the PC. */
@@ -98,6 +99,9 @@ data class ActiveItem(
     val expiresAt: Long = System.currentTimeMillis() + (60 * 60 * 1000)
 )
 
+/** Where a Shedinja came from: the shell Nincada leaves behind when it evolves. */
+const val SHEDINJA_POOL = "Evolution"
+
 @Dao
 interface PokemonDao {
     @Query("SELECT * FROM caught_pokemon WHERE isTraining = 1 LIMIT 1")
@@ -114,6 +118,15 @@ interface PokemonDao {
 
     @Query("UPDATE caught_pokemon SET currentExp = :exp, level = :level WHERE id = :pokemonId")
     suspend fun updateTrainingProgress(pokemonId: String, exp: Int, level: Int)
+
+    @Query("UPDATE caught_pokemon SET friendship = MIN(255, friendship + :amount) WHERE id = :pokemonId")
+    suspend fun addFriendship(pokemonId: String, amount: Int)
+
+    @Query("UPDATE caught_pokemon SET nickname = :nickname WHERE id = :pokemonId")
+    suspend fun updateNickname(pokemonId: String, nickname: String?)
+
+    @Query("UPDATE caught_pokemon SET friendship = :friendship WHERE id = :pokemonId")
+    suspend fun updateFriendship(pokemonId: String, friendship: Int)
 
     @Query(
         "UPDATE caught_pokemon SET speciesId = :newSpeciesId, level = :newLevel, currentExp = :newExp WHERE id = :pokemonId"
@@ -200,7 +213,8 @@ interface PokemonDao {
 
     /**
      * Evolves a caught Pokémon, keeping its form when the evolution shares it, and registers
-     * the new species (and its shininess) in the Pokédex.
+     * the new species (and its shininess) in the Pokédex. As in the main games, Nincada leaves
+     * its shell behind when it becomes Ninjask: a Shedinja joins the PC.
      */
     @Transaction
     suspend fun evolveCaught(pokemon: CaughtPokemon, targetSpeciesId: Int, newLevel: Int, newExp: Int) {
@@ -208,6 +222,18 @@ interface PokemonDao {
         val form = Forms.formAfterEvolution(pokemon.form, targetSpeciesId)
         updateForm(pokemon.id, form)
         recordPokedexEntry(targetSpeciesId, pokemon.isShiny, form)
+        if (pokemon.speciesId == Pokemon.NINCADA.id && targetSpeciesId == Pokemon.NINJASK.id) {
+            insert(
+                CaughtPokemon(
+                    speciesId = Pokemon.SHEDINJA.id,
+                    spawnedAt = System.currentTimeMillis(),
+                    level = newLevel,
+                    spawnPoolName = SHEDINJA_POOL,
+                    isShiny = pokemon.isShiny
+                )
+            )
+            recordPokedexEntry(Pokemon.SHEDINJA.id, pokemon.isShiny)
+        }
     }
 
     @Query(
@@ -358,7 +384,7 @@ interface ActiveItemDao {
         Egg::class,
         DebugEvent::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 4, to = 5),
@@ -367,7 +393,8 @@ interface ActiveItemDao {
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 10, to = 11),
         AutoMigration(from = 11, to = 12),
-        AutoMigration(from = 12, to = 13)
+        AutoMigration(from = 12, to = 13),
+        AutoMigration(from = 13, to = 14)
     ]
 )
 abstract class PokemonDatabase : RoomDatabase() {

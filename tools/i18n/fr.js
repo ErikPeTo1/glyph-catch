@@ -118,7 +118,7 @@ module.exports = {
     sleep_change_bedtime: 'Changer l\'heure du coucher',
     caught_screen_title: 'POKÉMON',
     caught_screen_total_caught: '%1$d capturés',
-    caught_screen_search_placeholder: 'Chercher un Pokémon…',
+    caught_screen_search_placeholder: 'Nom, numéro, type…',
     caught_screen_clear_search: 'Effacer la recherche',
     caught_screen_filter_favorites: 'Favoris',
     caught_screen_filter_event: 'Événement',
@@ -200,6 +200,7 @@ module.exports = {
     pool_uncommon: 'Peu commun',
     pool_rare: 'Rare',
     pool_egg: "Œuf",
+    pool_evolution: "Évolution",
     pool_very_rare: 'Très rare',
     caught_detail_encounter_event: 'Événement',
     caught_detail_empty_title: 'Pokémon introuvable',
@@ -389,7 +390,7 @@ module.exports = {
     "Chaque professeur te donne le Pokédex de sa région à mesure que le tien grandit : Johto à 50 Pokémon, Hoenn à 120, Sinnoh à 200 et Unys à 300.",
     "Touche le téléphone en haut de l'écran d'accueil pour ouvrir le Pokématos. Un point rouge signifie qu'un professeur a quelque chose pour toi ; sinon, il te dira où en est ton Pokédex et les dernières rumeurs.",
     "Certains Pokémon légendaires n'apparaissent pas sans leur objet rare, comme le Passe Éon. Quand tu entends leur rumeur, leur professeur te le garde sur le Pokématos.",
-    "Un Pokémon légendaire relâché peut réapparaître, un à la fois. Bonne nouvelle pour les chasseurs de chromatiques !",
+    "Un Pokémon légendaire relâché peut réapparaître, un à la fois. Bonne nouvelle pour les chasseurs de chromatiques : un légendaire est chromatique 1 fois sur 32 !",
     "Avec les quatre Pokédex régionaux, le Professeur Chen te donne la Carte pour choisir de quelles régions viennent les Pokémon.",
     "Complète le Pokédex National et le Professeur Chen te récompensera avec le Charme Chroma.",
     "Ton téléphone est en charge ? Les Pokémon de type Électrik, comme Pikachu, Magnéti ou Lixy, viennent rôder autour.",
@@ -401,6 +402,7 @@ module.exports = {
     "Trop de Roucool ? Dans le PC, le filtre En double ne montre que les espèces que tu as plusieurs fois, et « Tous sauf un » les sélectionne pour les relâcher en gardant un de chaque.",
     "Peu après le Pokédex de Sinnoh, un Scout t’offre du Miel. Étale-le depuis le Sac et, pendant une heure, des Pokémon gourmands comme Apitrini ou Scarhino viendront.",
     "Allume un Encens et les Pokémon apparaissent deux fois plus vite pendant une heure. On en gagne avec les missions ou parfois en attrapant un Pokémon.",
-    "À 150 espèces, le vendeur t’apporte le Super Repousse : seuls les Pokémon absents de ton PC s’approchent. Les légendaires ne fuient jamais un repousse."
+    "À 150 espèces, le vendeur t’apporte le Super Repousse : seuls les Pokémon absents de ton PC s’approchent. Les légendaires ne fuient jamais un repousse.",
+    "Garde tes favoris dans ton équipe et entraîne-les. Avec beaucoup d’amitié, ils s’entraînent plus dur, et certaines espèces n’évoluent que grâce à elle."
   ]
 };

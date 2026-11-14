@@ -31,6 +31,8 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import dev.equalparts.glyph_catch.components.PokemonSearch
+import dev.equalparts.glyph_catch.data.PokedexData
 import dev.equalparts.glyph_catch.data.PokemonDatabase
 import dev.equalparts.glyph_catch.data.PokemonNames
 import dev.equalparts.glyph_catch.data.PreferencesManager
@@ -38,6 +40,7 @@ import dev.equalparts.glyph_catch.debug.DebugExceptionTracker
 import dev.equalparts.glyph_catch.gameplay.HiddenCatchUp
 import dev.equalparts.glyph_catch.navigation.AppNavigationGraph
 import dev.equalparts.glyph_catch.navigation.AppScreen
+import dev.equalparts.glyph_catch.screens.garden.GardenSprites
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,6 +53,8 @@ class MainActivity : ComponentActivity() {
         val db = PokemonDatabase.getInstance(this)
 
         PokemonNames.init(this)
+        PokemonSearch.init(this)
+        PokedexData.init(this)
 
         val preferences = PreferencesManager(this)
         HiddenCatchUp.schedule(this, preferences.playWhileInUse)
@@ -74,6 +79,9 @@ class MainActivity : ComponentActivity() {
                 PreferencesManager(
                     applicationContext
                 ).forgetMissingPokemon(PokemonDatabase.getInstance(applicationContext))
+            }
+            if (Features.TOWN) {
+                GardenSprites.prefetch(applicationContext, PokemonDatabase.getInstance(applicationContext))
             }
         }
     }
@@ -201,6 +209,7 @@ private fun AppScreen.bottomNavLabel(): String = when (this) {
     AppScreen.Home -> stringResource(R.string.nav_home)
     AppScreen.Pokedex -> stringResource(R.string.nav_pokedex)
     AppScreen.Caught -> stringResource(R.string.nav_caught)
+    AppScreen.Garden -> stringResource(R.string.garden_title)
     AppScreen.Inventory -> stringResource(R.string.nav_bag)
     AppScreen.Settings -> stringResource(R.string.nav_settings)
 }

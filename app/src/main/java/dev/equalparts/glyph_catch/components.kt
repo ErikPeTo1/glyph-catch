@@ -421,6 +421,13 @@ fun AppScaffoldWithTopBar(
                 )
             )
         },
+        // The main screen already leaves room for the system bars and the bottom bar
+        contentWindowInsets = WindowInsets(
+            left = AppSizes.none,
+            top = AppSizes.none,
+            right = AppSizes.none,
+            bottom = AppSizes.none
+        ),
         content = content
     )
 }

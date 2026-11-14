@@ -7,6 +7,8 @@ A Pokémon catching game for the Nothing Phone (3) Glyph Matrix, and the Phone (
 
 ### [⬇️ Download](https://github.com/ErikPeTo1/glyph-catch/releases/latest) · [What's new](CHANGELOG.md) · [FAQ](FAQ.md)
 
+Coming from the original Glyph Catch? [Bring your progress along](FAQ.md#can-i-keep-my-progress-from-the-original-glyph-catch).
+
 Set Glyph Catch as your **Always-on Glyph Toy**. The app tells you when there's an update, or add this repository to [Obtainium](https://github.com/ImranR98/Obtainium).
 
 ![Glyph Catch on the Glyph Matrix](photo.jpg)
@@ -15,6 +17,8 @@ Set Glyph Catch as your **Always-on Glyph Toy**. The app tells you when there's 
 - Professors who unlock each region and call you with rumors
 - Shinies, eggs and legendary Pokémon with their own items
 - Charge your phone and Electric types show up
+- A Pokédex with entries, cries, weaknesses and evolution lines
+- Friendship, genders and the evolutions that depend on them
 - Home-screen widgets with your team, framed in the PC Box wallpapers
 - Achievements that unlock more wallpapers, and a companion on your Glyph Matrix
 - Super Repel, Honey and Incense to choose who shows up, and how often
