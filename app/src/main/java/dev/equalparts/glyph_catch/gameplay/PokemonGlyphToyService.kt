@@ -28,6 +28,7 @@ import dev.equalparts.glyph_catch.debug.DebugExceptionTracker
 import dev.equalparts.glyph_catch.debug.DebugSnapshot
 import dev.equalparts.glyph_catch.gameplay.animation.AnimationCoordinator
 import dev.equalparts.glyph_catch.gameplay.animation.GlyphMatrixHelper
+import dev.equalparts.glyph_catch.gameplay.animation.renderSmallClockFrame
 import dev.equalparts.glyph_catch.gameplay.spawner.GameplayContext
 import dev.equalparts.glyph_catch.gameplay.spawner.SpawnCadenceController
 import dev.equalparts.glyph_catch.gameplay.spawner.SpawnContext
@@ -579,10 +580,14 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
     private fun showPokeBall(brightnessFactor: Float?): Boolean {
         val waiting = synchronized(spawnQueue) { spawnQueue.toList() }
         if (waiting.isEmpty()) {
-            // Nothing fits the small matrix when idle; elsewhere the usual clock or companion
+            // Elsewhere the usual clock or companion; the small matrix has its own clock
             if (!GlyphDevice.isPhone4aPro) return false
             displayedSpawn = null
-            clearGlyphMatrix()
+            if (preferencesManager.glyphIdleDisplay == PreferencesManager.IDLE_CLOCK) {
+                showDigitalWatch()
+            } else {
+                clearGlyphMatrix()
+            }
             return true
         }
         displayedSpawn = waiting.first()
@@ -626,6 +631,17 @@ class PokemonGlyphToyService : GlyphMatrixService("Pokemon-Glyph-Toy") {
 
         glyphMatrixManager?.let { gmm ->
             val currentTime = Calendar.getInstance()
+            if (GLYPH_MATRIX_SIZE <= 13) {
+                // "12:34" is too wide for the 13×13 matrix: hours on top, minutes below
+                val hour = if (DateFormat.is24HourFormat(applicationContext)) {
+                    String.format(Locale.US, "%02d", currentTime.get(Calendar.HOUR_OF_DAY))
+                } else {
+                    (currentTime.get(Calendar.HOUR).takeIf { it != 0 } ?: 12).toString()
+                }
+                val minute = String.format(Locale.US, "%02d", currentTime.get(Calendar.MINUTE))
+                gmm.setMatrixFrame(renderSmallClockFrame(hour, minute, GLYPH_MATRIX_SIZE))
+                return
+            }
             val timeText = if (DateFormat.is24HourFormat(applicationContext)) {
                 val hour = currentTime.get(Calendar.HOUR_OF_DAY)
                 val minute = currentTime.get(Calendar.MINUTE)
