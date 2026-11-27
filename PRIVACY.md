@@ -45,8 +45,9 @@ you, there's no way to tell which ones were yours afterwards.
 
 ## Everything else
 
-- **Weather:** if you turn on live weather, the app asks OpenWeatherMap for the weather at the
-  coordinates of the place you chose, with your own API key. Nothing else goes with it.
+- **Weather:** if you turn on live weather, the app asks [Open-Meteo](https://open-meteo.com/) for
+  the weather at coarsened coordinates of the place you chose (about 11 km precision). No API key
+  or account is used. Nothing else goes with the request. Weather data by Open-Meteo.com (CC BY 4.0).
 - **Sprites and cries:** the animated sprites and the Pokémon cries are downloaded from PokeAPI's
   public files on GitHub the first time they're needed. Only the file is requested.
 - **Updates:** the app checks GitHub Releases for a newer version. Only the public release
