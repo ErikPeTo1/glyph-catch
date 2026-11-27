@@ -16,11 +16,10 @@ object WeatherProviderFactory {
     }
 
     fun create(prefs: PreferencesManager, config: WeatherConfig = prefs.getWeatherConfig()): WeatherProvider =
-        if (config.useOpenWeather) {
+        if (config.useLiveWeather) {
             if (config.isConfigured) {
-                OpenWeatherMapProvider(
+                OpenMeteoWeatherProvider(
                     prefs = prefs,
-                    apiKey = config.apiKey!!,
                     latitude = config.latitude.toDouble(),
                     longitude = config.longitude.toDouble()
                 )

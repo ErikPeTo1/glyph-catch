@@ -8,7 +8,7 @@ const BASE_FILES = ['strings.xml', 'rumors.xml', 'stats_missions.xml', 'professo
 // Strings that are the same in every language and fall back to English
 const SKIP = new Set([
   'app_name', 'toy_name', 'home_onboarding_step_format', 'home_progress_percentage', 'home_header_title',
-  'settings_weather_provider_openweathermap', 'settings_weather_help_url', 'sleep_bedtime_range',
+  'settings_weather_provider_openmeteo', 'settings_weather_attribution_url', 'sleep_bedtime_range',
   'pokedex_progress_subtitle', 'pokedex_entry_number', 'inventory_item_quantity', 'stats_duration',
   'pokedex_region_kanto', 'pokedex_region_johto', 'pokedex_region_hoenn', 'pokedex_region_sinnoh',
   'rumors_unknown_name', 'components_exp_chip', 'caught_screen_filter_shiny'

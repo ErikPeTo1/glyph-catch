@@ -53,13 +53,9 @@ class PreferencesManager(context: Context) {
         }
     }
 
-    var openWeatherMapApiKey: String?
-        get() = prefs.getString(KEY_OPENWEATHER_API, null)
-        set(value) = prefs.edit { putString(KEY_OPENWEATHER_API, value) }
-
-    var useOpenWeatherMap: Boolean
-        get() = prefs.getBoolean(KEY_USE_OPENWEATHER, false)
-        set(value) = prefs.edit { putBoolean(KEY_USE_OPENWEATHER, value) }
+    var useLiveWeather: Boolean
+        get() = prefs.getBoolean(KEY_USE_LIVE_WEATHER, false)
+        set(value) = prefs.edit { putBoolean(KEY_USE_LIVE_WEATHER, value) }
 
     var weatherLatitude: Float
         get() = prefs.getFloat(KEY_WEATHER_LAT, 0f)
@@ -618,13 +614,10 @@ class PreferencesManager(context: Context) {
         }
     }.distinctUntilChanged()
 
-    fun hasValidWeatherConfig(): Boolean = !openWeatherMapApiKey.isNullOrBlank() &&
-        weatherLatitude != 0f &&
-        weatherLongitude != 0f
+    fun hasValidWeatherConfig(): Boolean = weatherLatitude != 0f && weatherLongitude != 0f
 
     fun getWeatherConfig(): WeatherConfig = WeatherConfig(
-        useOpenWeather = useOpenWeatherMap,
-        apiKey = openWeatherMapApiKey,
+        useLiveWeather = useLiveWeather,
         latitude = weatherLatitude,
         longitude = weatherLongitude
     )
@@ -710,8 +703,8 @@ class PreferencesManager(context: Context) {
         private const val KEY_COLOR_SPRITES = "color_sprites"
         private const val KEY_RARITY_BOOST_UNTIL = "rarity_boost_until"
         private const val KEY_CLAIMED_MISSIONS = "claimed_missions"
-        private const val KEY_OPENWEATHER_API = "openweather_api_key"
-        private const val KEY_USE_OPENWEATHER = "use_openweather"
+        // Kept as "use_openweather" so existing installs keep their live-weather toggle.
+        private const val KEY_USE_LIVE_WEATHER = "use_openweather"
         private const val KEY_WEATHER_LAT = "weather_latitude"
         private const val KEY_WEATHER_LON = "weather_longitude"
         private const val KEY_WEATHER_LOCATION_NAME = "weather_location_name"
@@ -755,8 +748,7 @@ class PreferencesManager(context: Context) {
         private const val SLEEP_BONUS_POLL_INACTIVE_MILLIS = 60_000L
 
         private val WEATHER_CONFIG_KEYS = setOf(
-            KEY_USE_OPENWEATHER,
-            KEY_OPENWEATHER_API,
+            KEY_USE_LIVE_WEATHER,
             KEY_WEATHER_LAT,
             KEY_WEATHER_LON
         )

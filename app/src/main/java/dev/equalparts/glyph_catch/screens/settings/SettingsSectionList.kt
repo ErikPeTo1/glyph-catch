@@ -162,7 +162,7 @@ private const val FORUM_URL = "https://nothing.community/d/64460"
 @Composable
 private fun weatherSummary(preferences: PreferencesManager): String {
     val city = preferences.weatherLocationName
-    return if (preferences.useOpenWeatherMap && !city.isNullOrBlank()) {
+    return if (preferences.useLiveWeather && !city.isNullOrBlank()) {
         stringResource(R.string.settings_summary_weather_live, city)
     } else {
         stringResource(R.string.settings_weather_provider_random)

@@ -49,7 +49,7 @@ When you open it, the app checks this repository's GitHub Releases to tell you w
 
 The Pokédex shows animated sprites from Pokémon Black and White and plays each Pokémon's cry. Each sprite and cry is downloaded from PokeAPI on GitHub ([sprites](https://github.com/PokeAPI/sprites), [cries](https://github.com/PokeAPI/cries)) the first time it's needed and kept on your phone. Only the file is requested.
 
-Live weather sync uses the popular OpenWeatherMap API with a geographical location that you configure, no live location. Refer to the [OpenWeatherMap privacy policy](https://openweather.co.uk/privacy-policy) for details.
+Live weather sync uses the free [Open-Meteo](https://open-meteo.com/) API with a geographical location that you configure — no API key and no continuous live location. Only approximate coordinates (about 11 km) are sent. Weather data by Open-Meteo.com (CC BY 4.0). See their [terms](https://open-meteo.com/en/terms) for details.
 
 There is a "Save logs" option (off by default) under "Debugging" for troubleshooting purposes. If enabled, these logs are saved locally on your device, not automatically sent to a server. You can inspect or delete the logs at any point.
 

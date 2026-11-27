@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,7 +29,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -46,8 +43,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import dev.equalparts.glyph_catch.AppCard
 import dev.equalparts.glyph_catch.AppSizes
@@ -61,14 +56,12 @@ import java.util.Date
 import kotlinx.coroutines.launch
 
 private data class WeatherUiState(
-    val useOpenWeather: Boolean,
+    val useLiveWeather: Boolean,
     val connectionStatus: WeatherConnectionStatus,
     val lastUpdateMillis: Long,
-    val hasSavedApiKey: Boolean,
     val hasSavedLocation: Boolean,
     val hasPendingChanges: Boolean,
     val form: WeatherForm,
-    val showApiKey: Boolean,
     val isLoadingLocation: Boolean,
     val locationError: String?,
     val showConfiguration: Boolean,
@@ -76,27 +69,23 @@ private data class WeatherUiState(
 )
 
 private data class WeatherActions(
-    val onUseOpenWeatherChange: (Boolean) -> Unit,
+    val onUseLiveWeatherChange: (Boolean) -> Unit,
     val onFormChange: (WeatherForm) -> Unit,
-    val onToggleShowApiKey: () -> Unit,
     val onSearchCity: () -> Unit,
     val onUseCurrentLocation: () -> Unit,
-    val onSave: () -> Unit,
-    val onScrollToHelp: () -> Unit
+    val onSave: () -> Unit
 )
 
 private data class WeatherForm(
-    val apiKey: String,
     val locationName: String,
     val latitude: Float,
     val longitude: Float
 ) {
-    fun trimmed(): WeatherForm = copy(apiKey = apiKey.trim())
+    fun trimmed(): WeatherForm = copy(locationName = locationName.trim())
     fun hasCoordinates(): Boolean = latitude != 0f && longitude != 0f
 }
 
 private fun PreferencesManager.toWeatherForm() = WeatherForm(
-    apiKey = openWeatherMapApiKey.orEmpty(),
     locationName = weatherLocationName.orEmpty(),
     latitude = weatherLatitude,
     longitude = weatherLongitude
@@ -108,10 +97,9 @@ fun WeatherSettingsScreen(modifier: Modifier) {
     val prefs = remember { PreferencesManager(context) }
     val coroutineScope = rememberCoroutineScope()
 
-    var useOpenWeather by remember { mutableStateOf(prefs.useOpenWeatherMap) }
+    var useLiveWeather by remember { mutableStateOf(prefs.useLiveWeather) }
     var savedForm by remember { mutableStateOf(prefs.toWeatherForm()) }
     var form by remember { mutableStateOf(savedForm) }
-    var showApiKey by remember { mutableStateOf(false) }
     var isLoadingLocation by remember { mutableStateOf(false) }
     var locationError by remember { mutableStateOf<String?>(null) }
     var connectionStatus by remember { mutableStateOf(prefs.weatherConnectionStatus) }
@@ -127,7 +115,7 @@ fun WeatherSettingsScreen(modifier: Modifier) {
     }
 
     fun resetStatus(syncNow: Boolean) {
-        if (!useOpenWeather) {
+        if (!useLiveWeather) {
             prefs.weatherConnectionStatus = WeatherConnectionStatus.DISABLED
             prefs.weatherLastUpdateEpochMillis = 0L
             connectionStatus = WeatherConnectionStatus.DISABLED
@@ -150,12 +138,11 @@ fun WeatherSettingsScreen(modifier: Modifier) {
         form = normalized
         savedForm = normalized
 
-        prefs.openWeatherMapApiKey = normalized.apiKey.takeIf { it.isNotEmpty() }
         prefs.weatherLocationName = normalized.locationName.takeIf { it.isNotEmpty() }
         prefs.weatherLatitude = normalized.latitude
         prefs.weatherLongitude = normalized.longitude
 
-        resetStatus(syncNow = useOpenWeather)
+        resetStatus(syncNow = useLiveWeather)
         locationError = null
     }
 
@@ -211,38 +198,30 @@ fun WeatherSettingsScreen(modifier: Modifier) {
     val isDirty = form != savedForm
 
     val uiState = WeatherUiState(
-        useOpenWeather = useOpenWeather,
+        useLiveWeather = useLiveWeather,
         connectionStatus = connectionStatus,
         lastUpdateMillis = lastUpdateMillis,
-        hasSavedApiKey = savedForm.apiKey.isNotBlank(),
         hasSavedLocation = savedForm.hasCoordinates(),
         hasPendingChanges = isDirty,
         form = form,
-        showApiKey = showApiKey,
         isLoadingLocation = isLoadingLocation,
         locationError = locationError,
-        showConfiguration = useOpenWeather,
+        showConfiguration = useLiveWeather,
         saveEnabled = isDirty
     )
 
     val actions = WeatherActions(
-        onUseOpenWeatherChange = { enabled ->
-            useOpenWeather = enabled
-            prefs.useOpenWeatherMap = enabled
+        onUseLiveWeatherChange = { enabled ->
+            useLiveWeather = enabled
+            prefs.useLiveWeather = enabled
             resetStatus(syncNow = enabled)
         },
         onFormChange = { form = it },
-        onToggleShowApiKey = { showApiKey = !showApiKey },
         onSearchCity = { searchForCity() },
         onUseCurrentLocation = {
             locationPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
         },
-        onSave = { saveChanges() },
-        onScrollToHelp = {
-            coroutineScope.launch {
-                scrollState.animateScrollTo(scrollState.maxValue)
-            }
-        }
+        onSave = { saveChanges() }
     )
 
     Column(modifier = modifier.verticalScroll(scrollState)) {
@@ -253,8 +232,8 @@ fun WeatherSettingsScreen(modifier: Modifier) {
 @Composable
 private fun WeatherSettingsContent(state: WeatherUiState, actions: WeatherActions) {
     WeatherProviderToggleCard(
-        useOpenWeather = state.useOpenWeather,
-        onUseOpenWeatherChange = actions.onUseOpenWeatherChange
+        useLiveWeather = state.useLiveWeather,
+        onUseLiveWeatherChange = actions.onUseLiveWeatherChange
     )
 
     Spacer(modifier = Modifier.height(AppSizes.spacingLarge))
@@ -263,24 +242,19 @@ private fun WeatherSettingsContent(state: WeatherUiState, actions: WeatherAction
         WeatherStatusCard(
             connectionStatus = state.connectionStatus,
             lastUpdateMillis = state.lastUpdateMillis,
-            useOpenWeather = state.useOpenWeather,
-            hasSavedApiKey = state.hasSavedApiKey,
+            useLiveWeather = state.useLiveWeather,
             hasSavedLocation = state.hasSavedLocation,
             hasPendingChanges = state.hasPendingChanges
         )
 
         Spacer(modifier = Modifier.height(AppSizes.spacingLarge))
-        OpenWeatherConfigurationSection(state = state, actions = actions)
+        LiveWeatherConfigurationSection(state = state, actions = actions)
     }
 }
 
 @Composable
-private fun OpenWeatherConfigurationSection(state: WeatherUiState, actions: WeatherActions) {
-    ConfigureOpenWeatherCard(
-        apiKey = state.form.apiKey,
-        onApiKeyChange = { value -> actions.onFormChange(state.form.copy(apiKey = value)) },
-        showApiKey = state.showApiKey,
-        onToggleShowApiKey = actions.onToggleShowApiKey,
+private fun LiveWeatherConfigurationSection(state: WeatherUiState, actions: WeatherActions) {
+    ConfigureLiveWeatherCard(
         locationName = state.form.locationName,
         onLocationNameChange = { value -> actions.onFormChange(state.form.copy(locationName = value)) },
         isLoadingLocation = state.isLoadingLocation,
@@ -288,17 +262,16 @@ private fun OpenWeatherConfigurationSection(state: WeatherUiState, actions: Weat
         onSearchCity = actions.onSearchCity,
         onUseCurrentLocation = actions.onUseCurrentLocation,
         onSave = actions.onSave,
-        saveEnabled = state.saveEnabled,
-        onScrollToHelp = actions.onScrollToHelp
+        saveEnabled = state.saveEnabled
     )
 
     Spacer(modifier = Modifier.height(AppSizes.spacingLarge))
 
-    OpenWeatherInfoCard()
+    OpenMeteoAttributionCard()
 }
 
 @Composable
-private fun WeatherProviderToggleCard(useOpenWeather: Boolean, onUseOpenWeatherChange: (Boolean) -> Unit) {
+private fun WeatherProviderToggleCard(useLiveWeather: Boolean, onUseLiveWeatherChange: (Boolean) -> Unit) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -313,8 +286,8 @@ private fun WeatherProviderToggleCard(useOpenWeather: Boolean, onUseOpenWeatherC
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = if (useOpenWeather) {
-                        stringResource(R.string.settings_weather_provider_openweathermap)
+                    text = if (useLiveWeather) {
+                        stringResource(R.string.settings_weather_provider_openmeteo)
                     } else {
                         stringResource(R.string.settings_weather_provider_random)
                     },
@@ -322,17 +295,13 @@ private fun WeatherProviderToggleCard(useOpenWeather: Boolean, onUseOpenWeatherC
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Switch(checked = useOpenWeather, onCheckedChange = onUseOpenWeatherChange)
+            Switch(checked = useLiveWeather, onCheckedChange = onUseLiveWeatherChange)
         }
     }
 }
 
 @Composable
-private fun ConfigureOpenWeatherCard(
-    apiKey: String,
-    onApiKeyChange: (String) -> Unit,
-    showApiKey: Boolean,
-    onToggleShowApiKey: () -> Unit,
+private fun ConfigureLiveWeatherCard(
     locationName: String,
     onLocationNameChange: (String) -> Unit,
     isLoadingLocation: Boolean,
@@ -340,8 +309,7 @@ private fun ConfigureOpenWeatherCard(
     onSearchCity: () -> Unit,
     onUseCurrentLocation: () -> Unit,
     onSave: () -> Unit,
-    saveEnabled: Boolean,
-    onScrollToHelp: () -> Unit
+    saveEnabled: Boolean
 ) {
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(AppSizes.spacingXXLarge)) {
@@ -355,28 +323,7 @@ private fun ConfigureOpenWeatherCard(
                 text = stringResource(R.string.settings_weather_setup_info),
                 style = MaterialTheme.typography.bodyMedium
             )
-            TextButton(
-                onClick = onScrollToHelp,
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = AppSizes.none, vertical = AppSizes.spacingTiny)
-            ) {
-                Text(
-                    text = stringResource(R.string.settings_weather_help_button),
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start
-                )
-            }
             Spacer(modifier = Modifier.height(AppSizes.spacingXXLarge))
-
-            ApiKeyField(
-                value = apiKey,
-                onValueChange = onApiKeyChange,
-                showApiKey = showApiKey,
-                onToggleShowApiKey = onToggleShowApiKey
-            )
-
-            Spacer(modifier = Modifier.height(AppSizes.spacingLarge))
 
             LocationField(
                 locationName = locationName,
@@ -407,74 +354,31 @@ private fun ConfigureOpenWeatherCard(
 }
 
 @Composable
-private fun OpenWeatherInfoCard() {
+private fun OpenMeteoAttributionCard() {
+    val uriHandler = LocalUriHandler.current
+    val attributionUrl = stringResource(R.string.settings_weather_attribution_url)
     AppCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(AppSizes.spacingXXLarge)) {
             Text(
-                text = stringResource(R.string.settings_weather_help_title),
+                text = stringResource(R.string.settings_weather_attribution_title),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(AppSizes.spacingMedium))
             Text(
-                text = stringResource(R.string.settings_weather_help_information),
+                text = stringResource(R.string.settings_weather_attribution_body),
                 style = MaterialTheme.typography.bodySmall
             )
             Spacer(modifier = Modifier.height(AppSizes.spacingLarge))
-            OpenWeatherLink(url = stringResource(R.string.settings_weather_help_url))
-            Spacer(modifier = Modifier.height(AppSizes.spacingLarge))
             Text(
-                text = stringResource(R.string.settings_weather_help_footnote),
+                text = attributionUrl,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.clickable { uriHandler.openUri(attributionUrl) }
             )
         }
     }
-}
-
-@Composable
-private fun OpenWeatherLink(url: String) {
-    val uriHandler = LocalUriHandler.current
-    Text(
-        text = url,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.clickable { uriHandler.openUri(url) }
-    )
-}
-
-@Composable
-private fun ApiKeyField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    showApiKey: Boolean,
-    onToggleShowApiKey: () -> Unit
-) {
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(stringResource(R.string.settings_weather_api_key_label)) },
-        placeholder = { Text(stringResource(R.string.settings_weather_api_key_placeholder)) },
-        modifier = Modifier.fillMaxWidth(),
-        singleLine = true,
-        visualTransformation = if (showApiKey) {
-            VisualTransformation.None
-        } else {
-            PasswordVisualTransformation()
-        },
-        trailingIcon = {
-            IconButton(onClick = onToggleShowApiKey) {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = if (showApiKey) {
-                        stringResource(R.string.settings_weather_api_key_hide)
-                    } else {
-                        stringResource(R.string.settings_weather_api_key_show)
-                    }
-                )
-            }
-        }
-    )
 }
 
 @Composable
@@ -532,8 +436,7 @@ private fun CurrentLocationButton(enabled: Boolean, onClick: () -> Unit) {
 private fun WeatherStatusCard(
     connectionStatus: WeatherConnectionStatus,
     lastUpdateMillis: Long,
-    useOpenWeather: Boolean,
-    hasSavedApiKey: Boolean,
+    useLiveWeather: Boolean,
     hasSavedLocation: Boolean,
     hasPendingChanges: Boolean
 ) {
@@ -544,9 +447,8 @@ private fun WeatherStatusCard(
     }
 
     val detail = when {
-        !useOpenWeather -> stringResource(R.string.settings_weather_provider_random)
+        !useLiveWeather -> stringResource(R.string.settings_weather_provider_random)
         hasPendingChanges -> stringResource(R.string.settings_weather_status_save_changes)
-        !hasSavedApiKey -> stringResource(R.string.settings_weather_status_add_api_key)
         !hasSavedLocation -> stringResource(R.string.settings_weather_status_select_location)
         connectionStatus == WeatherConnectionStatus.CONNECTED && lastUpdateMillis > 0L -> stringResource(
             R.string.settings_weather_status_last_update,
